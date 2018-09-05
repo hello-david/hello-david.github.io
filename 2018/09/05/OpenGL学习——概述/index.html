@@ -93,9 +93,11 @@
 <meta property="og:image" content="https://hello-david.github.io/2018/09/05/OpenGL学习——概述/15360256097404/15361301555879.jpg">
 <meta property="og:image" content="https://hello-david.github.io/2018/09/05/OpenGL学习——概述/15360256097404/15360724326447.jpg">
 <meta property="og:image" content="https://hello-david.github.io/2018/09/05/OpenGL学习——概述/15360256097404/15360735303682.jpg">
+<meta property="og:image" content="https://hello-david.github.io/2018/09/05/OpenGL学习——概述/15360256097404/15361298306412.png">
 <meta property="og:image" content="https://hello-david.github.io/2018/09/05/OpenGL学习——概述/15360256097404/15361313357837.jpg">
 <meta property="og:image" content="https://hello-david.github.io/2018/09/05/OpenGL学习——概述/15360256097404/15360735950555.jpg">
-<meta property="og:updated_time" content="2018-09-05T15:44:37.000Z">
+<meta property="og:image" content="https://hello-david.github.io/2018/09/05/OpenGL学习——概述/15360256097404/15360736067972.png">
+<meta property="og:updated_time" content="2018-09-05T16:03:35.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OpenGL学习——概述">
 <meta name="twitter:description" content="OpenGL是什么？用来干嘛的？想来一开始接触OpenGL的时候也是一脸懵逼。 OpenGL是什么？我们从iOS的APP图形图像渲染基本流程来看一看它是什么。 OpenGL位于硬件驱动层和应用处理层之间，是一套相对底层的图形图像开发规范，由各个厂商在GPU驱动层以上实现一套相关操作的API。 OpenGL用来干嘛？emmmmm…它是用来干嘛的呢？我们从它的操作粒度来理解它，它是基于GPU硬件驱动层">
@@ -379,11 +381,11 @@
 </li>
 </ul>
 <h5 id="B-图元装配"><a href="#B-图元装配" class="headerlink" title="B.图元装配"></a><strong>B.图元装配</strong></h5><p>负责将顶点着色器输出的坐标信息进行组装和裁剪，将所有3D的图元转化为屏幕上2D的图元。<br><img src="/2018/09/05/OpenGL学习——概述/15360256097404/15360735303682.jpg"></p>
-<h5 id="C-光栅化"><a href="#C-光栅化" class="headerlink" title="C.光栅化"></a><strong>C.光栅化</strong></h5><p>到这一步我们已经为OpenGL描述了一个图形的样子，但是要转换为图像还需要颜色信息。在使用光栅化后基本图元被转换为供片段着色器使用的片段（Fragment），即实现通过插值运算将连续的值用一个个像素片段表示出来。<br></p>
+<h5 id="C-光栅化"><a href="#C-光栅化" class="headerlink" title="C.光栅化"></a><strong>C.光栅化</strong></h5><p>到这一步我们已经为OpenGL描述了一个图形的样子，但是要转换为图像还需要颜色信息。在使用光栅化后基本图元被转换为供片段着色器使用的片段（Fragment），即实现通过插值运算将连续的值用一个个像素片段表示出来。<br><img src="/2018/09/05/OpenGL学习——概述/15360256097404/15361298306412.png"></p>
 <h5 id="D-片段着色器（Fragament-Shader）"><a href="#D-片段着色器（Fragament-Shader）" class="headerlink" title="D.片段着色器（Fragament Shader）"></a><strong>D.片段着色器（Fragament Shader）</strong></h5><p>到了这一步我们已经有了一个个的像素片段（Fragament），我们在这个阶段给它涂上颜色值就可以变成一个完整的像素点。包括位置，颜色，纹理坐标等信息。同时我们可以编写Fragament Shader的脚本来实现对每个像素颜色的变换来达到一些效果，如纹理贴图，光照，环境光，阴影。</p>
 <h5 id="E-片段测试"><a href="#E-片段测试" class="headerlink" title="E.片段测试"></a><strong>E.片段测试</strong></h5><p>这个阶段是对每个像素点进行测试保证这些像素点是正确可用的。最后在输入到帧缓冲（Frambuffer）中。<br><img src="/2018/09/05/OpenGL学习——概述/15360256097404/15361313357837.jpg"></p>
 <h5 id="F-帧缓存-Framebuffer）"><a href="#F-帧缓存-Framebuffer）" class="headerlink" title="F.帧缓存 (Framebuffer）"></a><strong>F.帧缓存 (Framebuffer）</strong></h5><p>经过上述处理流程，我们想要看到的图形图像数据最后都会存储到<strong>帧缓存区（Framebuffer）</strong>中。我们可以同时存在很多帧缓存（Framebuffer），并且可以通过OpenGL让GPU把渲染结果存储到任意数量的帧缓存中（这里引申出一个离屏渲染的工作概念）。<br>但是，只有将内容绘制到视窗体提供的<strong>帧缓存（Renderbuffer）</strong>中，才能将内容输出到显示设备。在实现上渲染缓存（Renderbuffer）是直接跟屏幕映射的，可以绕开CPU进行工作。<br><img src="/2018/09/05/OpenGL学习——概述/15360256097404/15360735950555.jpg"></p>
-<h5 id="G-渲染帧缓存（Renderbuffer）"><a href="#G-渲染帧缓存（Renderbuffer）" class="headerlink" title="G.渲染帧缓存（Renderbuffer）"></a><strong>G.渲染帧缓存（Renderbuffer）</strong></h5><p>基本工作原理是存在两个缓存（前缓存和后缓存），当屏幕的刷新同步信号到达时让系统将后缓存交换到前缓存区上。<br>这个刷新的时间是由系统决定的，比如在iOS中屏幕刷新率是60fps即每16.75ms会发生一次前后缓存的交换。我们只需要准备好后缓存的数据提供给系统就能进行屏幕刷新渲染了。<br></p>
+<h5 id="G-渲染帧缓存（Renderbuffer）"><a href="#G-渲染帧缓存（Renderbuffer）" class="headerlink" title="G.渲染帧缓存（Renderbuffer）"></a><strong>G.渲染帧缓存（Renderbuffer）</strong></h5><p>基本工作原理是存在两个缓存（前缓存和后缓存），当屏幕的刷新同步信号到达时让系统将后缓存交换到前缓存区上。<br>这个刷新的时间是由系统决定的，比如在iOS中屏幕刷新率是60fps即每16.75ms会发生一次前后缓存的交换。我们只需要准备好后缓存的数据提供给系统就能进行屏幕刷新渲染了。<br><img src="/2018/09/05/OpenGL学习——概述/15360256097404/15360736067972.png"></p>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这篇文章主要是总结一下我对OpenGL整体工作流程的理解，首先OpenGL是用来操作GPU进行图形图像渲染工作的，它的操作粒度可以到每个像素点，同时它是直接操作GPU硬件工作的。而之后的工作核心（2D图形图像渲染）基本是集中在对顶点着色器和片段着色器的脚本实现上（酷炫的滤镜效果和动画效果）。</p>
 
       
