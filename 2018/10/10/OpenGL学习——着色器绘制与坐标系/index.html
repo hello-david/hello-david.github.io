@@ -88,14 +88,16 @@
 <meta property="og:description" content="上一篇学习如何将EGL和本地窗口系统联系在一起，这时候我们拥有了OpenGL的Contex（上下文环境）和本地渲染视图。接下来我们就可以愉快的开始进行OpenGL的渲染程序编写了。 在进行渲染程序编写之前，我们先要了解一下着色器(Shader)的基本工作流程。这里的着色器主要指的是顶点着色器(Vertex Shader)和片段着色器(Fragament Shader)。它们负责图形和图像颜色的绘制">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://hello-david.github.io/2018/10/10/OpenGL学习——着色器绘制与坐标系/img/15383129368174.png">
+<meta property="og:image" content="https://hello-david.github.io/2018/10/10/OpenGL学习——着色器绘制与坐标系/img/viewmodel.png">
 <meta property="og:image" content="https://hello-david.github.io/2018/10/10/OpenGL学习——着色器绘制与坐标系/img/15383129795215.png">
 <meta property="og:image" content="https://hello-david.github.io/2018/10/10/OpenGL学习——着色器绘制与坐标系/img/15384087490541.png">
+<meta property="og:image" content="https://hello-david.github.io/2018/10/10/OpenGL学习——着色器绘制与坐标系/img/15384064171683.jpg">
 <meta property="og:image" content="https://hello-david.github.io/2018/10/10/OpenGL学习——着色器绘制与坐标系/img/15384081183067.jpg">
 <meta property="og:image" content="https://hello-david.github.io/2018/10/10/OpenGL学习——着色器绘制与坐标系/img/15384046803516.png">
 <meta property="og:image" content="https://hello-david.github.io/2018/10/10/OpenGL学习——着色器绘制与坐标系/img/15384046933352.png">
 <meta property="og:image" content="https://hello-david.github.io/2018/10/10/OpenGL学习——着色器绘制与坐标系/img/15385405210511.jpg">
 <meta property="og:image" content="https://hello-david.github.io/2018/10/10/OpenGL学习——着色器绘制与坐标系/img/android.png">
-<meta property="og:updated_time" content="2018-10-10T11:06:28.237Z">
+<meta property="og:updated_time" content="2018-10-11T01:41:48.622Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OpenGL学习——着色器绘制与坐标系">
 <meta name="twitter:description" content="上一篇学习如何将EGL和本地窗口系统联系在一起，这时候我们拥有了OpenGL的Contex（上下文环境）和本地渲染视图。接下来我们就可以愉快的开始进行OpenGL的渲染程序编写了。 在进行渲染程序编写之前，我们先要了解一下着色器(Shader)的基本工作流程。这里的着色器主要指的是顶点着色器(Vertex Shader)和片段着色器(Fragament Shader)。它们负责图形和图像颜色的绘制">
@@ -385,7 +387,7 @@
 <li>最后，OpenGL要绘制到屏幕上又需要将裁剪坐标变换为屏幕坐标，我们将使用一个叫做视口变换(Viewport Transform)的过程让位于-1.0到1.0范围的裁剪空间坐标变换到由glViewport函数所定义的屏幕坐标范围内。最后变换出来的坐标将会送到光栅器将其转化为片段。</li>
 </ol>
 <p>上述流程中我们通过<strong>模型(Model)</strong>、<strong>观察(View)</strong>、<strong>投影(Projection)</strong>这三个矩阵来实现不同坐标系之间的转换。</p>
-<p>我们知道矩阵是可以相乘的并且不满足交换律的(有方向的)，而上面的全部流程我们可以通过下面的左乘矩阵来一步到位实现坐标转换。<br></p>
+<p>我们知道矩阵是可以相乘的并且不满足交换律的(有方向的)，而上面的全部流程我们可以通过下面的左乘矩阵来一步到位实现坐标转换。<br><img src="/2018/10/10/OpenGL学习——着色器绘制与坐标系/img/viewmodel.png"></p>
 <p>在OpenGL里面它希望传入顶点着色器的值是标准化设备的坐标(Normalized Device Coordinate, NDC)即裁剪空间的坐标。</p>
 <p>在目前我所接触到2D图像处理中，都是从单一观察角度去描述一个图像的。所以我所面临的构建坐标系统一般有两种情况:</p>
 <ol>
@@ -402,7 +404,7 @@
 <img src="/2018/10/10/OpenGL学习——着色器绘制与坐标系/img/15384087490541.png">
 <p>投影这个概念相比大家并不陌生，形象的说投影区域就像是阳光直射照见物体所形成的阴影面积一样，而在坐标的投影变换里面由投影矩阵创建的<strong>观察箱</strong>(Viewing Box)被称为<strong>平截头体</strong>(Frustum)，每个出现在平截头体范围内的坐标都会最终出现在用户的屏幕上。</p>
 <p>而当真正表示这个<strong>平截头体</strong>(Frustum)的时候我们需要赋予OpenGL (x,y,z,w)四个分量，其中x,y,z可以描述这个容器而w分量(齐次坐标)则表示观察者远近的概念。</p>
-<p>这里有必要再学习一下w分量(齐次坐标)的含义，我们知道在欧式空间里面两条共面的平行线无法相交然而在投影空间内却不是这样的。比如下图中两个平行的轨道间距随着视线变远而减小在远处某点相交（透视投影）:<br></p>
+<p>这里有必要再学习一下w分量(齐次坐标)的含义，我们知道在欧式空间里面两条共面的平行线无法相交然而在投影空间内却不是这样的。比如下图中两个平行的轨道间距随着视线变远而减小在远处某点相交（透视投影）:<br><img src="/2018/10/10/OpenGL学习——着色器绘制与坐标系/img/15384064171683.jpg"></p>
 <p>为了解决这个问题，数学家们引入齐次坐标这个概念，在N维空间中采用N+1个量来表示N维坐标。如(x,y,z)的空间就表示为(x,y,z,w)。而(x,y,z)与w之间的转换关系如下:<br><img src="/2018/10/10/OpenGL学习——着色器绘制与坐标系/img/15384081183067.jpg"></p>
 <p>那么w分量(齐次坐标)所代表的含义在这里我们可以看做是操作远近的分量。</p>
 <ul>
@@ -446,7 +448,7 @@
   <p><span>本文标题:</span><a href="/2018/10/10/OpenGL学习——着色器绘制与坐标系/">OpenGL学习——着色器绘制与坐标系</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 David Dai (戴黎明) 的个人博客">David Dai (戴黎明)</a></p>
   <p><span>发布时间:</span>2018年10月10日 - 18:10</p>
-  <p><span>最后更新:</span>2018年10月10日 - 19:10</p>
+  <p><span>最后更新:</span>2018年10月11日 - 09:10</p>
   <p><span>原始链接:</span><a href="/2018/10/10/OpenGL学习——着色器绘制与坐标系/" title="OpenGL学习——着色器绘制与坐标系">https://hello-david.github.io/2018/10/10/OpenGL学习——着色器绘制与坐标系/</a>
     <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/2018/10/10/OpenGL学习——着色器绘制与坐标系/"  aria-label="复制成功！"></i></span>
   </p>
