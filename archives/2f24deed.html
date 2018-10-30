@@ -95,7 +95,7 @@
 <meta property="og:image" content="https://hello-david.github.io/archives/2f24deed/media/15360262248129/15408853117002.jpg">
 <meta property="og:image" content="https://hello-david.github.io/archives/2f24deed/media/15360262248129/15408853236428.jpg">
 <meta property="og:image" content="https://hello-david.github.io/archives/2f24deed/media/15360262248129/15408860760877.jpg">
-<meta property="og:updated_time" content="2018-10-30T08:26:12.789Z">
+<meta property="og:updated_time" content="2018-10-30T08:30:54.815Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OpenGL学习——纹理">
 <meta name="twitter:description" content="之前的文章我们理解了OpenGL运行的基本原理和绘制过程。我们可以通过编写着色器脚本来实现每一个像素点的绘制操作，但是我们如何实现图片的渲染呢(总不能图片也要我们一个点一个点操作吧)。这里通过引入纹理这个概念来实现图片的渲染。 所以，什么是纹理呢？ 纹理基本概念材质贴图，又称纹理贴图，在计算机图形学中是把存储在内存里的位图包裹到3D渲染物体的表面。纹理贴图给物体提供了丰富的细节，用简单的方式模拟出">
@@ -364,11 +364,11 @@
 <p>纹理图像数据存在多种<strong>色彩格式(Pixelformat)</strong>和多种的<strong>存储格式(PixelType)</strong>。</p>
 <img src="/archives/2f24deed/media/15360262248129/texel.png">
 <p>这两个属性共同决定了纹理中的每一个数据单元–<strong>纹素(Texel)</strong>的构成。所以值得注意的是当我们加载一张纹理的时候必须要注意图像的输入输出格式是否和OpenGL中一一对应。</p>
-<h3 id="纹理坐标"><a href="#纹理坐标" class="headerlink" title="纹理坐标"></a>纹理坐标</h3><p>当渲染纹理时,纹理的坐标将成为索引。GL_TEXTURE_2D纹理的坐标轴分别是(s,t)或者(u,v)。</p>
+<h2 id="纹理坐标"><a href="#纹理坐标" class="headerlink" title="纹理坐标"></a>纹理坐标</h2><p>当渲染纹理时,纹理的坐标将成为索引。GL_TEXTURE_2D纹理的坐标轴分别是(s,t)或者(u,v)。</p>
 <p>2D纹理的坐标系是从<strong>左下角为原点向上为t轴,向右为s轴的坐标系</strong>。这个坐标系的y方向和GL坐标系相反，所以默认按顶点坐标系方向输入的图像是倒置的。<br><img src="/archives/2f24deed/media/15360262248129/15407968680724.jpg"></p>
 <p>如果想要让纹理正向显示，我们需要做的一步工作便是将输入的纹理坐标或者顶点坐标进行y轴方向的倒置。</p>
 <img src="/archives/2f24deed/media/15360262248129/15408814351196.jpg">
-<h3 id="纹理-处理-单元"><a href="#纹理-处理-单元" class="headerlink" title="纹理(处理)单元"></a>纹理(处理)单元</h3><p>这里存在两个概念:</p>
+<h2 id="纹理-处理-单元"><a href="#纹理-处理-单元" class="headerlink" title="纹理(处理)单元"></a>纹理(处理)单元</h2><p>这里存在两个概念:</p>
 <ul>
 <li>纹理目标（一张纹理图像）</li>
 <li>纹理单元（纹理图像的处理单元）</li>
@@ -376,7 +376,7 @@
 <p>形如<strong>GL_TEXTURE0</strong>、<strong>GL_TEXTURE1</strong>、<strong>GL_TEXTURE2</strong>的就是纹理单元，一台机子上纹理单元数量是有限的，依具体机型而定。通过glActiveTexture来激活具体的纹理单元。</p>
 <p>一个纹理单元又包含多个类型的纹理目标包括:<strong>GL_TEXTURE_1D</strong>、<strong>GL_TEXTURE_2D</strong>、<strong>GL_TEXTURE_3D</strong>、<strong>CUBE_MAP</strong>等等。其中GL_TEXTURE_2D类型的纹理是我们最常见的处理对象。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 激活纹理单元0并绑定一个2D纹理，最后将单元0句柄传入着色器</span><br><span class="line">glActiveTexture(GL_TEXTURE0);</span><br><span class="line">glBindTexture(GL_TEXTURE_2D, self.texture.texture);</span><br><span class="line">glUniform1i(self.textureUniform, 0);</span><br></pre></td></tr></table></figure>
-<h3 id="纹理环绕"><a href="#纹理环绕" class="headerlink" title="纹理环绕"></a>纹理环绕</h3><p>纹理坐标的范围通常是从[0, 0]到[1, 1]，超过[0.0, 1.0]的范围是允许的，而对与超出范围的内容要如何显示，这就取决于纹理的环绕方式(Wrapping mode)。在OpenGL默认的行为是重复这个纹理图像(GL_REPEAT)。</p>
+<h2 id="纹理环绕"><a href="#纹理环绕" class="headerlink" title="纹理环绕"></a>纹理环绕</h2><p>纹理坐标的范围通常是从[0, 0]到[1, 1]，超过[0.0, 1.0]的范围是允许的，而对与超出范围的内容要如何显示，这就取决于纹理的环绕方式(Wrapping mode)。在OpenGL默认的行为是重复这个纹理图像(GL_REPEAT)。</p>
 <table>
 <thead>
 <tr>
@@ -404,7 +404,7 @@
 <p>我们通过glTexParameteri指定Texture的环绕模式，可以看见它是可以在S,T两个方向上独立设置的。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// 设置Texutre的环绕模式</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);</span><br></pre></td></tr></table></figure></p>
 <p>假如我们在不同方向上设置不同的环绕模式，便会有不同的效果。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// 设置Texutre的环绕模式</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);</span><br></pre></td></tr></table></figure></p>
 <img src="/archives/2f24deed/media/15360262248129/15408845425275.jpg">
-<h3 id="纹理滤波"><a href="#纹理滤波" class="headerlink" title="纹理滤波"></a>纹理滤波</h3><p>纹理坐标不依赖于分辨率(Resolution)，它可以是任意浮点值，所以OpenGL需要知道怎样将纹理像素(Texture Pixel–Texel)映射到纹理坐标。</p>
+<h2 id="纹理滤波"><a href="#纹理滤波" class="headerlink" title="纹理滤波"></a>纹理滤波</h2><p>纹理坐标不依赖于分辨率(Resolution)，它可以是任意浮点值，所以OpenGL需要知道怎样将纹理像素(Texture Pixel–Texel)映射到纹理坐标。</p>
 <p>当你有一个很大的物体但是纹理的分辨率很低的时候这就变得很重要了（如何处理低分辨率的像素锯齿）。OpenGL对于上述情况会进行纹理过滤(Texture Filtering)，在ES中支持GL_NEAREST和GL_LINEAR，这两种滤波方式依据不同的算法会得出不同的像素结果。</p>
 <ul>
 <li><p>GL_NEAREST（也叫邻近过滤，Nearest Neighbor Filtering）是OpenGL默认的纹理过滤方式。当设置为GL_NEAREST的时候，OpenGL会选择中心点最接近纹理坐标的那个像素。</p>
@@ -416,7 +416,7 @@
 </ul>
 <p>下图从左到右依次是这两种效果：<br>GL_NEAREST，GL_LINEAR<br><img src="/archives/2f24deed/media/15360262248129/15408860760877.jpg"></p>
 <p>可以很直观的看出来，这两种滤波方式的不同。同时这两个参数也可以从两个方向设置，当进行放大(Magnify)和缩小(Minify)操作的时候可以设置纹理过滤的方式。如下，放大纹理和缩小纹理的时候都进行线性滤波。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// 设置Texutre的滤波方式</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);</span><br></pre></td></tr></table></figure></p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>Demo工程:<a href="https://github.com/hello-david/OpenGLDemo.git" target="_blank" rel="noopener">OpenGL学习实例</a><br>这篇文章介绍了OpenGL中纹理的基本概念和它的一些基本参数。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Demo工程:<a href="https://github.com/hello-david/OpenGLDemo.git" target="_blank" rel="noopener">OpenGL学习实例</a><br>这篇文章介绍了OpenGL中纹理的基本概念和它的一些基本参数。</p>
 
       
     </div>
@@ -622,7 +622,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#纹理基本概念"><span class="nav-number">1.</span> <span class="nav-text">纹理基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#纹理坐标"><span class="nav-number">1.1.</span> <span class="nav-text">纹理坐标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#纹理-处理-单元"><span class="nav-number">1.2.</span> <span class="nav-text">纹理(处理)单元</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#纹理环绕"><span class="nav-number">1.3.</span> <span class="nav-text">纹理环绕</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#纹理滤波"><span class="nav-number">1.4.</span> <span class="nav-text">纹理滤波</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">1.5.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#纹理基本概念"><span class="nav-number">1.</span> <span class="nav-text">纹理基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#纹理坐标"><span class="nav-number">2.</span> <span class="nav-text">纹理坐标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#纹理-处理-单元"><span class="nav-number">3.</span> <span class="nav-text">纹理(处理)单元</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#纹理环绕"><span class="nav-number">4.</span> <span class="nav-text">纹理环绕</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#纹理滤波"><span class="nav-number">5.</span> <span class="nav-text">纹理滤波</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
             
 
           </div>
