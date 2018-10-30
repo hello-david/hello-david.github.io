@@ -95,7 +95,9 @@
 <meta property="og:image" content="https://hello-david.github.io/archives/2f24deed/media/15360262248129/15408853117002.jpg">
 <meta property="og:image" content="https://hello-david.github.io/archives/2f24deed/media/15360262248129/15408853236428.jpg">
 <meta property="og:image" content="https://hello-david.github.io/archives/2f24deed/media/15360262248129/15408860760877.jpg">
-<meta property="og:updated_time" content="2018-10-30T08:30:54.815Z">
+<meta property="og:image" content="https://hello-david.github.io/archives/2f24deed/media/15360262248129/15408896124680.jpg">
+<meta property="og:image" content="https://hello-david.github.io/archives/2f24deed/media/15360262248129/15408884907477.jpg">
+<meta property="og:updated_time" content="2018-10-30T09:47:04.885Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OpenGL学习——纹理">
 <meta name="twitter:description" content="之前的文章我们理解了OpenGL运行的基本原理和绘制过程。我们可以通过编写着色器脚本来实现每一个像素点的绘制操作，但是我们如何实现图片的渲染呢(总不能图片也要我们一个点一个点操作吧)。这里通过引入纹理这个概念来实现图片的渲染。 所以，什么是纹理呢？ 纹理基本概念材质贴图，又称纹理贴图，在计算机图形学中是把存储在内存里的位图包裹到3D渲染物体的表面。纹理贴图给物体提供了丰富的细节，用简单的方式模拟出">
@@ -416,6 +418,11 @@
 </ul>
 <p>下图从左到右依次是这两种效果：<br>GL_NEAREST，GL_LINEAR<br><img src="/archives/2f24deed/media/15360262248129/15408860760877.jpg"></p>
 <p>可以很直观的看出来，这两种滤波方式的不同。同时这两个参数也可以从两个方向设置，当进行放大(Magnify)和缩小(Minify)操作的时候可以设置纹理过滤的方式。如下，放大纹理和缩小纹理的时候都进行线性滤波。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// 设置Texutre的滤波方式</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);</span><br></pre></td></tr></table></figure></p>
+<h3 id="多级渐远纹理（Mipmap）"><a href="#多级渐远纹理（Mipmap）" class="headerlink" title="多级渐远纹理（Mipmap）"></a>多级渐远纹理（Mipmap）</h3><p>假如我们将一张图缩小非常多倍的时候这时候，由于远处的物体可能只产生很少的片段，OpenGL从高分辨率纹理中为这些片段获取正确的颜色值就很困难，因为它需要对一个跨过纹理很大部分的片段只拾取一个纹理颜色。在小物体上这会产生不真实的感觉，更不用说对它们使用高分辨率纹理浪费内存的问题了。</p>
+<p>OpenGL使用一种叫做多级渐远纹理(Mipmap)的概念来解决这个问题，它简单来说就是一系列的纹理图像，后一个纹理图像是前一个的二分之一。多级渐远纹理背后的理念很简单：距观察者的距离超过一定的阈值，OpenGL会使用不同的多级渐远纹理，即最适合物体的距离的那个。</p>
+<p>由于距离远，解析度不高也不会被用户注意到。同时，多级渐远纹理另一加分之处是它的性能非常好。<br><img src="/archives/2f24deed/media/15360262248129/15408896124680.jpg"></p>
+<p>可以看到多级渐远纹理（Mipmap）是建立在<strong>缩小(Minify)</strong>纹理这种情况下的。<br><img src="/archives/2f24deed/media/15360262248129/15408884907477.jpg"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">// 纹理单元开启MipMap</span><br><span class="line">glTexParameterf(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);</span><br><span class="line">glGenerateMipmap(GL_TEXTURE_2D);</span><br><span class="line">    </span><br><span class="line">// 设置Texutre的滤波方式</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);</span><br></pre></td></tr></table></figure>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Demo工程:<a href="https://github.com/hello-david/OpenGLDemo.git" target="_blank" rel="noopener">OpenGL学习实例</a><br>这篇文章介绍了OpenGL中纹理的基本概念和它的一些基本参数。</p>
 
       
@@ -435,7 +442,7 @@
   <p><span>本文标题:</span><a href="/archives/2f24deed.html">OpenGL学习——纹理</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
   <p><span>发布时间:</span>2018年10月30日 - 16:10</p>
-  <p><span>最后更新:</span>2018年10月30日 - 16:10</p>
+  <p><span>最后更新:</span>2018年10月30日 - 17:10</p>
   <p><span>原始链接:</span><a href="/archives/2f24deed.html" title="OpenGL学习——纹理">https://hello-david.github.io/archives/2f24deed.html</a>
     <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/2f24deed.html"  aria-label="复制成功！"></i></span>
   </p>
@@ -622,7 +629,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#纹理基本概念"><span class="nav-number">1.</span> <span class="nav-text">纹理基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#纹理坐标"><span class="nav-number">2.</span> <span class="nav-text">纹理坐标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#纹理-处理-单元"><span class="nav-number">3.</span> <span class="nav-text">纹理(处理)单元</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#纹理环绕"><span class="nav-number">4.</span> <span class="nav-text">纹理环绕</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#纹理滤波"><span class="nav-number">5.</span> <span class="nav-text">纹理滤波</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#纹理基本概念"><span class="nav-number">1.</span> <span class="nav-text">纹理基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#纹理坐标"><span class="nav-number">2.</span> <span class="nav-text">纹理坐标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#纹理-处理-单元"><span class="nav-number">3.</span> <span class="nav-text">纹理(处理)单元</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#纹理环绕"><span class="nav-number">4.</span> <span class="nav-text">纹理环绕</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#纹理滤波"><span class="nav-number">5.</span> <span class="nav-text">纹理滤波</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#多级渐远纹理（Mipmap）"><span class="nav-number">5.1.</span> <span class="nav-text">多级渐远纹理（Mipmap）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
             
 
           </div>
