@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="OpenGL," />
+  <meta name="keywords" content="Metal," />
 
 
 
@@ -79,21 +79,18 @@
 
 
 
-<meta name="description" content="OpenGL中混合（Blending）通常指的是实现物体透明度（Transparency）的一种技术。在RGBA里面采用的混合模型叫“Porter-Duff”模型，通过该模型可实现混合效果。这个模型的核心公式：  结果色 = 源色  原因子 + 目标色  目标因子。结果alpha = 源透明度  源因子 + 目标透明度  目标因子。   源色即源颜色向量，这是源自纹理的颜色向量。 目标色即目标颜色">
-<meta name="keywords" content="OpenGL">
+<meta name="description" content="前面学习了Metal框架的基本组成和运行方式,知道了要如何科学使用的它。然而我们最终的目的还是要使用这套框架来优雅的操作GPU单元进行图像处理，也就回到了Shader的编写上了。 我们知道OpenGL的Shader编写语言GLSL的语法上是非常类似C的，而Metal的Shader编写语言MSL则是直接基于C++14实现的一个子集。 Metal Shading Language官方文档文档中通过7个">
+<meta name="keywords" content="Metal">
 <meta property="og:type" content="article">
-<meta property="og:title" content="OpenGL学习——混合">
-<meta property="og:url" content="https://hello-david.github.io/archives/180b47a3.html">
+<meta property="og:title" content="Metal学习——Metal着色器语言(MSL)(一)">
+<meta property="og:url" content="https://hello-david.github.io/archives/662d09a.html">
 <meta property="og:site_name" content="David&#39;Blog">
-<meta property="og:description" content="OpenGL中混合（Blending）通常指的是实现物体透明度（Transparency）的一种技术。在RGBA里面采用的混合模型叫“Porter-Duff”模型，通过该模型可实现混合效果。这个模型的核心公式：  结果色 = 源色  原因子 + 目标色  目标因子。结果alpha = 源透明度  源因子 + 目标透明度  目标因子。   源色即源颜色向量，这是源自纹理的颜色向量。 目标色即目标颜色">
+<meta property="og:description" content="前面学习了Metal框架的基本组成和运行方式,知道了要如何科学使用的它。然而我们最终的目的还是要使用这套框架来优雅的操作GPU单元进行图像处理，也就回到了Shader的编写上了。 我们知道OpenGL的Shader编写语言GLSL的语法上是非常类似C的，而Metal的Shader编写语言MSL则是直接基于C++14实现的一个子集。 Metal Shading Language官方文档文档中通过7个">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://hello-david.github.io/archives/180b47a3/15405416917030/blending1.png">
-<meta property="og:image" content="https://hello-david.github.io/archives/180b47a3/15405416917030/blending2.png">
-<meta property="og:updated_time" content="2018-12-14T03:59:07.567Z">
+<meta property="og:updated_time" content="2019-01-16T07:05:41.187Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="OpenGL学习——混合">
-<meta name="twitter:description" content="OpenGL中混合（Blending）通常指的是实现物体透明度（Transparency）的一种技术。在RGBA里面采用的混合模型叫“Porter-Duff”模型，通过该模型可实现混合效果。这个模型的核心公式：  结果色 = 源色  原因子 + 目标色  目标因子。结果alpha = 源透明度  源因子 + 目标透明度  目标因子。   源色即源颜色向量，这是源自纹理的颜色向量。 目标色即目标颜色">
-<meta name="twitter:image" content="https://hello-david.github.io/archives/180b47a3/15405416917030/blending1.png">
+<meta name="twitter:title" content="Metal学习——Metal着色器语言(MSL)(一)">
+<meta name="twitter:description" content="前面学习了Metal框架的基本组成和运行方式,知道了要如何科学使用的它。然而我们最终的目的还是要使用这套框架来优雅的操作GPU单元进行图像处理，也就回到了Shader的编写上了。 我们知道OpenGL的Shader编写语言GLSL的语法上是非常类似C的，而Metal的Shader编写语言MSL则是直接基于C++14实现的一个子集。 Metal Shading Language官方文档文档中通过7个">
 
 
 
@@ -123,14 +120,14 @@
 
 
 
-  <link rel="canonical" href="https://hello-david.github.io/archives/180b47a3.html"/>
+  <link rel="canonical" href="https://hello-david.github.io/archives/662d09a.html"/>
 
 
 
 <meta name="google-site-verification" content="xPc40P1FFnuv2Aer8rA72v2doNkgf1bEhU79GGlStmE" />
 
 
-  <title>OpenGL学习——混合 | David'Blog</title>
+  <title>Metal学习——Metal着色器语言(MSL)(一) | David'Blog</title>
   
 
 
@@ -257,7 +254,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/180b47a3.html">
+    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/662d09a.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="David Dai">
@@ -274,7 +271,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">OpenGL学习——混合</h1>
+          <h1 class="post-title" itemprop="name headline">Metal学习——Metal着色器语言(MSL)(一)</h1>
         
 
         <div class="post-meta">
@@ -286,8 +283,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-23T15:24:33+08:00">
-                2018-11-23
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-01-16T14:58:28+08:00">
+                2019-01-16
               </time>
             
 
@@ -351,38 +348,39 @@
       
 
       
-        <p>OpenGL中混合（Blending）通常指的是实现物体透明度（Transparency）的一种技术。在RGBA里面采用的混合模型叫“Porter-Duff”模型，通过该模型可实现混合效果。这个模型的核心公式：</p>
-<blockquote>
-<p>结果色 = 源色 <em> 原因子 + 目标色 </em> 目标因子。<br>结果alpha = 源透明度 <em> 源因子 + 目标透明度 </em> 目标因子。</p>
-</blockquote>
+        <p>前面学习了Metal框架的基本组成和运行方式,知道了要如何科学使用的它。然而我们最终的目的还是要使用这套框架来优雅的操作GPU单元进行图像处理，也就回到了Shader的编写上了。</p>
+<p>我们知道OpenGL的Shader编写语言GLSL的语法上是非常类似C的，而Metal的Shader编写语言MSL则是直接基于C++14实现的一个子集。</p>
+<p><a href="https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf" target="_blank" rel="noopener">Metal Shading Language官方文档</a>文档中通过7个模块来介绍Metal：</p>
 <ul>
-<li>源色即源颜色向量，这是源自纹理的颜色向量。</li>
-<li>目标色即目标颜色向量，这是当前储存在颜色缓冲中的颜色向量。</li>
-<li>源因子指定了alpha值对源颜色的影响程度。</li>
-<li>目标因子指定了alpha值对目标颜色的影响程度。</li>
+<li>“简介”是对文档的介绍，介绍了Metal和C++ 14之间的异同。</li>
+<li>“数据类型”列出了Metal数据类型，包括表示向量，矩阵，缓冲区，纹理和采样器的类型。它还讨论了类型对齐和类型转换。</li>
+<li>“运算符”列出了“Metal”运算符。</li>
+<li>“函数和变量声明”详细说明了如何声明函数和变量，有时使用限制它们使用方式的属性。</li>
+<li>“Metal Standard Library”定义了一系列内置Metal函数。</li>
+<li>“编译器”详细介绍了Metal编译器的选项，包括预处理器指令，数学内在函数选项和控制优化的选项。</li>
+<li>“数值符合性”描述了表示浮点数的要求，包括数学运算的准确性。</li>
 </ul>
-<p>源颜色和目标颜色将会由OpenGL自动设定，但源因子和目标因子的值可以有我们来决定。这个是一个混合的默认公式，使用glBlendFunc来实现。当然的在GL中还提供一些灵活的用法。</p>
-<ul>
-<li>简单的Blending  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">// 开启Blend</span><br><span class="line">glEnable(GL_BLEND);</span><br><span class="line"></span><br><span class="line">// 使用默认的Blend公式来进行混合</span><br><span class="line">glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line">* void glBlendFunc(GLenum sfactor, GLenum dfactor);</span><br><span class="line">* 原因子和目标因子值及其含义：</span><br><span class="line">* GL_ZERO                   = (0, 0, 0, 0)</span><br><span class="line">* GL_ONE                    = (1, 1, 1, 1)</span><br><span class="line">* GL_SRC_COLOR              = (sR, sG, sB, sA)</span><br><span class="line">* GL_DST_COLOR              = (dR, dG, dB, dA)</span><br><span class="line">* GL_ONE_MINUS_SRC_COLOR    = (1 - sR, 1 - sG, 1 - sB, 1 - sA)</span><br><span class="line">* GL_ONE_MINUS_DST_COLOR    = (1 - dR, 1 - dG, 1 - dB, 1 - dA)</span><br><span class="line">* GL_SRC_ALPHA              = (sA, sA, sA, sA)</span><br><span class="line">* GL_DST_ALPHA              = (dA, dA, dA, dA)</span><br><span class="line">* GL_ONE_MINUS_SRC_ALPHA    = (1 - sA, 1 - sA, 1 - sA, 1 - sA)</span><br><span class="line">* GL_ONE_MINUS_DST_ALPHA    = (1 - dA, 1 - dA, 1 - dA, 1 - dA)</span><br><span class="line">* GL_SRC_ALPHA_SATURATE     = (i, i, i, 1 ) </span><br><span class="line">* /</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<ul>
-<li><p>分别设置RGB和Alpha混合因子系数的Blending</p>
-  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// 开启Blend</span><br><span class="line">glEnable(GL_BLEND);</span><br><span class="line"></span><br><span class="line">// 分别设置RGB和Alpha</span><br><span class="line">glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);// 这个函数和我们之前设置的那样设置了RGB分量，但这样只能让最终的alpha分量被源颜色向量的alpha值所影响到。</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line">* 参数是RGB或者Alpha的混合因子</span><br><span class="line">* void glBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha);</span><br><span class="line">* /</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>指定Blend公式的Blending</p>
-  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">  // 开启Blend</span><br><span class="line">  glEnable(GL_BLEND);</span><br><span class="line">  </span><br><span class="line">  // 指定帧缓存区与源颜色混合的方式</span><br><span class="line">  glBlendEquation(GL_FUNC_REVERSE_SUBTRACT);</span><br><span class="line">   </span><br><span class="line">// 允许RGB和Alpha使用不同的混合方式</span><br><span class="line">glBlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha);</span><br><span class="line">  </span><br><span class="line">  /**</span><br><span class="line">  * 可选混合公式</span><br><span class="line">  * GL_FUNC_ADD：默认选项，将两个分量相加，C = S + D</span><br><span class="line">  * GL_FUNC_SUBTRACT：将两个分量相减，C = S - D</span><br><span class="line">  * GL_FUNC_REVERSE_SUBTRACT：将两个分量倒置并相减，C = D - S</span><br><span class="line">  * GL_MIN：取分量小值，Rr=min(Rs,Rd) Gr=min(Gs,Gd) Br=min(Bs,Bd)</span><br><span class="line">  * GL_MAX：取分量大值，Rr=max(Rs,Rd) Gr=max(Gs,Gd) Br=max(Bs,Bd)</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<p>Demo工程:<a href="https://github.com/hello-david/OpenGLDemo.git" target="_blank" rel="noopener">OpenGL学习实例</a></p>
-<h2 id="图像合成滤镜"><a href="#图像合成滤镜" class="headerlink" title="图像合成滤镜"></a>图像合成滤镜</h2><p>假如我们不开启GL的混合的话，默认是不处理图片的Alpha通道的才导致了下图的这种情况。这时我们有几种处理方法：</p>
-<ul>
-<li>假设背景是张Texture我们可以将两张Texture在着色器中使用Mix进行颜色混合。</li>
-<li>无论背景是什么，我们在着色器中判断alpha &lt; 0.1然后进行Discard把这个片段丢弃。</li>
-<li>开启GL的混合模式。</li>
-</ul>
-<img src="/archives/180b47a3/15405416917030/blending1.png">
-<p>下图是开启Blend模式的贴图：<br><img src="/archives/180b47a3/15405416917030/blending2.png"></p>
+<hr>
+<p>接下来这里围绕着一个简单的MSL脚本来学习Metal的语法，之后再详细学习各个部分的细节。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;metal_stdlib&gt; // 导入Metal标准库</span><br><span class="line">using namespace metal;</span><br><span class="line"></span><br><span class="line">// 定义一个结构体用于传递顶点着色器的输出</span><br><span class="line">struct SingleInputVertexIO &#123;</span><br><span class="line">    float4 position [[position]];</span><br><span class="line">    float2 textureCoordinate [[user(texturecoord)]];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">// 顶点着色器</span><br><span class="line">vertex SingleInputVertexIO oneInputVertex(device packed_float2 *position [[buffer(0)]],</span><br><span class="line">                                          device packed_float2 *texturecoord [[buffer(1)]],</span><br><span class="line">                                          uint vid [[vertex_id]]) &#123;</span><br><span class="line">    SingleInputVertexIO outputVertices;</span><br><span class="line">    outputVertices.position = float4(position[vid], 0, 1.0);</span><br><span class="line">    outputVertices.textureCoordinate = texturecoord[vid];</span><br><span class="line">    </span><br><span class="line">    return outputVertices;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 片段着色器</span><br><span class="line">fragment half4 passthroughFragment(SingleInputVertexIO fragmentInput [[stage_in]],</span><br><span class="line">                                   texture2d&lt;half&gt; inputTexture [[texture(0)]]) &#123;</span><br><span class="line">    constexpr sampler quadSampler;</span><br><span class="line">    half4 color = inputTexture.sample(quadSampler, fragmentInput.textureCoordinate);</span><br><span class="line">    </span><br><span class="line">    return color;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在Metal中用[[…]]包含的这种变量实际上着色器的<strong>内置变量/内置函数</strong>，就像OpenGL中我们通过gl_Position函数访问顶点着色器的像素位置信息。</p>
+<p>可以看做着色器属性访问符号，在这里简化了语法可以十分的方便访问着色器的内置对象/方法(getter/setter函数)。</p>
+<p>这是一个简单的纹理绘制脚本，我们把它分成三个部分来解析。</p>
+<h2 id="结构体部分"><a href="#结构体部分" class="headerlink" title="结构体部分"></a>结构体部分</h2><p>我们定义了一个名为SingleInputVertexIO的结构体，它内部包含两个变量position和textureCoordinate。因为我们贴一张2D的纹理图一般只需要知道纹理的顶点坐标和纹理坐标就够了。</p>
+<p><strong>[[position]]</strong> 表示裁剪空间中输入到GPU中的原始坐标信息，固定是一个四维(xyzw)的向量。</p>
+<p><strong>[[user(name_xxx)]]</strong> 表示为片段着色器的函数参数指定一个(ImageBlock)图像块数据类型的属性名称为name_xxx，和OpenGL中varying限定符的作用十分相似。ImageBlock是一种二维图像独有的数据结构，它表示一个像素点的(x,y)坐标。简单的说就是定义一个name_xxx的二维图像坐标的片段着色器参数，理解起来有点绕，具体可以参考文档的2.10选节。</p>
+<h2 id="顶点着色器部分"><a href="#顶点着色器部分" class="headerlink" title="顶点着色器部分"></a>顶点着色器部分</h2><p>首先，在Metal中支持三种函数(kernel, vertex, fragment)的定义，而我们这里图像处理主要集中在编写vertex和fragment的Shader。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vertex SingleInputVertexIO oneInputVertex(device packed_float2 *position [[buffer(0)]],</span><br><span class="line">                                          device packed_float2 *texturecoord [[buffer(1)]],</span><br><span class="line">                                          uint vid [[vertex_id]])</span><br></pre></td></tr></table></figure>
+<p>接着我们来看顶点着色器脚本的函数声明，显然这里定义了一个叫oneInputVertex其中返回值为SingleInputVertexIO结构类型的顶点着色器。</p>
+<p><strong>[[buffer(n)]]</strong> 表示第n个设备和常量缓存区，即外部通过setVertexBuffer设置到encoder中的MTLBuffer对象。同时我们在外部实际上是把这个对象的指针传入设备中，所以我们这里声明为指针类型，而在Metal中指针对象必须要声明它的空间属性(Address Space Attributes)。</p>
+<p>其中在iOS中支持device/threadgroup/constant/thread/threadgroup_imageblock这5种空间属性。具体可参考文档4.2/4.3.1选节</p>
+<p><strong>packed_float2</strong> 表示压缩的2维float向量，将一组相关的数据打包在一起传递给GPU称作数据打包传输，我们可通过这个数组直接访问相关的数据(顶点坐标/法线等)从而减少了调用次数提高了效率。</p>
+<p><strong>[[vertex_id]]</strong> 表示每个顶点的标识符，而每个顶点缓冲区的真正地址基于这个标识符的相对偏移n来访问。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">outputVertices.position = float4(position[vid], 0, 1.0);</span><br><span class="line">相当于OpenGL中</span><br><span class="line">gl_Position = vec4(x, y, 0 , 1.0);</span><br><span class="line"></span><br><span class="line">device packed_float2 *texturecoord [[buffer(1)]]</span><br><span class="line">outputVertices.textureCoordinate = texturecoord[vid];</span><br><span class="line">相当于这个管线单元中缓存区buffer(1)的对象赋值给.textureCoordinate</span><br></pre></td></tr></table></figure>
+<h2 id="片段着色器部分"><a href="#片段着色器部分" class="headerlink" title="片段着色器部分"></a>片段着色器部分</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">fragment half4 passthroughFragment(SingleInputVertexIO fragmentInput [[stage_in]],</span><br><span class="line">                                   texture2d&lt;half&gt; inputTexture [[texture(0)]])</span><br></pre></td></tr></table></figure>
+<p><strong>[[stage_in]]</strong> 表示顶点着色器的输出/片段着色器的输入，它可以是一个结构体或者一个变量，结构体中变量可以是标量或者向量，具体参考4.3.5选节。</p>
+<p><strong>[[texture(n)]]</strong> 表示这个管线单元的纹理对象，外部通过setFragmentTexture函数输入到管线中。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这里通过一个示例来介绍MSL的基本结构和编写方法，其他内置对象/函数的含义可以详细查阅官方文档来得知。<a href="https://github.com/hello-david/MetalImage.git" target="_blank" rel="noopener">这是一个使用Metal实现的滤镜链框架</a></p>
 
       
     </div>
@@ -398,12 +396,12 @@
   <script type="text/javascript" src="http://jslibs.wuxubj.cn/sweetalert_mini/jquery-1.7.1.min.js"></script>
   <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
   <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
-  <p><span>本文标题:</span><a href="/archives/180b47a3.html">OpenGL学习——混合</a></p>
+  <p><span>本文标题:</span><a href="/archives/662d09a.html">Metal学习——Metal着色器语言(MSL)(一)</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
-  <p><span>发布时间:</span>2018年11月23日 - 15:11</p>
-  <p><span>最后更新:</span>2018年12月14日 - 11:12</p>
-  <p><span>原始链接:</span><a href="/archives/180b47a3.html" title="OpenGL学习——混合">https://hello-david.github.io/archives/180b47a3.html</a>
-    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/180b47a3.html"  aria-label="复制成功！"></i></span>
+  <p><span>发布时间:</span>2019年01月16日 - 14:01</p>
+  <p><span>最后更新:</span>2019年01月16日 - 15:01</p>
+  <p><span>原始链接:</span><a href="/archives/662d09a.html" title="Metal学习——Metal着色器语言(MSL)(一)">https://hello-david.github.io/archives/662d09a.html</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/662d09a.html"  aria-label="复制成功！"></i></span>
   </p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
 </div>
@@ -435,7 +433,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/OpenGL/" rel="tag"># OpenGL</a>
+            <a href="/tags/Metal/" rel="tag"># Metal</a>
           
         </div>
       
@@ -448,8 +446,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/archives/1294c030.html" rel="next" title="OpenGL学习——简单滤镜">
-                <i class="fa fa-chevron-left"></i> OpenGL学习——简单滤镜
+              <a href="/archives/6819375.html" rel="next" title="Hook调试初体验">
+                <i class="fa fa-chevron-left"></i> Hook调试初体验
               </a>
             
           </div>
@@ -457,10 +455,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/archives/98dc9fea.html" rel="prev" title="Metal学习——基础概念与框架">
-                Metal学习——基础概念与框架 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -592,7 +586,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#图像合成滤镜"><span class="nav-number">1.</span> <span class="nav-text">图像合成滤镜</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#结构体部分"><span class="nav-number">1.</span> <span class="nav-text">结构体部分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#顶点着色器部分"><span class="nav-number">2.</span> <span class="nav-text">顶点着色器部分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#片段着色器部分"><span class="nav-number">3.</span> <span class="nav-text">片段着色器部分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
             
 
           </div>
