@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="iOS工程上的二三事," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="在Tecent/Mars开源工程中我们用到它Comm模块部分的代码，其中这部分代码都是一些C++头文件实现代码。同时它的类命名也未尝有命名空间，这里对此产生了两个疑惑：1.在头文件中实现一个无命名空间的类会有命名冲突吗？2.这种写法的原理是什么？ Tecent/Mars工程 在查阅了一些资料后认为应该是跟C++中头文件进行类/函数定义有关，接下来就学习一下相关的概念。 内联函数的基本含义 在计算机">
+<meta name="keywords" content="iOS工程上的二三事">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++中存在的头文件类&#x2F;函数完整实现">
+<meta property="og:url" content="https://hello-david.github.io/archives/2fbe6240.html">
+<meta property="og:site_name" content="David&#39;Blog">
+<meta property="og:description" content="在Tecent/Mars开源工程中我们用到它Comm模块部分的代码，其中这部分代码都是一些C++头文件实现代码。同时它的类命名也未尝有命名空间，这里对此产生了两个疑惑：1.在头文件中实现一个无命名空间的类会有命名冲突吗？2.这种写法的原理是什么？ Tecent/Mars工程 在查阅了一些资料后认为应该是跟C++中头文件进行类/函数定义有关，接下来就学习一下相关的概念。 内联函数的基本含义 在计算机">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://hello-david.github.io/archives/2fbe6240/media/15510597664753/15510597910251.jpg">
+<meta property="og:image" content="https://hello-david.github.io/archives/2fbe6240/media/15510597664753/15510611786986.jpg">
+<meta property="og:image" content="https://hello-david.github.io/archives/2fbe6240/media/15510597664753/15510839730244.png">
+<meta property="og:image" content="https://hello-david.github.io/archives/2fbe6240/media/15510597664753/15510842108188.png">
+<meta property="og:updated_time" content="2019-03-16T12:03:42.182Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="C++中存在的头文件类&#x2F;函数完整实现">
+<meta name="twitter:description" content="在Tecent/Mars开源工程中我们用到它Comm模块部分的代码，其中这部分代码都是一些C++头文件实现代码。同时它的类命名也未尝有命名空间，这里对此产生了两个疑惑：1.在头文件中实现一个无命名空间的类会有命名冲突吗？2.这种写法的原理是什么？ Tecent/Mars工程 在查阅了一些资料后认为应该是跟C++中头文件进行类/函数定义有关，接下来就学习一下相关的概念。 内联函数的基本含义 在计算机">
+<meta name="twitter:image" content="https://hello-david.github.io/archives/2fbe6240/media/15510597664753/15510597910251.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hello-david.github.io/archives/2fbe6240.html"/>
+
+
+
+<meta name="google-site-verification" content="xPc40P1FFnuv2Aer8rA72v2doNkgf1bEhU79GGlStmE" />
+
+
+  <title>C++中存在的头文件类/函数完整实现 | David'Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">David'Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/2fbe6240.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="David Dai">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="David'Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">C++中存在的头文件类/函数完整实现</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-16T19:57:16+08:00">
+                2019-03-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/工程上的二三事/" itemprop="url" rel="index">
+                    <span itemprop="name">工程上的二三事</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在Tecent/Mars开源工程中我们用到它Comm模块部分的代码，其中这部分代码都是一些C++头文件实现代码。同时它的类命名也未尝有命名空间，这里对此产生了两个疑惑：<br>1.在头文件中实现一个无命名空间的类会有命名冲突吗？<br>2.这种写法的原理是什么？</p>
+<p><a href="https://github.com/Tencent/mars/blob/master/mars" target="_blank" rel="noopener">Tecent/Mars工程</a></p>
+<p>在查阅了一些资料后认为应该是跟C++中头文件进行类/函数定义有关，接下来就学习一下相关的概念。</p>
+<h2 id="内联函数的基本含义"><a href="#内联函数的基本含义" class="headerlink" title="内联函数的基本含义"></a>内联函数的基本含义</h2><blockquote>
+<p>在计算机科学中，内联函数（有时称作在线函数或编译时期展开函数）是一种编程语言结构，用来建议编译器对一些特殊函数进行内联扩展（有时称作在线扩展）</p>
+</blockquote>
+<blockquote>
+<p>也就是说建议编译器将指定的函数体插入并取代每一处调用该函数的地方（上下文），从而节省了每次调用函数带来的额外时间开支。</p>
+</blockquote>
+<blockquote>
+<p>但在选择使用内联函数时，必须在程序占用空间和程序执行效率之间进行权衡，因为过多的比较复杂的函数进行内联扩展将带来很大的存储资源开支。另外还需要特别注意的是对递归函数的内联扩展可能引起部分编译器的无穷编译。</p>
+</blockquote>
+<p>显然内联函数是一种针对编译器的优化，它将函数体在编译阶段展开到栈中从而提高了调用效率。</p>
+<hr>
+<h3 id="内联函数与宏定义"><a href="#内联函数与宏定义" class="headerlink" title="内联函数与宏定义"></a>内联函数与宏定义</h3><img src="/archives/2fbe6240/media/15510597664753/15510597910251.jpg">
+<hr>
+<h3 id="内联函数的缺点"><a href="#内联函数的缺点" class="headerlink" title="内联函数的缺点"></a>内联函数的缺点</h3><img src="/archives/2fbe6240/media/15510597664753/15510611786986.jpg">
+<h2 id="C-中内联函数声明方式"><a href="#C-中内联函数声明方式" class="headerlink" title="C++中内联函数声明方式"></a>C++中内联函数声明方式</h2><p>可能很多开发者不知道，inline只是对编译器的一个请求而非命令。该请求可以隐式地进行也可以显式地声明。</p>
+<p>当你的函数较复杂（比如有循环、递归），或者是虚函数时，编译器很可能会拒绝把它inline。因为虚函数调用只有运行时才能决定调用哪个，而inline是在编译器便要嵌入函数体。 有些编译器在dianotics级别编译时，会对拒绝inline给出warning。</p>
+<p>隐式的办法便是把函数定义放在类的定义中：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">class Person&#123;</span><br><span class="line">    ...</span><br><span class="line">    int age() const&#123; return _age;&#125;  // 这会生成一个inline函数！</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>例子中是成员函数，如果是友元函数也是一样的。除非友元函数定义在类的外面。</p>
+<p>显式的声明则是使用inline限定符：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">template&lt;typename T&gt;</span><br><span class="line">inline const T&amp; max(const T&amp; a, const T&amp; b)&#123; return a&lt;b ? b: a;&#125;</span><br></pre></td></tr></table></figure>
+<p><a href="https://harttle.land/2015/08/28/effective-cpp-30.html" target="_blank" rel="noopener">Effective C++(内联函数)</a></p>
+<h2 id="static限定符"><a href="#static限定符" class="headerlink" title="static限定符"></a>static限定符</h2><h3 id="C语言中的static"><a href="#C语言中的static" class="headerlink" title="C语言中的static"></a>C语言中的static</h3><p>static修饰的变量作用是修改它的生命期/作用域。<br>1.对于变量来说，它们的生命期都提升到程序执行前申请到程序结束才释放。<br>2.而全局变量的作用域默认为文件内只有用external才能让外部可见，局部变量的作用域依然是代码块内。</p>
+<p>static修饰的函数，它起到修改限定这个函数的作用域表示这个函数只能在本文件中使用。</p>
+<h3 id="C-中的static"><a href="#C-中的static" class="headerlink" title="C++中的static"></a>C++中的static</h3><p>对比C语言中的特性它略有不同。添加了static的变量称作这个类的静态数据成员。<br>1.它不能再类中定义和初始化，只能在类中声明，在类外进行定义和初始化，默认初始化为0。<br>2.生命期都提升到程序执行前申请到程序结束才释放，所有类的实例都共享这个静态变量内存区。</p>
+<p>static修饰的函数称作这个类的静态成员函数。<br>1.在类外定义静态成员函数时，不用再加static关键字，只要在类中声明时加上即可。<br>2.静态成员函数只能访问静态数据成员和静态成员函数，普通成员函数可以访问静态成员函数和静态数据成员。<br>3.静态成员函数属于类，不属于任意一个类对象。<br>4.静态成员函数没有this指针。</p>
+<h2 id="在C-头文件中的直接进行类-函数定义"><a href="#在C-头文件中的直接进行类-函数定义" class="headerlink" title="在C++头文件中的直接进行类/函数定义"></a>在C++头文件中的直接进行类/函数定义</h2><p>这里我们来学习一下具体的示例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">#ifdef __APPLE__</span><br><span class="line">#include &lt;libkern/OSAtomic.h&gt;</span><br><span class="line"></span><br><span class="line">#define splock OSSpinLock</span><br><span class="line">#define splockinit(lock) \</span><br><span class="line">    &#123; *lock = OS_SPINLOCK_INIT; &#125;</span><br><span class="line">#define splocklock OSSpinLockLock</span><br><span class="line">#define splockunlock OSSpinLockUnlock</span><br><span class="line">#define splocktrylock OSSpinLockTry</span><br><span class="line"></span><br><span class="line">class SpinLock</span><br><span class="line">&#123;</span><br><span class="line">  public:</span><br><span class="line">    typedef splock handle_type;</span><br><span class="line"></span><br><span class="line">  public:</span><br><span class="line">    SpinLock() &#123; splockinit(&amp;lock_); &#125;</span><br><span class="line"></span><br><span class="line">    bool lock() &#123;</span><br><span class="line">        splocklock(&amp;lock_);</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    bool unlock() &#123;</span><br><span class="line">        splockunlock(&amp;lock_);</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    bool trylock() &#123;</span><br><span class="line">        return splocktrylock(&amp;lock_);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    splock *internal() &#123; return &amp;lock_; &#125;</span><br><span class="line"></span><br><span class="line">  private:</span><br><span class="line">    SpinLock(const SpinLock &amp;);</span><br><span class="line">    SpinLock &amp;operator=(const SpinLock &amp;);</span><br><span class="line"></span><br><span class="line">  private:</span><br><span class="line">    splock lock_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>可以看到这里定义了一个SpinLock类并依赖于系统的splock具体内部实现，这种写法可以看做是对splock的代码扩展。</p>
+<h3 id="这种写法有副作用吗？"><a href="#这种写法有副作用吗？" class="headerlink" title="这种写法有副作用吗？"></a>这种写法有副作用吗？</h3><p>这里我们使用一个简单的示例来看有没有问题。<br>Header_Imp类：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#ifndef Header_Imp_h</span><br><span class="line">#define Header_Imp_h</span><br><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">class HeaderImpTest &#123;</span><br><span class="line">public:</span><br><span class="line">    void func() &#123; printf(&quot;我是头文件中_______HeaderImpTest类的func实现\n&quot;); &#125;;</span><br><span class="line">&#125;;</span><br><span class="line">#endif /* Header_Imp_h */</span><br></pre></td></tr></table></figure></p>
+<p>Implementation类：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">//.hpp</span><br><span class="line">#ifndef Implementation_hpp</span><br><span class="line">#define Implementation_hpp</span><br><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">class Test &#123;</span><br><span class="line">public:</span><br><span class="line">    void func();</span><br><span class="line">&#125;;</span><br><span class="line">#endif /* Implementation_hpp */</span><br><span class="line"></span><br><span class="line">// .cpp</span><br><span class="line">#include &quot;Implementation.hpp&quot;</span><br><span class="line">class HeaderImpTest &#123;</span><br><span class="line">public:</span><br><span class="line">    void func() &#123; printf(&quot;我是实现文件___0___中HeaderImpTest类的func实现\n&quot;); &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">void Test::func() &#123;</span><br><span class="line">    HeaderImpTest *test = new HeaderImpTest();</span><br><span class="line">    test-&gt;func();</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>Implementation1类<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#ifndef Implementation1_hpp</span><br><span class="line">#define Implementation1_hpp</span><br><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">class Test1 &#123;</span><br><span class="line">public:</span><br><span class="line">    void func();</span><br><span class="line">&#125;;</span><br><span class="line">#endif /* Implementation1_hpp */</span><br><span class="line"></span><br><span class="line">#include &quot;Implementation1.hpp&quot;</span><br><span class="line">class HeaderImpTest &#123;</span><br><span class="line">public:</span><br><span class="line">    void func() &#123; printf(&quot;我是实现文件___1___中HeaderImpTest类的func实现\n&quot;); &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">void Test1::func() &#123;</span><br><span class="line">    HeaderImpTest *test = new HeaderImpTest();</span><br><span class="line">    test-&gt;func();</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>main.cpp<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">#include &quot;Header_Imp.h&quot;</span><br><span class="line">#include &quot;Implementation.hpp&quot;</span><br><span class="line">#include &quot;Implementation1.hpp&quot;</span><br><span class="line"></span><br><span class="line">int main () &#123;</span><br><span class="line">    HeaderImpTest *test = new HeaderImpTest();</span><br><span class="line">    test-&gt;func();</span><br><span class="line">    </span><br><span class="line">    Test *test1 = new Test();</span><br><span class="line">    test1-&gt;func();</span><br><span class="line">    </span><br><span class="line">    Test1 *test2 = new Test1();</span><br><span class="line">    test2-&gt;func();</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里我们在三个文件中分别定义了HeaderImpTest这个类，然后在main.cpp中实例化三个对象<br><img src="/archives/2fbe6240/media/15510597664753/15510839730244.png"><br>最终会发现在编译阶段并不会提示错误，但是在运行时期会使用先编入的那个实现。这就造成了副作用，即这种没有添加命名空间的类在运行时才能发现问题。</p>
+<p>当我们给HeaderImpTest加上namespace之后就正常了。<br><img src="/archives/2fbe6240/media/15510597664753/15510842108188.png"></p>
+<p>之后又做了一个C语言中inline函数无命名前缀然后再另一个文件定义同样符号的实验</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">inline void testFunc() &#123;</span><br><span class="line">    printf(&quot;我是头文件中_______testFunc\n&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class HeaderImpTest &#123;</span><br><span class="line">public:</span><br><span class="line">    void func() &#123;</span><br><span class="line">        printf(&quot;我是头文件中_______HeaderImpTest类的func实现\n&quot;);</span><br><span class="line">        testFunc();</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">namespace  Implementation &#123;</span><br><span class="line">    class HeaderImpTest;</span><br><span class="line">&#125;</span><br><span class="line">using namespace Implementation;</span><br><span class="line"></span><br><span class="line">void testFunc() &#123;</span><br><span class="line">    printf(&quot;我是实现文件___0___中testFunc\n&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class Implementation::HeaderImpTest &#123;</span><br><span class="line">public:</span><br><span class="line">    void func() &#123; printf(&quot;我是实现文件___0___中HeaderImpTest类的func实现\n&quot;); &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">void Test::func() &#123;</span><br><span class="line">    HeaderImpTest *test = new HeaderImpTest();</span><br><span class="line">    test-&gt;func();</span><br><span class="line">    testFunc();</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>发现结论是一致的，在编译时并不会报错，但是头文件的testFunc()函数的实现变成了实现文件中testFunc()函数的结果，而同时加入在另一个实现文件中定义testFunc()函数则会编译失败。</p>
+<p>所以直接在头文件中定义类/函数实现假如未处理它们的命名则有可能产生严重的副作用，且只能等到运行时才会发现问题。</p>
+<p><a href="https://www.cnblogs.com/Caiqinghua/archive/2010/08/14/1799577.html" target="_blank" rel="noopener">C语言中命名冲突解决</a><br><a href="https://stackoverflow.com/questions/6379422/c-multiple-classes-with-same-name" target="_blank" rel="noopener">C++中命名冲突</a><br><a href="https://www.jianshu.com/p/05135b3fa75a" target="_blank" rel="noopener">另一个相似的示例</a><br><a href="https://zhuanlan.zhihu.com/p/50812510" target="_blank" rel="noopener">内联函数细节</a></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>对于一开始提出的两个疑问，这里可以进行比较明确的回答。</p>
+<p>第一，在头文件中实现一个类/函数且不加命名空间，这种写法确实不会导致命名冲突因为在编译阶段编译器只会拿多个同名类中最先编入的那个类的实现，而在编写阶段假设我们同时将两个类暴露则会检测出类名冲突。同时这种写法是不安全的，因为在运行的时候假设有多个同名类且无命名空间则会导致真正实现是不正确的。</p>
+<p>第二，直接在头文件中定义类/函数应该是一种编码风格，我们可以为每个类加上前置命名空间就不会出现第一个问题了。</p>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="http://jslibs.wuxubj.cn/sweetalert_mini/jquery-1.7.1.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/archives/2fbe6240.html">C++中存在的头文件类/函数完整实现</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
+  <p><span>发布时间:</span>2019年03月16日 - 19:03</p>
+  <p><span>最后更新:</span>2019年03月16日 - 20:03</p>
+  <p><span>原始链接:</span><a href="/archives/2fbe6240.html" title="C++中存在的头文件类/函数完整实现">https://hello-david.github.io/archives/2fbe6240.html</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/2fbe6240.html"  aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
+</div>
+<script> 
+    var clipboard = new Clipboard('.fa-clipboard');
+    clipboard.on('success', $(function(){
+      $(".fa-clipboard").click(function(){
+        swal({   
+          title: "",   
+          text: '复制成功',   
+          html: false,
+          timer: 500,   
+          showConfirmButton: false
+        });
+      });
+    }));  
+</script>
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/iOS工程上的二三事/" rel="tag"># iOS工程上的二三事</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/archives/662d09a.html" rel="next" title="Metal学习——Metal着色器语言(MSL)(一)">
+                <i class="fa fa-chevron-left"></i> Metal学习——Metal着色器语言(MSL)(一)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">David Dai</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#内联函数的基本含义"><span class="nav-number">1.</span> <span class="nav-text">内联函数的基本含义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#内联函数与宏定义"><span class="nav-number">1.1.</span> <span class="nav-text">内联函数与宏定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内联函数的缺点"><span class="nav-number">1.2.</span> <span class="nav-text">内联函数的缺点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C-中内联函数声明方式"><span class="nav-number">2.</span> <span class="nav-text">C++中内联函数声明方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#static限定符"><span class="nav-number">3.</span> <span class="nav-text">static限定符</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#C语言中的static"><span class="nav-number">3.1.</span> <span class="nav-text">C语言中的static</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#C-中的static"><span class="nav-number">3.2.</span> <span class="nav-text">C++中的static</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在C-头文件中的直接进行类-函数定义"><span class="nav-number">4.</span> <span class="nav-text">在C++头文件中的直接进行类/函数定义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#这种写法有副作用吗？"><span class="nav-number">4.1.</span> <span class="nav-text">这种写法有副作用吗？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">David Dai</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+-->
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
