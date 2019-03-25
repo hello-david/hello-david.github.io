@@ -92,7 +92,8 @@
 <meta property="og:image" content="https://hello-david.github.io/archives/1294c030/media/15409747133792/liangdu.gif">
 <meta property="og:image" content="https://hello-david.github.io/archives/1294c030/media/15409747133792/ruihua.gif">
 <meta property="og:image" content="https://hello-david.github.io/archives/1294c030/media/15409747133792/yunying.gif">
-<meta property="og:updated_time" content="2018-12-14T03:58:10.441Z">
+<meta property="og:image" content="https://hello-david.github.io/archives/1294c030/media/15409747133792/hue.gif">
+<meta property="og:updated_time" content="2019-03-25T04:59:52.052Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OpenGL学习——简单滤镜">
 <meta name="twitter:description" content="OpenGL的学习到这边也告一段落了，从工程的角度上来说从这篇开始就可以集中注意在编写一些滤镜效果了，这也是之后我更关心的部分。 话说回来，什么是滤镜呢？  滤镜通常用于相机镜头作为调色、添加效果之用。如UV镜、偏振镜、星光镜、各种色彩滤光片。    滤镜也是绘图软件中用于制造特殊效果的工具统称，以Photoshop为例，它拥有风格化、画笔描边、模糊、扭曲、锐化、视频、素描、纹理、像素化、渲染、艺">
@@ -420,6 +421,18 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">uniform sampler2D inputTexture;</span><br><span class="line">varying highp vec2 textureCoordinate;</span><br><span class="line"></span><br><span class="line">uniform lowp vec2 vignetteCenter;</span><br><span class="line">uniform lowp vec3 vignetteColor;</span><br><span class="line">uniform highp float vignetteStart;</span><br><span class="line">uniform highp float vignetteEnd;</span><br><span class="line"></span><br><span class="line">void main()</span><br><span class="line">&#123;</span><br><span class="line">    lowp vec4 sourceImageColor = texture2D(inputTexture, textureCoordinate);</span><br><span class="line">    lowp float d = distance(textureCoordinate, vec2(vignetteCenter.x, vignetteCenter.y));</span><br><span class="line">    lowp float percent = smoothstep(vignetteStart, vignetteEnd, d);</span><br><span class="line">    gl_FragColor = vec4(mix(sourceImageColor.rgb, vignetteColor, percent), sourceImageColor.a);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这里用到GSGL的几个内置函数distance（计算距离）,mix（混合颜色）,smoothstep（平滑阶梯）。</p>
 <img src="/archives/1294c030/media/15409747133792/yunying.gif">
+<h3 id="色调-色相"><a href="#色调-色相" class="headerlink" title="色调/色相"></a>色调/色相</h3><blockquote>
+<p>明色调(Tint)与暗色调(Shade)。明色调，也有人称为含白度。暗色调，也有人称为含黑度。</p>
+</blockquote>
+<blockquote>
+<p>在色彩理论中，明色调是一种与白色颜色的混合，这减少了暗度。而暗色调是与黑色的混合，这增加了暗度。色调(Tone)则透过和灰色的混合，或是和明色调和暗色调两者着色的混合。将颜色和任何的中性色混合(包括黑，灰和白色)可降低彩度或视彩度，同时色相保持不变。</p>
+</blockquote>
+<blockquote>
+<p>色调不是指颜色的性质，是对一幅绘画作品的整体评价。一幅绘画作品虽然可能用了多种颜色，但总体有一种色调，是偏蓝或偏红，是偏暖或偏冷等等。</p>
+</blockquote>
+<p>色调(Hue)描述的是整体的颜色效果，但是在HSV/HLS色彩空间中调整效果不是很理想，<a href="https://stackoverflow.com/questions/9234724/how-to-change-hue-of-a-texture-with-glsl/9234854" target="_blank" rel="noopener">这里建议切换到YIQ色彩空间进行计算</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">precision highp float;</span><br><span class="line">varying highp vec2 textureCoordinate;</span><br><span class="line"> </span><br><span class="line">uniform sampler2D inputImageTexture;</span><br><span class="line">uniform mediump float hueAdjust;</span><br><span class="line">const highp  vec4  kRGBToYPrime = vec4 (0.299, 0.587, 0.114, 0.0);</span><br><span class="line">const highp  vec4  kRGBToI     = vec4 (0.595716, -0.274453, -0.321263, 0.0);</span><br><span class="line">const highp  vec4  kRGBToQ     = vec4 (0.211456, -0.522591, 0.31135, 0.0);</span><br><span class="line"> </span><br><span class="line">const highp  vec4  kYIQToR   = vec4 (1.0, 0.9563, 0.6210, 0.0);</span><br><span class="line">const highp  vec4  kYIQToG   = vec4 (1.0, -0.2721, -0.6474, 0.0);</span><br><span class="line">const highp  vec4  kYIQToB   = vec4 (1.0, -1.1070, 1.7046, 0.0);</span><br><span class="line"> </span><br><span class="line">void main () &#123;</span><br><span class="line">    // Sample the input pixel</span><br><span class="line">    highp vec4 color   = texture2D(inputImageTexture, textureCoordinate);</span><br><span class="line">     </span><br><span class="line">    // Convert to YIQ</span><br><span class="line">    highp float   YPrime  = dot (color, kRGBToYPrime);</span><br><span class="line">    highp float   I      = dot (color, kRGBToI);</span><br><span class="line">    highp float   Q      = dot (color, kRGBToQ);</span><br><span class="line">     </span><br><span class="line">    // Calculate the hue and chroma</span><br><span class="line">    highp float   hue     = atan (Q, I);</span><br><span class="line">    highp float   chroma  = sqrt (I * I + Q * Q);</span><br><span class="line">     </span><br><span class="line">    // Make the user&apos;s adjustments</span><br><span class="line">    hue += (-hueAdjust); //why negative rotation?</span><br><span class="line">     </span><br><span class="line">    // Convert back to YIQ</span><br><span class="line">    Q = chroma * sin (hue);</span><br><span class="line">    I = chroma * cos (hue);</span><br><span class="line">     </span><br><span class="line">    // Convert back to RGB</span><br><span class="line">    highp vec4  yIQ = vec4 (YPrime, I, Q, 0.0);</span><br><span class="line">    color.r = dot (yIQ, kYIQToR);</span><br><span class="line">    color.g = dot (yIQ, kYIQToG);</span><br><span class="line">    color.b = dot (yIQ, kYIQToB);</span><br><span class="line">     </span><br><span class="line">    // Save the result</span><br><span class="line">    gl_FragColor = color;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<img src="/archives/1294c030/media/15409747133792/hue.gif">
 
       
     </div>
@@ -438,7 +451,7 @@
   <p><span>本文标题:</span><a href="/archives/1294c030.html">OpenGL学习——简单滤镜</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
   <p><span>发布时间:</span>2018年11月13日 - 12:11</p>
-  <p><span>最后更新:</span>2018年12月14日 - 11:12</p>
+  <p><span>最后更新:</span>2019年03月25日 - 12:03</p>
   <p><span>原始链接:</span><a href="/archives/1294c030.html" title="OpenGL学习——简单滤镜">https://hello-david.github.io/archives/1294c030.html</a>
     <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/1294c030.html"  aria-label="复制成功！"></i></span>
   </p>
@@ -574,7 +587,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-count">14</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -596,7 +609,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">4</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -629,7 +642,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本效果滤镜"><span class="nav-number">1.</span> <span class="nav-text">基本效果滤镜</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#对比度（Contrast）"><span class="nav-number">1.1.</span> <span class="nav-text">对比度（Contrast）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#饱和度（Saturation）"><span class="nav-number">1.2.</span> <span class="nav-text">饱和度（Saturation）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#亮度（luminance）"><span class="nav-number">1.3.</span> <span class="nav-text">亮度（luminance）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#锐化（Sharpen）"><span class="nav-number">1.4.</span> <span class="nav-text">锐化（Sharpen）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#晕影（Vignette）"><span class="nav-number">1.5.</span> <span class="nav-text">晕影（Vignette）</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本效果滤镜"><span class="nav-number">1.</span> <span class="nav-text">基本效果滤镜</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#对比度（Contrast）"><span class="nav-number">1.1.</span> <span class="nav-text">对比度（Contrast）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#饱和度（Saturation）"><span class="nav-number">1.2.</span> <span class="nav-text">饱和度（Saturation）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#亮度（luminance）"><span class="nav-number">1.3.</span> <span class="nav-text">亮度（luminance）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#锐化（Sharpen）"><span class="nav-number">1.4.</span> <span class="nav-text">锐化（Sharpen）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#晕影（Vignette）"><span class="nav-number">1.5.</span> <span class="nav-text">晕影（Vignette）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#色调-色相"><span class="nav-number">1.6.</span> <span class="nav-text">色调/色相</span></a></li></ol></li></ol></div>
             
 
           </div>
