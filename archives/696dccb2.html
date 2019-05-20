@@ -79,21 +79,21 @@
 
 
 
-<meta name="description" content="像素卷积变换，常见的滤镜效果包括边缘检测、高斯模糊、锐化等。从我的理解上卷积就是一种数学运算，它运用在图像处理中可以让不同的图像滤波器通过卷积运算而获得相应的滤波效果。 而边缘检测、高斯模糊、锐化这些效果的本质区别就是滤波器的不同而已，它们都可以通过滤波器的卷积运算获得。 接下来详细学习一下卷积的概念以及如何通过它实现几个滤镜效果，这里代码部分就使用之前编写的Metal滤镜处理框架。 卷积运算12">
+<meta name="description" content="像素卷积变换，常见的滤镜效果包括边缘检测、高斯模糊、锐化等。从我的理解上卷积就是一种数学运算，它运用在图像处理中可以让不同的图像滤波器通过卷积运算而获得相应的滤波效果。 接下来详细学习一下卷积的概念以及如何通过它实现几个滤镜效果，这里代码部分就使用之前编写的Metal滤镜处理框架。 卷积运算 数字图像是一个二维的离散信号，对数字图像做卷积操作其实就是利用卷积核（卷积模板）在图像上滑动，将图像点上的">
 <meta name="keywords" content="Filter">
 <meta property="og:type" content="article">
 <meta property="og:title" content="滤镜Shader——像素卷积变换">
 <meta property="og:url" content="https://hello-david.github.io/archives/696dccb2.html">
 <meta property="og:site_name" content="David&#39;Blog">
-<meta property="og:description" content="像素卷积变换，常见的滤镜效果包括边缘检测、高斯模糊、锐化等。从我的理解上卷积就是一种数学运算，它运用在图像处理中可以让不同的图像滤波器通过卷积运算而获得相应的滤波效果。 而边缘检测、高斯模糊、锐化这些效果的本质区别就是滤波器的不同而已，它们都可以通过滤波器的卷积运算获得。 接下来详细学习一下卷积的概念以及如何通过它实现几个滤镜效果，这里代码部分就使用之前编写的Metal滤镜处理框架。 卷积运算12">
+<meta property="og:description" content="像素卷积变换，常见的滤镜效果包括边缘检测、高斯模糊、锐化等。从我的理解上卷积就是一种数学运算，它运用在图像处理中可以让不同的图像滤波器通过卷积运算而获得相应的滤波效果。 接下来详细学习一下卷积的概念以及如何通过它实现几个滤镜效果，这里代码部分就使用之前编写的Metal滤镜处理框架。 卷积运算 数字图像是一个二维的离散信号，对数字图像做卷积操作其实就是利用卷积核（卷积模板）在图像上滑动，将图像点上的">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://hello-david.github.io/archives/696dccb2/media/15474306601702/convolution.gif">
 <meta property="og:image" content="https://hello-david.github.io/archives/696dccb2/media/15474306601702/conv_simulation.gif">
 <meta property="og:image" content="https://hello-david.github.io/archives/696dccb2/media/15474306601702/15581472212106.jpg">
-<meta property="og:updated_time" content="2019-05-20T15:12:06.404Z">
+<meta property="og:updated_time" content="2019-05-20T15:20:58.083Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="滤镜Shader——像素卷积变换">
-<meta name="twitter:description" content="像素卷积变换，常见的滤镜效果包括边缘检测、高斯模糊、锐化等。从我的理解上卷积就是一种数学运算，它运用在图像处理中可以让不同的图像滤波器通过卷积运算而获得相应的滤波效果。 而边缘检测、高斯模糊、锐化这些效果的本质区别就是滤波器的不同而已，它们都可以通过滤波器的卷积运算获得。 接下来详细学习一下卷积的概念以及如何通过它实现几个滤镜效果，这里代码部分就使用之前编写的Metal滤镜处理框架。 卷积运算12">
+<meta name="twitter:description" content="像素卷积变换，常见的滤镜效果包括边缘检测、高斯模糊、锐化等。从我的理解上卷积就是一种数学运算，它运用在图像处理中可以让不同的图像滤波器通过卷积运算而获得相应的滤波效果。 接下来详细学习一下卷积的概念以及如何通过它实现几个滤镜效果，这里代码部分就使用之前编写的Metal滤镜处理框架。 卷积运算 数字图像是一个二维的离散信号，对数字图像做卷积操作其实就是利用卷积核（卷积模板）在图像上滑动，将图像点上的">
 <meta name="twitter:image" content="https://hello-david.github.io/archives/696dccb2/media/15474306601702/convolution.gif">
 
 
@@ -353,9 +353,11 @@
 
       
         <p>像素卷积变换，常见的滤镜效果包括边缘检测、高斯模糊、锐化等。从我的理解上卷积就是一种数学运算，它运用在图像处理中可以让不同的图像滤波器通过卷积运算而获得相应的滤波效果。</p>
-<p>而边缘检测、高斯模糊、锐化这些效果的本质区别就是滤波器的不同而已，它们都可以通过滤波器的卷积运算获得。</p>
 <p>接下来详细学习一下卷积的概念以及如何通过它实现几个滤镜效果，这里代码部分就使用之前编写的<a href="https://github.com/hello-david/MetalImage" target="_blank" rel="noopener">Metal滤镜处理框架</a>。</p>
-<h2 id="卷积运算"><a href="#卷积运算" class="headerlink" title="卷积运算"></a>卷积运算</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">数字图像是一个二维的离散信号，对数字图像做卷积操作其实就是利用卷积核（卷积模板）在图像上滑动，将图像点上的像素灰度值与对应的卷积核上的数值相乘，然后将所有相乘后的值相加作为卷积核中间像素对应的图像上像素的灰度值，并最终滑动完所有图像的过程。 </span><br><span class="line"></span><br><span class="line">还有一种说法，图像卷积就是一个加权平均的过程。</span><br></pre></td></tr></table></figure>
+<h2 id="卷积运算"><a href="#卷积运算" class="headerlink" title="卷积运算"></a>卷积运算</h2><blockquote>
+<p>数字图像是一个二维的离散信号，对数字图像做卷积操作其实就是利用卷积核（卷积模板）在图像上滑动，将图像点上的像素灰度值与对应的卷积核上的数值相乘，然后将所有相乘后的值相加作为卷积核中间像素对应的图像上像素的灰度值，并最终滑动完所有图像的过程。 </p>
+<p>还有一种说法，图像卷积就是一个加权平均的过程。</p>
+</blockquote>
 <p>正如下图我们使用下面这个卷积模板进行图像卷积运算，其结果就如动图那样，每个像素值都进行了加权平均运算。<br>$$<br> \left[<br> \begin{matrix}<br>   1 &amp; 0 &amp; 1 \\<br>   0 &amp; 1 &amp; 0 \\<br>   1 &amp; 0 &amp; 1<br>  \end{matrix}<br>  \right]<br>$$</p>
 <img src="/archives/696dccb2/media/15474306601702/convolution.gif"> 
 <img src="/archives/696dccb2/media/15474306601702/conv_simulation.gif">
