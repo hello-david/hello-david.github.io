@@ -79,21 +79,20 @@
 
 
 
-<meta name="description" content="emmmmm，这篇文章主要是记录下最近在项目上调试GL资源的一些流程和原理。 首先呢，我们都知道调试GL图像效果是一件非常不方便的事情，特别是在各个项目频繁交叉使用可能产生一些意想不到的问题，所以一个良好的调试手段是必要的。 话说回来，OpenGL这种系统厂商实现的函数库我们要怎么调试呢？在iOS平台上还好说，至少还能用Xcode的GPU Frame Capture(那个小相机)调试GPU绘制的图">
+<meta name="description" content="这里从原理上如何实现iOS的逆向工程的，以及如何从工程化的角度去实现逆向一个iPA。在我看来整体的流程上就三个步骤：砸壳-&amp;gt;注入-&amp;gt;重签安装。 砸壳从AppStore上(官方渠道)分发的ipa包都是经过加密的，逆向的第一步就是对这个应用进行解密。不过在现如今，实施这个过程的前提条件:  一台越狱iOS设备  一条命令实现dump砸壳应用，Frida-ios-dump一键砸壳菜鸡版 照着">
 <meta name="keywords" content="iOS工程上的二三事">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hook调试初体验">
-<meta property="og:url" content="https://hello-david.github.io/archives/6819375.html">
+<meta property="og:title" content="iOS逆向工程三板斧:砸壳-注入-重签">
+<meta property="og:url" content="https://hello-david.github.io/archives/82a2b295.html">
 <meta property="og:site_name" content="David&#39;Blog">
-<meta property="og:description" content="emmmmm，这篇文章主要是记录下最近在项目上调试GL资源的一些流程和原理。 首先呢，我们都知道调试GL图像效果是一件非常不方便的事情，特别是在各个项目频繁交叉使用可能产生一些意想不到的问题，所以一个良好的调试手段是必要的。 话说回来，OpenGL这种系统厂商实现的函数库我们要怎么调试呢？在iOS平台上还好说，至少还能用Xcode的GPU Frame Capture(那个小相机)调试GPU绘制的图">
+<meta property="og:description" content="这里从原理上如何实现iOS的逆向工程的，以及如何从工程化的角度去实现逆向一个iPA。在我看来整体的流程上就三个步骤：砸壳-&amp;gt;注入-&amp;gt;重签安装。 砸壳从AppStore上(官方渠道)分发的ipa包都是经过加密的，逆向的第一步就是对这个应用进行解密。不过在现如今，实施这个过程的前提条件:  一台越狱iOS设备  一条命令实现dump砸壳应用，Frida-ios-dump一键砸壳菜鸡版 照着">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://hello-david.github.io/archives/6819375/media/15411406653253/15411487609584.jpg">
-<meta property="og:image" content="https://hello-david.github.io/archives/6819375/media/15411406653253/elfheader.png">
-<meta property="og:updated_time" content="2018-12-14T03:58:44.772Z">
+<meta property="og:image" content="https://hello-david.github.io/archives/82a2b295/media/15553161853757/15595550106471.png">
+<meta property="og:updated_time" content="2019-06-10T03:21:26.061Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hook调试初体验">
-<meta name="twitter:description" content="emmmmm，这篇文章主要是记录下最近在项目上调试GL资源的一些流程和原理。 首先呢，我们都知道调试GL图像效果是一件非常不方便的事情，特别是在各个项目频繁交叉使用可能产生一些意想不到的问题，所以一个良好的调试手段是必要的。 话说回来，OpenGL这种系统厂商实现的函数库我们要怎么调试呢？在iOS平台上还好说，至少还能用Xcode的GPU Frame Capture(那个小相机)调试GPU绘制的图">
-<meta name="twitter:image" content="https://hello-david.github.io/archives/6819375/media/15411406653253/15411487609584.jpg">
+<meta name="twitter:title" content="iOS逆向工程三板斧:砸壳-注入-重签">
+<meta name="twitter:description" content="这里从原理上如何实现iOS的逆向工程的，以及如何从工程化的角度去实现逆向一个iPA。在我看来整体的流程上就三个步骤：砸壳-&amp;gt;注入-&amp;gt;重签安装。 砸壳从AppStore上(官方渠道)分发的ipa包都是经过加密的，逆向的第一步就是对这个应用进行解密。不过在现如今，实施这个过程的前提条件:  一台越狱iOS设备  一条命令实现dump砸壳应用，Frida-ios-dump一键砸壳菜鸡版 照着">
+<meta name="twitter:image" content="https://hello-david.github.io/archives/82a2b295/media/15553161853757/15595550106471.png">
 
 
 
@@ -123,14 +122,14 @@
 
 
 
-  <link rel="canonical" href="https://hello-david.github.io/archives/6819375.html"/>
+  <link rel="canonical" href="https://hello-david.github.io/archives/82a2b295.html"/>
 
 
 
 <meta name="google-site-verification" content="xPc40P1FFnuv2Aer8rA72v2doNkgf1bEhU79GGlStmE" />
 
 
-  <title>Hook调试初体验 | David'Blog</title>
+  <title>iOS逆向工程三板斧:砸壳-注入-重签 | David'Blog</title>
   
 
 
@@ -257,7 +256,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/6819375.html">
+    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/82a2b295.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="David Dai">
@@ -274,7 +273,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Hook调试初体验</h1>
+          <h1 class="post-title" itemprop="name headline">iOS逆向工程三板斧:砸壳-注入-重签</h1>
         
 
         <div class="post-meta">
@@ -286,8 +285,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-14T11:55:00+08:00">
-                2018-12-14
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-10T11:17:10+08:00">
+                2019-06-10
               </time>
             
 
@@ -351,30 +350,47 @@
       
 
       
-        <p>emmmmm，这篇文章主要是记录下最近在项目上调试GL资源的一些流程和原理。</p>
-<p>首先呢，我们都知道调试GL图像效果是一件非常不方便的事情，特别是在各个项目频繁交叉使用可能产生一些意想不到的问题，所以一个良好的调试手段是必要的。</p>
-<p>话说回来，OpenGL这种系统厂商实现的函数库我们要怎么调试呢？在iOS平台上还好说，至少还能用Xcode的GPU Frame Capture(那个小相机)调试GPU绘制的图像效果。而Android Studio的GPU调试工具实在是复杂的一匹。</p>
-<p>那么Hook具体是如何实现的呢？这个可以扯到逆向工程的一些技术了，这里就不展开了。我们知道在iOS中由于Objective-C是一门动态语言可以直接用<strong>Method Swizzling</strong>这种方法来动态修改调用方法来实现Hook函数添加。但是我们要Hook的是GL的函数呀(C函数)，这就需要我们往系统层来考虑这件事了。</p>
-<h2 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h2><p>我们知道我们的开发语言大致有分为两种类型：编译型(C/C++,Obejctive-C,Swift)和解释型(Java,Python,Shell,Javascript)。</p>
-<p>它们的最大差别在于编译型语言在运行前代码就在各个系统平台上通过编译链接生成一个个程序镜像(image）它们执行的是机器指令，在不同的系统平台上是无法通用的。</p>
-<p>而解释型语言则是运行在一种系统无关的环境上，如Java虚拟机，Javascript引擎等等。它们执行的是一种标记指令，再交由软件环境去翻译器成机器指令去真正执行。</p>
-<p>我们将运行在各个系统平台上的程序镜像(image)称为可执行二进制文件。而在这里要Hook的目标就是我们程序中调用的系统OpenGL函数库的方法调用。</p>
-<h3 id="可执行文件结构"><a href="#可执行文件结构" class="headerlink" title="可执行文件结构"></a>可执行文件结构</h3><p>学过计算机的同学都应该知道我们的所有高级语言代码最后都是被转化为二进制代码运行的，而这些二进制代码在不同的文件系统上有各自的组织方式。比如在OS X/iOS中使用Mach-O格式，而在Linux/Android中使用ELF格式。</p>
-<p>Mach-O二进制文件:<br><img src="/archives/6819375/media/15411406653253/15411487609584.jpg"></p>
-<p>ELF二进制文件:<br><img src="/archives/6819375/media/15411406653253/elfheader.png"></p>
-<p>从上面的截图，可以知道这些二进制文件存储着动态库函数跳转符号表、数据、文件格式等信息。</p>
-<p>而我们Hook的目的就是通过截取动态库函数跳转符号并加以修改来实现函数功能的修改。那么我们又要如何实现这一步呢？</p>
-<h3 id="可执行文件执行过程"><a href="#可执行文件执行过程" class="headerlink" title="可执行文件执行过程"></a>可执行文件执行过程</h3><p>对于它们的实现细节并不是我关心的重点，这里从较为宏观的流程来阐述它们具体要如何加载到OS内核去运行的。</p>
-<p>总体而言，运行一个可执行文件基本需要以下四个流程：</p>
-<ol>
-<li>解析文件 </li>
-<li>依赖建立（动态链接依赖库）</li>
-<li>初始化运行环境 </li>
-<li>执行进程</li>
-</ol>
-<p>而我们要实现的Hook功能正是在进行动态链接依赖库(.so)这个流程的时候实现的。其中dyld(Dynamic Loader)和Android linker它们分别是OS X/iOS和Android上的动态依赖库加载器。</p>
-<h2 id="FishHook与Xhook"><a href="#FishHook与Xhook" class="headerlink" title="FishHook与Xhook"></a>FishHook与Xhook</h2><p>我们分别通过<a href="https://github.com/facebook/fishhook" target="_blank" rel="noopener">FishHook</a>和<a href="https://github.com/iqiyi/xHook" target="_blank" rel="noopener">Xhook</a>这两个第三方库来实现对iOS/Android这两个平台的动态库函数Hook。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://www.jianshu.com/p/54d842db3f69" target="_blank" rel="noopener">Mach-O解析</a><br><a href="http://turingh.github.io/2016/03/01/dyld%E4%B8%ADmacho%E5%8A%A0%E8%BD%BD%E7%9A%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/" target="_blank" rel="noopener">Mach-O加载流程</a><br><a href="http://jzhihui.iteye.com/blog/1447570" target="_blank" rel="noopener">ELF加载流程</a><br><a href="https://www.jianshu.com/p/9e1f4d771e35" target="_blank" rel="noopener">FishHook解析</a><br><a href="https://juejin.im/entry/5aea8c736fb9a07a9b35c904" target="_blank" rel="noopener">xHook分析</a><br><a href="https://draveness.me/fishhook" target="_blank" rel="noopener">C语言函数修改</a></p>
+        <p>这里从原理上如何实现iOS的逆向工程的，以及如何从工程化的角度去实现逆向一个iPA。在我看来整体的流程上就三个步骤：<strong>砸壳-&gt;注入-&gt;重签安装</strong>。</p>
+<h2 id="砸壳"><a href="#砸壳" class="headerlink" title="砸壳"></a>砸壳</h2><p>从AppStore上(官方渠道)分发的ipa包都是经过加密的，逆向的第一步就是对这个应用进行解密。不过在现如今，实施这个过程的前提条件:</p>
+<blockquote>
+<p>一台越狱iOS设备</p>
+</blockquote>
+<p><a href="http://www.alonemonkey.com/2018/01/30/frida-ios-dump/" target="_blank" rel="noopener">一条命令实现dump砸壳应用</a>，<a href="http://iosre.com/t/frida-ios-dump/11640" target="_blank" rel="noopener">Frida-ios-dump一键砸壳菜鸡版</a></p>
+<p>照着上面文章中的流程在iOS和MacOS上分别装好frida后需要连到越狱机器的控制台，接着需要连接通过usb连接到iOS上，这时候用到<code>iproxy</code>这个命令可以通过<code>brew install usbmuxd</code>安装，同时记得要利用cydia给越狱机器装上ssh才能登录得上。</p>
+<p>接下去利用<a href="https://github.com/AloneMonkey/frida-ios-dump" target="_blank" rel="noopener">frida-ios-dump</a>这个工程提供的脚本进行一键dump砸壳ipa包。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 配置frida-ios-dump运行环境</span><br><span class="line">sudo pip install -r ./requirements.txt --upgrade --ignore-installed six</span><br><span class="line"></span><br><span class="line"># 将越狱机器上的22(ssh)端口映射到电脑上的2222端口</span><br><span class="line">iproxy 2222 22</span><br><span class="line"></span><br><span class="line"># 一键dump一个砸壳包</span><br><span class="line">./dump.py xxx(应用名称)</span><br></pre></td></tr></table></figure>
+<h2 id="注入"><a href="#注入" class="headerlink" title="注入"></a>注入</h2><p>到了这一步是真正需要进行开发修改功能/代码的。注入这个话题可以很大，真正的实施过程需要<br>有很多的理论基础才行，之前在<a href="https://hello-david.github.io/archives/6819375.html">Hook初体验</a>这里简单学习了在iOS平台下Hook代码及注入动态库的基本原理。</p>
+<p>简而言之，在iOS上我们可以从两个层次来实现功能入侵和修改：</p>
+<ul>
+<li>OC层次：Metod Swizzling/+load</li>
+<li>C层次：修改dyld链接符号表</li>
+</ul>
+<p>关于如何Hook的技术细节以及它的应用场景在这里就不讨论了，在iOS中可以利用<a href="https://github.com/AloneMonkey/MonkeyDev" target="_blank" rel="noopener">MonkeyDev</a>注入framework到目标app中，同时它还支持利用cocoapods开发自己的插件。</p>
+<h2 id="重签"><a href="#重签" class="headerlink" title="重签"></a>重签</h2><blockquote>
+<p>一个已签名的可执行文件的签名包含在 Mach-O 二进制文件格式中；对于例如脚本这样的非 Mach-O 可执行文件，就存放在该文件系统的的扩展属性中。</p>
+</blockquote>
+<blockquote>
+<p>这种做法使得在 OS X 和 iOS 上的任何可执行二进制文件都可以被设置签名：不论是动态库，命令行工具，还是 .app 后缀的程序包。这也意味着设置签名的过程实际上会改动可执行文件的文件内容，将签名数据写入二进制文件中。</p>
+</blockquote>
+<p>关于证书签名(Code Signing) / 授权机制(Entitlements) / 配置文件(Provisioning)的区别和实现原理可以参考<a href="http://blog.cnbang.net/tech/3386/" target="_blank" rel="noopener">iOS App签名的原理</a>和<a href="https://objccn.io/issue-17-2/" target="_blank" rel="noopener">代码签名探析</a>。</p>
+<img src="/archives/82a2b295/media/15553161853757/15595550106471.png">
+<p>通过上面的文章可以知道：</p>
+<ul>
+<li>钥匙分为公钥和私钥，它们基于RSA算法，是一种不对称的加密方式。通过公钥进行签名(加密)的数据只能通过私钥验证(解密)，反之亦然。</li>
+<li>数字证书中包含一个L公钥和一个经过A私钥签名(加密)的数据内容。</li>
+</ul>
+<p>而在这里我们重签指的是通过MacOS下<code>codesign</code>工具去替换配置文件(Provisioning Profile)以及重新签名相关资源的过程，比如我们拥有：</p>
+<ul>
+<li>Appstore上某个经过砸壳的iPA包（无证书或者使用该证书无法装到个人iPhone上）</li>
+<li>个人开发证书<br>这时候我们装上这个iPA包就必须进行重签。</li>
+</ul>
+<p>重签命令的基本格式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># .framework 与 .dylib 签名</span><br><span class="line">codesign -f -s &lt;证书&gt; &lt;framework 二进制&gt;</span><br><span class="line"></span><br><span class="line"># app 与 appex 签名</span><br><span class="line">codesign -f -s &lt;证书&gt; --entitlements &lt;Entitlements 文件&gt; &lt;app 二进制&gt;&apos;</span><br></pre></td></tr></table></figure></p>
+<h2 id="一波带走"><a href="#一波带走" class="headerlink" title="一波带走"></a>一波带走</h2><p>当我们手上没有越狱机器又需要进行逆向工程的时候该怎么办呢？</p>
+<ul>
+<li>从xx助手等第三方渠道下载破壳(越狱)的ipa包。</li>
+<li>集成<a href="https://github.com/AloneMonkey/MonkeyDev" target="_blank" rel="noopener">MonkeyDev</a>工程进行逆向开发，其中注入和重签步骤都可以通过这个工程完成。</li>
+</ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://cydia-app.com/" target="_blank" rel="noopener">Cydia App</a><br><a href="https://zhuanlan.zhihu.com/p/34003393" target="_blank" rel="noopener">iOS 10越狱与SSH连接</a><br><a href="https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Introduction/Introduction.html" target="_blank" rel="noopener">Coding Signing Guide</a><br><a href="https://lincode.github.io/Certificate" target="_blank" rel="noopener">iOS开发中的证书和钥匙</a><br><a href="https://www.jianshu.com/p/ac5ce7e2bb53" target="_blank" rel="noopener">iOS数字签名和iPA重签</a><br><a href="https://juejin.im/post/5bd27039e51d457ac61c2a4b" target="_blank" rel="noopener">iOS逆向之旅（进阶篇） — 重签名APP（一）</a></p>
 
       
     </div>
@@ -390,12 +406,12 @@
   <script type="text/javascript" src="http://jslibs.wuxubj.cn/sweetalert_mini/jquery-1.7.1.min.js"></script>
   <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
   <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
-  <p><span>本文标题:</span><a href="/archives/6819375.html">Hook调试初体验</a></p>
+  <p><span>本文标题:</span><a href="/archives/82a2b295.html">iOS逆向工程三板斧:砸壳-注入-重签</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
-  <p><span>发布时间:</span>2018年12月14日 - 11:12</p>
-  <p><span>最后更新:</span>2018年12月14日 - 11:12</p>
-  <p><span>原始链接:</span><a href="/archives/6819375.html" title="Hook调试初体验">https://hello-david.github.io/archives/6819375.html</a>
-    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/6819375.html"  aria-label="复制成功！"></i></span>
+  <p><span>发布时间:</span>2019年06月10日 - 11:06</p>
+  <p><span>最后更新:</span>2019年06月10日 - 11:06</p>
+  <p><span>原始链接:</span><a href="/archives/82a2b295.html" title="iOS逆向工程三板斧:砸壳-注入-重签">https://hello-david.github.io/archives/82a2b295.html</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/82a2b295.html"  aria-label="复制成功！"></i></span>
   </p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
 </div>
@@ -440,8 +456,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/archives/9be06744.html" rel="next" title="Apple内购开发流程">
-                <i class="fa fa-chevron-left"></i> Apple内购开发流程
+              <a href="/archives/696dccb2.html" rel="next" title="滤镜Shader——像素卷积变换">
+                <i class="fa fa-chevron-left"></i> 滤镜Shader——像素卷积变换
               </a>
             
           </div>
@@ -449,10 +465,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/archives/662d09a.html" rel="prev" title="Metal学习——Metal着色器语言(MSL)(一)">
-                Metal学习——Metal着色器语言(MSL)(一) <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -584,7 +596,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本原理"><span class="nav-number">1.</span> <span class="nav-text">基本原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#可执行文件结构"><span class="nav-number">1.1.</span> <span class="nav-text">可执行文件结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#可执行文件执行过程"><span class="nav-number">1.2.</span> <span class="nav-text">可执行文件执行过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FishHook与Xhook"><span class="nav-number">2.</span> <span class="nav-text">FishHook与Xhook</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#砸壳"><span class="nav-number">1.</span> <span class="nav-text">砸壳</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#注入"><span class="nav-number">2.</span> <span class="nav-text">注入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#重签"><span class="nav-number">3.</span> <span class="nav-text">重签</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一波带走"><span class="nav-number">4.</span> <span class="nav-text">一波带走</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>
