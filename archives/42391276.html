@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Metal," />
+  <meta name="keywords" content="iOS工程上的二三事," />
 
 
 
@@ -79,18 +79,22 @@
 
 
 
-<meta name="description" content="前面学习了Metal框架的基本组成和运行方式,知道了要如何科学使用的它。然而我们最终的目的还是要使用这套框架来优雅的操作GPU单元进行图像处理，也就回到了Shader的编写上了。 我们知道OpenGL的Shader编写语言GLSL的语法上是非常类似C的，而Metal的Shader编写语言MSL则是直接基于C++14实现的一个子集。 Metal Shading Language官方文档文档中通过7个">
-<meta name="keywords" content="Metal">
+<meta name="description" content="近期接到了个需求，要实现一个组件项目在开发时候实现自动输出Framework。即这个项目实际上是一个基于Podspec的组件私有库，开发的时候只有部分同学可以访问私有库的源码，而最后以Framework的形式输出给其他人。 这是Demo传送链接 Cocoapods注入脚本为了实现以上的需求，最先想到的就是希望在每次构建结束后利用脚本来自动化这个功能。经过一番查询，在Cococapods中发现果然可">
+<meta name="keywords" content="iOS工程上的二三事">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Metal学习——Metal着色器语言(MSL)(一)">
-<meta property="og:url" content="https://hello-david.github.io/archives/662d09a.html">
+<meta property="og:title" content="Cocoapods实现私有库开发和二进制发布">
+<meta property="og:url" content="https://hello-david.github.io/archives/42391276.html">
 <meta property="og:site_name" content="David&#39;Blog">
-<meta property="og:description" content="前面学习了Metal框架的基本组成和运行方式,知道了要如何科学使用的它。然而我们最终的目的还是要使用这套框架来优雅的操作GPU单元进行图像处理，也就回到了Shader的编写上了。 我们知道OpenGL的Shader编写语言GLSL的语法上是非常类似C的，而Metal的Shader编写语言MSL则是直接基于C++14实现的一个子集。 Metal Shading Language官方文档文档中通过7个">
+<meta property="og:description" content="近期接到了个需求，要实现一个组件项目在开发时候实现自动输出Framework。即这个项目实际上是一个基于Podspec的组件私有库，开发的时候只有部分同学可以访问私有库的源码，而最后以Framework的形式输出给其他人。 这是Demo传送链接 Cocoapods注入脚本为了实现以上的需求，最先想到的就是希望在每次构建结束后利用脚本来自动化这个功能。经过一番查询，在Cococapods中发现果然可">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-01-16T07:06:38.498Z">
+<meta property="og:image" content="https://hello-david.github.io/archives/42391276/media/15602360477345/15603946759962.png">
+<meta property="og:image" content="https://hello-david.github.io/archives/42391276/media/15602360477345/15604230932693.png">
+<meta property="og:image" content="https://hello-david.github.io/archives/42391276/media/15602360477345/15604230964147.png">
+<meta property="og:updated_time" content="2019-06-14T01:56:20.566Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Metal学习——Metal着色器语言(MSL)(一)">
-<meta name="twitter:description" content="前面学习了Metal框架的基本组成和运行方式,知道了要如何科学使用的它。然而我们最终的目的还是要使用这套框架来优雅的操作GPU单元进行图像处理，也就回到了Shader的编写上了。 我们知道OpenGL的Shader编写语言GLSL的语法上是非常类似C的，而Metal的Shader编写语言MSL则是直接基于C++14实现的一个子集。 Metal Shading Language官方文档文档中通过7个">
+<meta name="twitter:title" content="Cocoapods实现私有库开发和二进制发布">
+<meta name="twitter:description" content="近期接到了个需求，要实现一个组件项目在开发时候实现自动输出Framework。即这个项目实际上是一个基于Podspec的组件私有库，开发的时候只有部分同学可以访问私有库的源码，而最后以Framework的形式输出给其他人。 这是Demo传送链接 Cocoapods注入脚本为了实现以上的需求，最先想到的就是希望在每次构建结束后利用脚本来自动化这个功能。经过一番查询，在Cococapods中发现果然可">
+<meta name="twitter:image" content="https://hello-david.github.io/archives/42391276/media/15602360477345/15603946759962.png">
 
 
 
@@ -120,14 +124,14 @@
 
 
 
-  <link rel="canonical" href="https://hello-david.github.io/archives/662d09a.html"/>
+  <link rel="canonical" href="https://hello-david.github.io/archives/42391276.html"/>
 
 
 
 <meta name="google-site-verification" content="xPc40P1FFnuv2Aer8rA72v2doNkgf1bEhU79GGlStmE" />
 
 
-  <title>Metal学习——Metal着色器语言(MSL)(一) | David'Blog</title>
+  <title>Cocoapods实现私有库开发和二进制发布 | David'Blog</title>
   
 
 
@@ -254,7 +258,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/662d09a.html">
+    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/42391276.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="David Dai">
@@ -271,7 +275,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Metal学习——Metal着色器语言(MSL)(一)</h1>
+          <h1 class="post-title" itemprop="name headline">Cocoapods实现私有库开发和二进制发布</h1>
         
 
         <div class="post-meta">
@@ -283,8 +287,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-01-16T14:58:28+08:00">
-                2019-01-16
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-14T09:52:14+08:00">
+                2019-06-14
               </time>
             
 
@@ -306,8 +310,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/图像处理/" itemprop="url" rel="index">
-                    <span itemprop="name">图像处理</span>
+                  <a href="/categories/工程上的二三事/" itemprop="url" rel="index">
+                    <span itemprop="name">工程上的二三事</span>
                   </a>
                 </span>
 
@@ -348,39 +352,28 @@
       
 
       
-        <p>前面学习了Metal框架的基本组成和运行方式,知道了要如何科学使用的它。然而我们最终的目的还是要使用这套框架来优雅的操作GPU单元进行图像处理，也就回到了Shader的编写上了。</p>
-<p>我们知道OpenGL的Shader编写语言GLSL的语法上是非常类似C的，而Metal的Shader编写语言MSL则是直接基于C++14实现的一个子集。</p>
-<p><a href="https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf" target="_blank" rel="noopener">Metal Shading Language官方文档</a>文档中通过7个模块来介绍Metal：</p>
+        <p>近期接到了个需求，要实现一个组件项目在开发时候实现自动输出Framework。即这个项目实际上是一个基于Podspec的组件私有库，开发的时候只有部分同学可以访问私有库的源码，而最后以Framework的形式输出给其他人。</p>
+<p><a href="https://github.com/hello-david/Binarization" target="_blank" rel="noopener">这是Demo传送链接</a><br><img src="/archives/42391276/media/15602360477345/15603946759962.png"></p>
+<h2 id="Cocoapods注入脚本"><a href="#Cocoapods注入脚本" class="headerlink" title="Cocoapods注入脚本"></a>Cocoapods注入脚本</h2><p>为了实现以上的需求，最先想到的就是希望在每次构建结束后利用脚本来自动化这个功能。经过一番查询，在Cococapods中发现果然可以实现脚本注入。</p>
+<p>根据<a href="https://blog.cocoapods.org/CocoaPods-1.4.0/" target="_blank" rel="noopener">这篇文章</a>在1.4.0之后支持podfile和podspec注入脚本到xcode中对应的工程target中。即在podfile中的脚本会注入到<code>Demo.xcodeproj</code>而podspec中的脚本注入到<code>Pods.xcodeproj</code>中的target。</p>
+<p>利用cocopods提供的脚本注入语法，注入的脚本的执行时机是在该target进行编译前/中/后。</p>
+<p>显然根据需求我们是在制作一个podspec组件，所以我们将要注入Framework制作脚本到<code>Demo.xcodeproj</code>中触发脚本到<code>Pods.xcodeproj</code>制作一个Framework。因为我们要制作的framework本身就是<code>Pods.xcodeproj</code>中的target，假如把脚本注入到<code>Pods.xcodeproj</code>这个工程中则会引起脚本循环执行。</p>
+<h2 id="Framework制作脚本"><a href="#Framework制作脚本" class="headerlink" title="Framework制作脚本"></a>Framework制作脚本</h2><p>接下来我们制作Framework的脚本有以下三种方案：</p>
 <ul>
-<li>“简介”是对文档的介绍，介绍了Metal和C++ 14之间的异同。</li>
-<li>“数据类型”列出了Metal数据类型，包括表示向量，矩阵，缓冲区，纹理和采样器的类型。它还讨论了类型对齐和类型转换。</li>
-<li>“运算符”列出了“Metal”运算符。</li>
-<li>“函数和变量声明”详细说明了如何声明函数和变量，有时使用限制它们使用方式的属性。</li>
-<li>“Metal Standard Library”定义了一系列内置Metal函数。</li>
-<li>“编译器”详细介绍了Metal编译器的选项，包括预处理器指令，数学内在函数选项和控制优化的选项。</li>
-<li>“数值符合性”描述了表示浮点数的要求，包括数学运算的准确性。</li>
+<li>Carthage Build，需要将target scheme改为shared才能构建，只支持dynamic的Framwork且没有支持mangle技术。</li>
+<li>Cocoapods-packager支持dynamic和static的Framework，并且支持mangle技术可以修改符号表防止方法名冲突，但动态库打包目前只支持到pod 1.5.3版本，引入Swift代码会有问题，长期缺少维护。</li>
+<li>自制xcodebuild脚本，实际上上面两种第三方方案原理上也是调用xcodebuild来进行打包的所以我们同样可以自定义一个xcodebuild脚本来更自由实现打包工作。</li>
 </ul>
-<hr>
-<p>接下来这里围绕着一个简单的MSL脚本来学习Metal的语法，之后再详细学习各个部分的细节。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;metal_stdlib&gt; // 导入Metal标准库</span><br><span class="line">using namespace metal;</span><br><span class="line"></span><br><span class="line">// 定义一个结构体用于传递顶点着色器的输出</span><br><span class="line">struct SingleInputVertexIO &#123;</span><br><span class="line">    float4 position [[position]];</span><br><span class="line">    float2 textureCoordinate [[user(texturecoord)]];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">// 顶点着色器</span><br><span class="line">vertex SingleInputVertexIO oneInputVertex(device packed_float2 *position [[buffer(0)]],</span><br><span class="line">                                          device packed_float2 *texturecoord [[buffer(1)]],</span><br><span class="line">                                          uint vid [[vertex_id]]) &#123;</span><br><span class="line">    SingleInputVertexIO outputVertices;</span><br><span class="line">    outputVertices.position = float4(position[vid], 0, 1.0);</span><br><span class="line">    outputVertices.textureCoordinate = texturecoord[vid];</span><br><span class="line">    </span><br><span class="line">    return outputVertices;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 片段着色器</span><br><span class="line">fragment half4 passthroughFragment(SingleInputVertexIO fragmentInput [[stage_in]],</span><br><span class="line">                                   texture2d&lt;half&gt; inputTexture [[texture(0)]]) &#123;</span><br><span class="line">    constexpr sampler quadSampler;</span><br><span class="line">    half4 color = inputTexture.sample(quadSampler, fragmentInput.textureCoordinate);</span><br><span class="line">    </span><br><span class="line">    return color;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>在Metal中用[[…]]包含的这种变量实际上着色器的<strong>内置变量/内置函数</strong>，就像OpenGL中我们通过gl_Position函数访问顶点着色器的像素位置信息。</p>
-<p>可以看做着色器属性访问符号，在这里简化了语法可以十分的方便访问着色器的内置对象/方法(getter/setter函数)。</p>
-<p>这是一个简单的纹理绘制脚本，我们把它分成三个部分来解析。</p>
-<h2 id="结构体部分"><a href="#结构体部分" class="headerlink" title="结构体部分"></a>结构体部分</h2><p>我们定义了一个名为SingleInputVertexIO的结构体，它内部包含两个变量position和textureCoordinate。因为我们贴一张2D的纹理图一般只需要知道纹理的顶点坐标和纹理坐标就够了。</p>
-<p><strong>[[position]]</strong> 表示裁剪空间中输入到GPU中的原始坐标信息，固定是一个四维(xyzw)的向量。</p>
-<p><strong>[[user(name_xxx)]]</strong> 表示为片段着色器的函数参数指定一个(ImageBlock)图像块数据类型的属性名称为name_xxx，和OpenGL中varying限定符的作用十分相似。ImageBlock是一种二维图像独有的数据结构，它表示一个像素点的(x,y)坐标。简单的说就是定义一个name_xxx的二维图像坐标的片段着色器参数，理解起来有点绕，具体可以参考文档的2.10选节。</p>
-<h2 id="顶点着色器部分"><a href="#顶点着色器部分" class="headerlink" title="顶点着色器部分"></a>顶点着色器部分</h2><p>首先，在Metal中支持三种函数(kernel, vertex, fragment)的定义，而我们这里图像处理主要集中在编写vertex和fragment的Shader。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vertex SingleInputVertexIO oneInputVertex(device packed_float2 *position [[buffer(0)]],</span><br><span class="line">                                          device packed_float2 *texturecoord [[buffer(1)]],</span><br><span class="line">                                          uint vid [[vertex_id]])</span><br></pre></td></tr></table></figure>
-<p>接着我们来看顶点着色器脚本的函数声明，显然这里定义了一个叫oneInputVertex其中返回值为SingleInputVertexIO结构类型的顶点着色器。</p>
-<p><strong>[[buffer(n)]]</strong> 表示第n个设备和常量缓存区，即外部通过setVertexBuffer设置到encoder中的MTLBuffer对象。同时我们在外部实际上是把这个对象的指针传入设备中，所以我们这里声明为指针类型，而在Metal中指针对象必须要声明它的空间属性(Address Space Attributes)。</p>
-<p>其中在iOS中支持device/threadgroup/constant/thread/threadgroup_imageblock这5种空间属性。具体可参考文档4.2/4.3.1选节</p>
-<p><strong>packed_float2</strong> 表示压缩的2维float向量，将一组相关的数据打包在一起传递给GPU称作数据打包传输，我们可通过这个数组直接访问相关的数据(顶点坐标/法线等)从而减少了调用次数提高了效率。</p>
-<p><strong>[[vertex_id]]</strong> 表示每个顶点的标识符，而每个顶点缓冲区的真正地址基于这个标识符的相对偏移n来访问。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">outputVertices.position = float4(position[vid], 0, 1.0);</span><br><span class="line">相当于OpenGL中</span><br><span class="line">gl_Position = vec4(x, y, 0 , 1.0);</span><br><span class="line"></span><br><span class="line">device packed_float2 *texturecoord [[buffer(1)]]</span><br><span class="line">outputVertices.textureCoordinate = texturecoord[vid];</span><br><span class="line">相当于这个管线单元中缓存区buffer(1)的对象赋值给.textureCoordinate</span><br></pre></td></tr></table></figure>
-<h2 id="片段着色器部分"><a href="#片段着色器部分" class="headerlink" title="片段着色器部分"></a>片段着色器部分</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">fragment half4 passthroughFragment(SingleInputVertexIO fragmentInput [[stage_in]],</span><br><span class="line">                                   texture2d&lt;half&gt; inputTexture [[texture(0)]])</span><br></pre></td></tr></table></figure>
-<p><strong>[[stage_in]]</strong> 表示顶点着色器的输出/片段着色器的输入，它可以是一个结构体或者一个变量，结构体中变量可以是标量或者向量，具体参考4.3.5选节。</p>
-<p><strong>[[texture(n)]]</strong> 表示这个管线单元的纹理对象，外部通过setFragmentTexture函数输入到管线中。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这里通过一个示例来介绍MSL的基本结构和编写方法，其他内置对象/函数的含义可以详细查阅官方文档来得知。<a href="https://github.com/hello-david/MetalImage.git" target="_blank" rel="noopener">这是一个使用Metal实现的滤镜链框架</a></p>
+<p>在实践的时候发现还是用自制xcodebuild shell脚本最为简单，Carthage由于需要手动将target scheme设为shared导致无法实现脚本打包，Cocoapods-packager需要先上传代码到远程仓库上。</p>
+<p>具体过程可以参考<a href="https://github.com/hello-david/Binarization" target="_blank" rel="noopener">Demo</a></p>
+<p>最后实现在每次构建结束后生成一个Framework，最后将这个Framework输出到最终发布仓库下实现整个开发发布流程。如下图我们实现两个仓库：</p>
+<ul>
+<li>私有组件仓库Binarization</li>
+<li>二进制发布公开仓库Binarization_Public</li>
+</ul>
+<img src="/archives/42391276/media/15602360477345/15604230932693.png">
+<img src="/archives/42391276/media/15602360477345/15604230964147.png">
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://blog.dianqk.org/2017/05/01/dev-on-pod/" target="_blank" rel="noopener">基于 CocoaPods 进行 iOS 开发</a><br><a href="https://ripperhe.com/2017/03/30/fastlane-pod/" target="_blank" rel="noopener">一行命令发布 Pod 框架</a><br><a href="https://imfong.com/post/Talk-iOS-Library-Binary-Practice" target="_blank" rel="noopener">谈谈CocoaPods组件二进制化方案</a><br><a href="https://objchris.com/2018/04/02/iOS%E8%84%9A%E6%9C%AC%E6%89%93%E5%8C%85/" target="_blank" rel="noopener">iOS脚本打包</a></p>
 
       
     </div>
@@ -396,12 +389,12 @@
   <script type="text/javascript" src="http://jslibs.wuxubj.cn/sweetalert_mini/jquery-1.7.1.min.js"></script>
   <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
   <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
-  <p><span>本文标题:</span><a href="/archives/662d09a.html">Metal学习——Metal着色器语言(MSL)(一)</a></p>
+  <p><span>本文标题:</span><a href="/archives/42391276.html">Cocoapods实现私有库开发和二进制发布</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
-  <p><span>发布时间:</span>2019年01月16日 - 14:01</p>
-  <p><span>最后更新:</span>2019年01月16日 - 15:01</p>
-  <p><span>原始链接:</span><a href="/archives/662d09a.html" title="Metal学习——Metal着色器语言(MSL)(一)">https://hello-david.github.io/archives/662d09a.html</a>
-    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/662d09a.html"  aria-label="复制成功！"></i></span>
+  <p><span>发布时间:</span>2019年06月14日 - 09:06</p>
+  <p><span>最后更新:</span>2019年06月14日 - 09:06</p>
+  <p><span>原始链接:</span><a href="/archives/42391276.html" title="Cocoapods实现私有库开发和二进制发布">https://hello-david.github.io/archives/42391276.html</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/42391276.html"  aria-label="复制成功！"></i></span>
   </p>
   <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
 </div>
@@ -433,7 +426,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Metal/" rel="tag"># Metal</a>
+            <a href="/tags/iOS工程上的二三事/" rel="tag"># iOS工程上的二三事</a>
           
         </div>
       
@@ -446,8 +439,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/archives/6819375.html" rel="next" title="Hook调试初体验">
-                <i class="fa fa-chevron-left"></i> Hook调试初体验
+              <a href="/archives/82a2b295.html" rel="next" title="iOS逆向工程三板斧:砸壳-注入-重签">
+                <i class="fa fa-chevron-left"></i> iOS逆向工程三板斧:砸壳-注入-重签
               </a>
             
           </div>
@@ -455,10 +448,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/archives/2fbe6240.html" rel="prev" title="C++中存在的头文件类/函数完整实现">
-                C++中存在的头文件类/函数完整实现 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -590,7 +579,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#结构体部分"><span class="nav-number">1.</span> <span class="nav-text">结构体部分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#顶点着色器部分"><span class="nav-number">2.</span> <span class="nav-text">顶点着色器部分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#片段着色器部分"><span class="nav-number">3.</span> <span class="nav-text">片段着色器部分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Cocoapods注入脚本"><span class="nav-number">1.</span> <span class="nav-text">Cocoapods注入脚本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Framework制作脚本"><span class="nav-number">2.</span> <span class="nav-text">Framework制作脚本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>
