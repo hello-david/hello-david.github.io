@@ -98,7 +98,7 @@
 <meta property="og:image" content="https://hello-david.github.io/archives/4569df37/media/15428905981290/15620491013356.png">
 <meta property="og:image" content="https://hello-david.github.io/archives/4569df37/media/15428905981290/15620683902759.png">
 <meta property="og:image" content="https://hello-david.github.io/archives/4569df37/media/15428905981290/15620537540013.png">
-<meta property="og:updated_time" content="2019-07-02T12:19:39.605Z">
+<meta property="og:updated_time" content="2019-07-02T12:33:29.975Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS调试和性能优化技巧">
 <meta name="twitter:description" content="WWDC2019-Session-417专门讨论如何利用Metrics来进行性能监控和优化，对于我们开发者显然是一个重大利好。Metrics涵盖了整个App开发的完整流程：  XCTest Metrics (开发和测试阶段) MetricsKit (内测阶段和线上阶段) Xcode Metrics Organizer (线上阶段)  对于性能监控和优化这个主题上今年推出的MetricKit聚焦于两">
@@ -394,8 +394,7 @@
 <img src="/archives/4569df37/media/15428905981290/15611208856163.jpg">
 <p>在使用Xcode -&gt; Debug- &gt; Simulate Metrics Payloads的功能后将会触发一份设备Metric数据到<code>- (void)didReceiveMetricPayloads:(NSArray&lt;MXMetricPayload *&gt; *)payloads</code>监听方法里面。</p>
 <img src="/archives/4569df37/media/15428905981290/15611232020778.jpg">
-<p>在学习到利用<a href="https://developer.apple.com/documentation/metrickit/mxsignpostmetric?language=objc" target="_blank" rel="noopener">MXSignpostMetric</a>标记业务流程时候发现我们完全可以通过埋点的方式关注到每个业务流的性能情况。</p>
-<p>它提供的粒度已经相对较为细致了，更多具体的优化细节应该结合业务利用Xcode+Insturment去分析。</p>
+<p>在学习到利用<a href="https://developer.apple.com/documentation/metrickit/mxsignpostmetric?language=objc" target="_blank" rel="noopener">MXSignpostMetric</a>标记业务流程时候发现我们完全可以通过埋点的方式关注到每个业务流的性能情况。它提供的粒度已经相对较为细致了，更多具体的优化细节应该结合业务利用Xcode+Insturment去分析。</p>
 <p>关于<a href="https://developer.apple.com/documentation/metrickit?language=objc" target="_blank" rel="noopener">MetricKit</a>和Metrics的话题到这里就暂时告一段落，接下来主要是讲一讲在学习到利用埋点标记业务流程后带来的一些调试思路启发。</p>
 <h2 id="基本场景概况"><a href="#基本场景概况" class="headerlink" title="基本场景概况"></a>基本场景概况</h2><p>性能优化应该是要结合到具体业务具体场景下去讨论才是有意义的。接下来让我们从两个方面（<strong>耗电量</strong>和<strong>性能表现</strong>）来分析一个<a href="https://github.com/hello-david/MetalImage" target="_blank" rel="noopener">相机滤镜渲染业务</a>的瓶颈/优化点</p>
 <ul>
@@ -424,8 +423,8 @@
 </ul>
 <p>接下来我们放大到一个滤镜渲染流程业务标记区间，可以看到大部分运行时间都集中在<code>MetalImageGaussianFilter</code>这段业务逻辑上，也就是接下去若有需要优化CPU性能应该深入研究这段业务的代码是否有优化空间。<br><img src="/archives/4569df37/media/15428905981290/15620491013356.png"></p>
 <h3 id="GPU调试分析"><a href="#GPU调试分析" class="headerlink" title="GPU调试分析"></a>GPU调试分析</h3><p>利用Instrument的Metal System Trace模块可以观察到这个业务场景中滤镜的工作流程，显然和我们之前的推测是一致的。<code>MetalImageGaussianFilter</code>这个滤镜的Fragment脚本实现上是十分消耗性能的。<br><img src="/archives/4569df37/media/15428905981290/15620683902759.png"></p>
-<p>在Xcode的Frame Capture界面同样可以在更细致的粒度上调试Shader，更多具体的调试细节这里就不介绍了（Apple官方文档关于这一块的描述实际挺全面的）。<br><img src="/archives/4569df37/media/15428905981290/15620537540013.png"></p>
-<p>最后高效的高斯模糊效果实现可以参考<a href="https://yemi.me/2018/04/30/super-fast-blur-gpu/" target="_blank" rel="noopener">快速高斯模糊Shader实现</a>。</p>
+<p>在Xcode的Frame Capture界面可以在更细致的粒度上调试Shader，更多具体的调试细节这里就不介绍了（Apple官方文档关于这一块的描述实际挺全面的）。<br><img src="/archives/4569df37/media/15428905981290/15620537540013.png"></p>
+<p>这里实现的是一个高斯模糊的效果，在这个Fragment脚本中我所用到的方式是在水平和垂直方向先后进行了高斯模糊算法的运算，而关于模糊效果的算法优化可以参考<a href="https://yemi.me/2018/04/30/super-fast-blur-gpu/" target="_blank" rel="noopener">快速高斯模糊Shader实现</a>。</p>
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://punmy.cn/2019/06/16/wwdc_417_metrics.html" target="_blank" rel="noopener">iOS耗电量和性能优化的全新框架</a><br><a href="https://punmy.cn/2018/06/12/iOS%20%E6%9C%80%E5%85%A8%E9%9D%A2%E7%9A%84%E5%8A%9F%E8%80%97%E5%88%86%E6%9E%90%E4%B9%8B%E2%80%94%E2%80%94Power%20Log.html" target="_blank" rel="noopener">iOS 最全面的功耗分析之——Power Log</a><br><a href="https://developer.apple.com/documentation/metrickit/improving_your_app_s_performance?language=objc" target="_blank" rel="noopener">Improving Your App’s Performance</a><br><a href="https://developer.apple.com/videos/play/wwdc2019/417/" target="_blank" rel="noopener">WWDC-417</a><br><a href="https://developer.apple.com/videos/play/wwdc2019/414/" target="_blank" rel="noopener">Developing a Great Profiling Experience</a><br><a href="https://help.apple.com/instruments/mac/current/#/dev7b09c84f5" target="_blank" rel="noopener">Instruments官方文档</a></p>
 
       
