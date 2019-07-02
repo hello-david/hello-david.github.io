@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="iOS工程上的二三事," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="WWDC2019-Session-417专门讨论如何利用Metrics来进行性能监控和优化，对于我们开发者显然是一个重大利好。Metrics涵盖了整个App开发的完整流程：  XCTest Metrics (开发和测试阶段) MetricsKit (内测阶段和线上阶段) Xcode Metrics Organizer (线上阶段)  对于性能监控和优化这个主题上今年推出的MetricKit聚焦于两">
+<meta name="keywords" content="iOS工程上的二三事">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS调试和性能优化技巧">
+<meta property="og:url" content="https://hello-david.github.io/archives/4569df37.html">
+<meta property="og:site_name" content="David&#39;Blog">
+<meta property="og:description" content="WWDC2019-Session-417专门讨论如何利用Metrics来进行性能监控和优化，对于我们开发者显然是一个重大利好。Metrics涵盖了整个App开发的完整流程：  XCTest Metrics (开发和测试阶段) MetricsKit (内测阶段和线上阶段) Xcode Metrics Organizer (线上阶段)  对于性能监控和优化这个主题上今年推出的MetricKit聚焦于两">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://hello-david.github.io/archives/4569df37/media/15428905981290/15611207330718.jpg">
+<meta property="og:image" content="https://hello-david.github.io/archives/4569df37/media/15428905981290/15611208624165.jpg">
+<meta property="og:image" content="https://hello-david.github.io/archives/4569df37/media/15428905981290/15611208856163.jpg">
+<meta property="og:image" content="https://hello-david.github.io/archives/4569df37/media/15428905981290/15611232020778.jpg">
+<meta property="og:image" content="https://hello-david.github.io/archives/4569df37/media/15428905981290/15619702863889.png">
+<meta property="og:image" content="https://hello-david.github.io/archives/4569df37/media/15428905981290/15619716247847.png">
+<meta property="og:image" content="https://hello-david.github.io/archives/4569df37/media/15428905981290/15620305292664.png">
+<meta property="og:image" content="https://hello-david.github.io/archives/4569df37/media/15428905981290/15620477709903.png">
+<meta property="og:image" content="https://hello-david.github.io/archives/4569df37/media/15428905981290/15620491013356.png">
+<meta property="og:image" content="https://hello-david.github.io/archives/4569df37/media/15428905981290/15620683902759.png">
+<meta property="og:image" content="https://hello-david.github.io/archives/4569df37/media/15428905981290/15620537540013.png">
+<meta property="og:updated_time" content="2019-07-02T12:19:39.605Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS调试和性能优化技巧">
+<meta name="twitter:description" content="WWDC2019-Session-417专门讨论如何利用Metrics来进行性能监控和优化，对于我们开发者显然是一个重大利好。Metrics涵盖了整个App开发的完整流程：  XCTest Metrics (开发和测试阶段) MetricsKit (内测阶段和线上阶段) Xcode Metrics Organizer (线上阶段)  对于性能监控和优化这个主题上今年推出的MetricKit聚焦于两">
+<meta name="twitter:image" content="https://hello-david.github.io/archives/4569df37/media/15428905981290/15611207330718.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hello-david.github.io/archives/4569df37.html"/>
+
+
+
+<meta name="google-site-verification" content="xPc40P1FFnuv2Aer8rA72v2doNkgf1bEhU79GGlStmE" />
+
+
+  <title>iOS调试和性能优化技巧 | David'Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">David'Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/4569df37.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="David Dai">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="David'Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">iOS调试和性能优化技巧</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-07-02T20:08:58+08:00">
+                2019-07-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/工程上的二三事/" itemprop="url" rel="index">
+                    <span itemprop="name">工程上的二三事</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><a href="https://developer.apple.com/videos/play/wwdc2019/417/" target="_blank" rel="noopener">WWDC2019-Session-417</a>专门讨论如何利用Metrics来进行性能监控和优化，对于我们开发者显然是一个重大利好。Metrics涵盖了整个App开发的完整流程：</p>
+<ul>
+<li>XCTest Metrics (开发和测试阶段)</li>
+<li>MetricsKit (内测阶段和线上阶段)</li>
+<li>Xcode Metrics Organizer (线上阶段)</li>
+</ul>
+<p>对于性能监控和优化这个主题上今年推出的MetricKit聚焦于两个主题：</p>
+<ul>
+<li>Battery</li>
+<li>Performance</li>
+</ul>
+<img src="/archives/4569df37/media/15428905981290/15611207330718.jpg">
+<p>设备耗电情况体现：</p>
+<ul>
+<li>CPU Processing(CPU运算)</li>
+<li>Location(定位)</li>
+<li>Display(显示/屏幕亮度)</li>
+<li>Networking(网络服务)</li>
+<li>Accessories(外围设备如蓝牙)</li>
+<li>Multimedia(多媒体)</li>
+<li>Camera(相机)</li>
+</ul>
+<img src="/archives/4569df37/media/15428905981290/15611208624165.jpg">
+<p>性能指标体现：</p>
+<ul>
+<li>Hangs(主线程卡顿)</li>
+<li>Disk(设备IO)</li>
+<li>Application Launch(应用启动耗时)</li>
+<li>Memory(内存表现)</li>
+<li>Custom Intervals(其他)</li>
+</ul>
+<img src="/archives/4569df37/media/15428905981290/15611208856163.jpg">
+<p>在使用Xcode -&gt; Debug- &gt; Simulate Metrics Payloads的功能后将会触发一份设备Metric数据到<code>- (void)didReceiveMetricPayloads:(NSArray&lt;MXMetricPayload *&gt; *)payloads</code>监听方法里面。</p>
+<img src="/archives/4569df37/media/15428905981290/15611232020778.jpg">
+<p>在学习到利用<a href="https://developer.apple.com/documentation/metrickit/mxsignpostmetric?language=objc" target="_blank" rel="noopener">MXSignpostMetric</a>标记业务流程时候发现我们完全可以通过埋点的方式关注到每个业务流的性能情况。</p>
+<p>它提供的粒度已经相对较为细致了，更多具体的优化细节应该结合业务利用Xcode+Insturment去分析。</p>
+<p>关于<a href="https://developer.apple.com/documentation/metrickit?language=objc" target="_blank" rel="noopener">MetricKit</a>和Metrics的话题到这里就暂时告一段落，接下来主要是讲一讲在学习到利用埋点标记业务流程后带来的一些调试思路启发。</p>
+<h2 id="基本场景概况"><a href="#基本场景概况" class="headerlink" title="基本场景概况"></a>基本场景概况</h2><p>性能优化应该是要结合到具体业务具体场景下去讨论才是有意义的。接下来让我们从两个方面（<strong>耗电量</strong>和<strong>性能表现</strong>）来分析一个<a href="https://github.com/hello-david/MetalImage" target="_blank" rel="noopener">相机滤镜渲染业务</a>的瓶颈/优化点</p>
+<ul>
+<li>1920x1080后置摄像头分辨率</li>
+<li>依次叠加饱和度/高斯模糊/亮度滤镜到这个链路上</li>
+</ul>
+<p>首先我们切到<strong>Energy Impact</strong>模块中观察耗电量的基本情况。发现其中GPU单元的耗电量影响占93.9%，而CPU单元仅占6.1%。可以预计在这个场景中设备发热和性能损耗将主要是由GPU单元运算引起的，所以之后的性能分析重心应该放在调用GPU相关的代码上。<br><img src="/archives/4569df37/media/15428905981290/15619702863889.png"></p>
+<p>接下来我们再看一下<strong>FPS</strong>模块中的GPU单元运行的基本情况，我们已知iOS设备的屏幕刷新率是60fps即理论上GPU运算单元损耗要控制在1 / 60 = 16.75 ms才能够达到这个帧率，而下图中FrameTime中GPU运算花去了22.9ms即意味着这个场景上最多只能达到43fps左右的帧率。<br><img src="/archives/4569df37/media/15428905981290/15619716247847.png"></p>
+<p>显然这个相机滤镜链业务里面，滤镜脚本所实现的性能表现差强人意。那么要如何确认具体是哪一个滤镜导致的性能瓶颈问题呢？</p>
+<h2 id="分离业务边界"><a href="#分离业务边界" class="headerlink" title="分离业务边界"></a>分离业务边界</h2><p>在<a href="https://developer.apple.com/documentation/os/logging?language=objc" target="_blank" rel="noopener">Logging</a>这个主题中<strong>Debugging CPU Performance</strong>部分发现我们可以通过OSSignPost给业务埋点标记出业务的运行流程。它的基本用法也十分的简单：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># OC版</span><br><span class="line">os_log_t log = os_log_create(&quot;Subsystem&quot;, &quot;Category&quot;);// 全局变量</span><br><span class="line"></span><br><span class="line">os_signpost_id_t postId = os_signpost_id_generate(log);</span><br><span class="line">os_signpost_interval_begin(log, postId, &quot;Event&quot;, &quot;MoreInfoTag&quot;);</span><br><span class="line"></span><br><span class="line">dosomething();</span><br><span class="line"></span><br><span class="line">os_signpost_interval_end(log, postId, &quot;Event&quot;, &quot;MoreInfoTag&quot;);</span><br></pre></td></tr></table></figure></p>
+<p>在这个示例中，我所实现的业务流：相机画面输出-&gt;饱和度滤镜-&gt;高斯模糊滤镜-&gt;亮度滤镜-&gt;提交视图渲染，接下去通过在三个滤镜渲染前后埋点标记出渲染业务CPU部分的执行顺序。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"># Swift版</span><br><span class="line">let filterChainProcessBlock: MetalImageFilterBlock = &#123;(beforeProcess, textureReousrece, filter) in</span><br><span class="line">    struct StaticVar &#123; static var postId = OSSignpostID(log: .metalImage) &#125;</span><br><span class="line">    if beforeProcess &#123;</span><br><span class="line">        StaticVar.postId = OSSignpostID(log: .metalImage)</span><br><span class="line">        os_signpost(.begin, log: .metalImage, name: &quot;Filter&quot;, signpostID: StaticVar.postId, &quot;b_%s&quot;, NSStringFromClass(filter.classForCoder))</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">    os_signpost(.end, log: .metalImage, name: &quot;Filter&quot;, signpostID: StaticVar.postId, &quot;e_%s&quot;, NSStringFromClass(filter.classForCoder))</span><br><span class="line">&#125;</span><br><span class="line">saturationFilter.chainProcessHandle = filterChainProcessBlock</span><br><span class="line">gaussianFilter.chainProcessHandle = filterChainProcessBlock</span><br><span class="line">luminanceFilter.chainProcessHandle = filterChainProcessBlock</span><br></pre></td></tr></table></figure>
+<p>接下来结合Instrument+Xcode来分析这段业务代码里面的性能表现情况。</p>
+<h2 id="具体问题具体分析"><a href="#具体问题具体分析" class="headerlink" title="具体问题具体分析"></a>具体问题具体分析</h2><p>在Apple平台上做性能调试是一件相对简单的事情，这里将结合Xcode+Instrument进行调试分析。</p>
+<ul>
+<li>CPU调试分析：Instrument的<strong>Time Profiler</strong>和<strong>os_signpost</strong>两个模板。</li>
+<li>GPU调试分析：Xcode的<strong>Frame Capture</strong>以及Instrument的<strong>Metal System Trace</strong>模板。</li>
+</ul>
+<img src="/archives/4569df37/media/15428905981290/15620305292664.png">
+<h3 id="CPU调试分析"><a href="#CPU调试分析" class="headerlink" title="CPU调试分析"></a>CPU调试分析</h3><p>整体上可以看到这个场景中实际损耗的CPU并不严重，90s的运行时间里面平均只损耗了12%左右的性能。<br><img src="/archives/4569df37/media/15428905981290/15620477709903.png"></p>
+<p>而各个部分的损耗占比：</p>
+<ul>
+<li>滤镜渲染流程约84%</li>
+<li>渲染到视图流程约9.6%</li>
+<li>纹理缓存回收与获取调度约5.5%</li>
+</ul>
+<p>接下来我们放大到一个滤镜渲染流程业务标记区间，可以看到大部分运行时间都集中在<code>MetalImageGaussianFilter</code>这段业务逻辑上，也就是接下去若有需要优化CPU性能应该深入研究这段业务的代码是否有优化空间。<br><img src="/archives/4569df37/media/15428905981290/15620491013356.png"></p>
+<h3 id="GPU调试分析"><a href="#GPU调试分析" class="headerlink" title="GPU调试分析"></a>GPU调试分析</h3><p>利用Instrument的Metal System Trace模块可以观察到这个业务场景中滤镜的工作流程，显然和我们之前的推测是一致的。<code>MetalImageGaussianFilter</code>这个滤镜的Fragment脚本实现上是十分消耗性能的。<br><img src="/archives/4569df37/media/15428905981290/15620683902759.png"></p>
+<p>在Xcode的Frame Capture界面同样可以在更细致的粒度上调试Shader，更多具体的调试细节这里就不介绍了（Apple官方文档关于这一块的描述实际挺全面的）。<br><img src="/archives/4569df37/media/15428905981290/15620537540013.png"></p>
+<p>最后高效的高斯模糊效果实现可以参考<a href="https://yemi.me/2018/04/30/super-fast-blur-gpu/" target="_blank" rel="noopener">快速高斯模糊Shader实现</a>。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://punmy.cn/2019/06/16/wwdc_417_metrics.html" target="_blank" rel="noopener">iOS耗电量和性能优化的全新框架</a><br><a href="https://punmy.cn/2018/06/12/iOS%20%E6%9C%80%E5%85%A8%E9%9D%A2%E7%9A%84%E5%8A%9F%E8%80%97%E5%88%86%E6%9E%90%E4%B9%8B%E2%80%94%E2%80%94Power%20Log.html" target="_blank" rel="noopener">iOS 最全面的功耗分析之——Power Log</a><br><a href="https://developer.apple.com/documentation/metrickit/improving_your_app_s_performance?language=objc" target="_blank" rel="noopener">Improving Your App’s Performance</a><br><a href="https://developer.apple.com/videos/play/wwdc2019/417/" target="_blank" rel="noopener">WWDC-417</a><br><a href="https://developer.apple.com/videos/play/wwdc2019/414/" target="_blank" rel="noopener">Developing a Great Profiling Experience</a><br><a href="https://help.apple.com/instruments/mac/current/#/dev7b09c84f5" target="_blank" rel="noopener">Instruments官方文档</a></p>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="http://jslibs.wuxubj.cn/sweetalert_mini/jquery-1.7.1.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/archives/4569df37.html">iOS调试和性能优化技巧</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
+  <p><span>发布时间:</span>2019年07月02日 - 20:07</p>
+  <p><span>最后更新:</span>2019年07月02日 - 20:07</p>
+  <p><span>原始链接:</span><a href="/archives/4569df37.html" title="iOS调试和性能优化技巧">https://hello-david.github.io/archives/4569df37.html</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/4569df37.html"  aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
+</div>
+<script> 
+    var clipboard = new Clipboard('.fa-clipboard');
+    clipboard.on('success', $(function(){
+      $(".fa-clipboard").click(function(){
+        swal({   
+          title: "",   
+          text: '复制成功',   
+          html: false,
+          timer: 500,   
+          showConfirmButton: false
+        });
+      });
+    }));  
+</script>
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/iOS工程上的二三事/" rel="tag"># iOS工程上的二三事</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/archives/42391276.html" rel="next" title="Cocoapods实现私有库开发和二进制发布">
+                <i class="fa fa-chevron-left"></i> Cocoapods实现私有库开发和二进制发布
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">David Dai</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本场景概况"><span class="nav-number">1.</span> <span class="nav-text">基本场景概况</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分离业务边界"><span class="nav-number">2.</span> <span class="nav-text">分离业务边界</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#具体问题具体分析"><span class="nav-number">3.</span> <span class="nav-text">具体问题具体分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CPU调试分析"><span class="nav-number">3.1.</span> <span class="nav-text">CPU调试分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GPU调试分析"><span class="nav-number">3.2.</span> <span class="nav-text">GPU调试分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">David Dai</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+-->
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
