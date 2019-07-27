@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="iOS工作原理," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Objective-C Runtime顾名思义就是Objective-C的一个运行时库，它提供对Objective-C语言的动态特性的支持。 我们知道在比如C/C++/Swift这种静态语言一大特征就是在编译阶段就确定了对象的结构，而动态语言则在运行时还能够修改对象的结构，其中Objective-C正是利用Runtime这个技术来表现它的动态特性。 可以说Runtime是整个Objective-C">
+<meta name="keywords" content="iOS工作原理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Objective-C的运行时Runtime">
+<meta property="og:url" content="https://hello-david.github.io/archives/c6605a39.html">
+<meta property="og:site_name" content="David&#39;Blog">
+<meta property="og:description" content="Objective-C Runtime顾名思义就是Objective-C的一个运行时库，它提供对Objective-C语言的动态特性的支持。 我们知道在比如C/C++/Swift这种静态语言一大特征就是在编译阶段就确定了对象的结构，而动态语言则在运行时还能够修改对象的结构，其中Objective-C正是利用Runtime这个技术来表现它的动态特性。 可以说Runtime是整个Objective-C">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://hello-david.github.io/archives/c6605a39/media/15620470479138/15634622726048.jpg">
+<meta property="og:image" content="https://hello-david.github.io/archives/c6605a39/media/15620470479138/15638650514435.jpg">
+<meta property="og:image" content="https://hello-david.github.io/archives/c6605a39/media/15620470479138/15639470627349.jpg">
+<meta property="og:image" content="https://hello-david.github.io/archives/c6605a39/media/15620470479138/15639551168913.jpg">
+<meta property="og:image" content="https://hello-david.github.io/archives/c6605a39/media/15620470479138/15641105678938.jpg">
+<meta property="og:image" content="https://hello-david.github.io/archives/c6605a39/media/15620470479138/15641265241781.jpg">
+<meta property="og:updated_time" content="2019-07-27T07:16:32.859Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Objective-C的运行时Runtime">
+<meta name="twitter:description" content="Objective-C Runtime顾名思义就是Objective-C的一个运行时库，它提供对Objective-C语言的动态特性的支持。 我们知道在比如C/C++/Swift这种静态语言一大特征就是在编译阶段就确定了对象的结构，而动态语言则在运行时还能够修改对象的结构，其中Objective-C正是利用Runtime这个技术来表现它的动态特性。 可以说Runtime是整个Objective-C">
+<meta name="twitter:image" content="https://hello-david.github.io/archives/c6605a39/media/15620470479138/15634622726048.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hello-david.github.io/archives/c6605a39.html"/>
+
+
+
+<meta name="google-site-verification" content="xPc40P1FFnuv2Aer8rA72v2doNkgf1bEhU79GGlStmE" />
+
+
+  <title>Objective-C的运行时Runtime | David'Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">David'Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/c6605a39.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="David Dai">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="David'Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Objective-C的运行时Runtime</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-07-27T15:07:53+08:00">
+                2019-07-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS工作原理/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS工作原理</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Objective-C Runtime顾名思义就是Objective-C的一个运行时库，它提供对Objective-C语言的动态特性的支持。</p>
+<p>我们知道在比如C/C++/Swift这种静态语言一大特征就是在编译阶段就确定了对象的结构，而动态语言则在运行时还能够修改对象的结构，其中Objective-C正是利用Runtime这个技术来表现它的动态特性。</p>
+<p>可以说Runtime是整个Objective-C编程的基石，每一个类/对象的发送消息都通过这一套机制来完成最终的处理实现。在Wiki上是这么评价OC这门语言的：</p>
+<blockquote>
+<p>Objective-C最大的特色是承自Smalltalk的消息传递模型（message passing），此机制与今日C++式之主流风格差异甚大。Objective-C里，与其说对象互相调用方法，不如说对象之间互相传递消息更为精确。此二种风格的主要差异在于调用方法/消息传递这个动作。</p>
+</blockquote>
+<blockquote>
+<p>C++里类别与方法的关系严格清楚，一个方法必定属于一个类别，而且在编译时（compile time）就已经紧密绑定，不可能调用一个不存在类别里的方法。但在Objective-C，类别与消息的关系比较松散，调用方法视为对对象发送消息，所有方法都被视为对消息的回应。所有消息处理直到运行时（runtime）才会动态决定，并交由类别自行决定如何处理收到的消息。也就是说，一个类别不保证一定会回应收到的消息，如果类别收到了一个无法处理的消息，程序只会抛出异常，不会出错或崩溃。</p>
+</blockquote>
+<p>ps：同样的，Swift中也有类似的运行时特性。</p>
+<h2 id="Objective-C-Runtime-Programming相关话题"><a href="#Objective-C-Runtime-Programming相关话题" class="headerlink" title="Objective-C Runtime Programming相关话题"></a>Objective-C Runtime Programming相关话题</h2><p>根据官方文档中介绍利用Runtime进行编程有以下七个相关话题：</p>
+<ul>
+<li>Runtime的版本和平台（Runtime Versions and Platforms）</li>
+<li>与运行时交互（Interacting with the Runtime）</li>
+<li>消息（Messaging）</li>
+<li>动态方法解析（Dynamic Method Resolution）</li>
+<li>消息转发（Message Forwarding）</li>
+<li>类型编码（Type Encodings）</li>
+<li>声明的属性（Declared Properties）</li>
+</ul>
+<p>接下去就直接跟着<a href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Introduction/Introduction.html?language=objc#//apple_ref/doc/uid/TP40008048" target="_blank" rel="noopener">官方文档</a>学习Runtime的基本运行原理（消息，动态方法解析，消息转发这三个话题是Runtime的原理核心）以及如何利用它强大的动态特性来编程。</p>
+<p>ps: 对于OC2.0 Runtime实现可以在<a href="https://opensource.apple.com/source/objc4/" target="_blank" rel="noopener">Apple Open Source</a>中找到。</p>
+<h3 id="Runtime的版本和平台"><a href="#Runtime的版本和平台" class="headerlink" title="Runtime的版本和平台"></a>Runtime的版本和平台</h3><p>在不同平台上有不同版本的Objective-C Runtime。这里我们只需要知道由于历史发展问题Objective-C的Runtime被认为有两个版本：”modern”和”legacy”。</p>
+<ul>
+<li>在legacy runtime中，如果更改类中实例变量的布局，则必须重新编译从其继承的类。</li>
+<li>在modern runtime中，如果更改类中实例变量的布局，则不必重新编译从其继承的类。</li>
+</ul>
+<p>到了9102年的iOS开发也没有人关心Lagacy的Runtime问题了，而且网上也有很多相关的优秀资料从代码层面去解析它的实现细节，接下来我们都基于Objective-C 2.0的版本特性来学习它的基本原理和相关应用场景。</p>
+<p>ps：在对于Runtime实现细节网上有挺多误解的文章——<a href="https://juejin.im/entry/5c99ed70e51d453313616fd8" target="_blank" rel="noopener">objc_class深深的误解</a></p>
+<h3 id="与Runtime交互"><a href="#与Runtime交互" class="headerlink" title="与Runtime交互"></a>与Runtime交互</h3><p>Objective-C程序中在三个层级与Runtime交互：</p>
+<ul>
+<li>通过Objective-C编写的代码</li>
+<li>调用Foundation框架的NSObject及其子类中相关方法</li>
+<li>直接通过Runtime库(&lt;objc/runtime.h&gt;)中调用的代码</li>
+</ul>
+<p>可以看到，纯粹使用OC编写的程序基本上就没有绕开Runtime运行机制的(NSProxy类除外)。因为我们所熟知的<code>[receiver message]</code>调用方式背后正是基于Runtime机制实现的。</p>
+<h3 id="消息"><a href="#消息" class="headerlink" title="消息"></a>消息</h3><p>在文档这一章介绍在Objective-C编程中</p>
+<ul>
+<li>消息传递是如何实现的</li>
+<li>如何直接利用objc_msgSend</li>
+<li>如何绕过动态绑定(Dynamic Binding)</li>
+</ul>
+<h4 id="Key1：消息-SEL-直到运行时才绑定到对应的方法实现-IMP"><a href="#Key1：消息-SEL-直到运行时才绑定到对应的方法实现-IMP" class="headerlink" title="Key1：消息(SEL)直到运行时才绑定到对应的方法实现(IMP)"></a>Key1：消息(SEL)直到运行时才绑定到对应的方法实现(IMP)</h4><p>编译器会将消息表达式<code>[receiver message]</code>转换成<code>objc_msgSend(receiver, selector, arg1, arg2, ...)</code>函数。这个函数会完成动态绑定(Dynamic Binding)，首先它会找到这个消息(SEL)所对应的实现(IMP)，然后它将调用该IMP并将接收对象(Receiver)和相关的参数传递给IMP，最后返回IMP的返回值，从而实现整个消息传递流程。</p>
+<h4 id="Key2：消息传递的关键在于每个类的结构和它的实例对象之间的联系"><a href="#Key2：消息传递的关键在于每个类的结构和它的实例对象之间的联系" class="headerlink" title="Key2：消息传递的关键在于每个类的结构和它的实例对象之间的联系"></a>Key2：消息传递的关键在于每个类的结构和它的实例对象之间的联系</h4><p>每个类的结构有两个关键元素：</p>
+<ul>
+<li>指向父类的指针</li>
+<li>类的调度表（这个表中存储着SEL和IMP的关联结构列表<code>method_list_t</code>）<br>当一个对象被实例化之后，它的内存结构中包含它的实例变量以及指向其类结构的指针(isa)。消息传递的基本过程（除此之外还有消息转发的流程之后会讲到）如下图所示：<img src="/archives/c6605a39/media/15620470479138/15634622726048.jpg">
+</li>
+</ul>
+<p>消息传递的流程可以总结为当一个对象接收一个消息的时候，从这个对象的类及其父类结构的调度表中递归找到相应的选择器(SEL)，直到它到达NSObject类。一旦通过<code>method_t</code>找到相应的选择器，objc_msgSend就会调用<code>method_t</code>中和这个选择器(SEL)所对应的方法(IMP)并将接收对象(Reciver)的数据结构传递给它。</p>
+<p>为了加速消息传递过程，每个类都有一个单独的缓存，它包含继承方法的选择器(SEL)以及类中定义的方法(IMP)，Runtime会先通过高速缓存去加速消息传递流程。</p>
+<h4 id="Key3：可通过Self和-cmd传递消息"><a href="#Key3：可通过Self和-cmd传递消息" class="headerlink" title="Key3：可通过Self和_cmd传递消息"></a>Key3：可通过<code>Self</code>和<code>_cmd</code>传递消息</h4><p>上面介绍了Runtime的消息传递核心就是objc_msgSend这个函数，它输入参数接收者Reciver和方法选择器SEL是通过编译器隐式传入的。而在一般代码层次我们通过<code>Self</code>访问当前的接收者，通过<code>_cmd</code>访问当前的方法选择器。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">- (void)strange &#123;</span><br><span class="line">    id  target = getTheReceiver();</span><br><span class="line">    SEL method = getTheMethod();</span><br><span class="line"> </span><br><span class="line">    if ( target == self || method == _cmd )</span><br><span class="line">        return nil;</span><br><span class="line">    return [target performSelector:method];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="Key4：规避动态绑定-Dynamic-Binding-的唯一方法是获取方法的地址并直接调用它"><a href="#Key4：规避动态绑定-Dynamic-Binding-的唯一方法是获取方法的地址并直接调用它" class="headerlink" title="Key4：规避动态绑定(Dynamic Binding)的唯一方法是获取方法的地址并直接调用它"></a>Key4：规避动态绑定(Dynamic Binding)的唯一方法是获取方法的地址并直接调用它</h4><p>唯一绕过objc_msgSend流程的方法就是通过<code>[NSObject methodForSelector:]</code>去直接获取SEL所对应IMP的地址并调用它，这么做的唯一好处就是能提高重复调用函数的性能。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">void (*setter)(id, SEL, BOOL);</span><br><span class="line">int i;</span><br><span class="line"> </span><br><span class="line">setter = (void (*)(id, SEL, BOOL))[target methodForSelector:@selector(setFilled:)];</span><br><span class="line"></span><br><span class="line">for ( i = 0 ; i &lt; 1000 ; i++ ) &#123;</span><br><span class="line">    setter(targetList[i], @selector(setFilled:), YES);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="动态方法解析"><a href="#动态方法解析" class="headerlink" title="动态方法解析"></a>动态方法解析</h3><p>上面一个话题中主要介绍了一个消息及其它的选择器SEL是如何找到方法实现IMP从而实现整个消息传递的流程，接下来了解如何动态添加一个方法实现IMP到类结构中。</p>
+<p>这里我们利用重载<code>+resolveInstanceMethod:</code>或者<code>+resolveInstanceMethod:</code>动态注册一个类/对象的方法实现IMP到类结构中。</p>
+<p>当我们利用<code>@dynamic propertyName</code>标记动态生成一个属性的方法的这种让Runtime无法正常在类结构中找到该消息的IMP的时候首先就会触发这两个方法调用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">void dynamicMethodIMP(id self, SEL _cmd) &#123;</span><br><span class="line">    // implementation ....</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@implementation MyClass</span><br><span class="line">+ (BOOL)resolveInstanceMethod:(SEL)aSEL &#123;</span><br><span class="line">    if (aSEL == @selector(resolveThisMethodDynamically)) &#123;</span><br><span class="line">          class_addMethod([self class], aSEL, (IMP) dynamicMethodIMP, &quot;v@:&quot;);</span><br><span class="line">          return YES;</span><br><span class="line">    &#125;</span><br><span class="line">    return [super resolveInstanceMethod:aSEL];</span><br><span class="line">&#125;</span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<p>这个步骤常常被当做进入 <em>消息转发</em> 的前置步骤，当一个消息无法找到它的方法实现IMP的时候会触发<code>unrecognized selector</code>异常。这时候Runtime系统在抛出这个异常之前会进入下面流程尝试解决这个异常：</p>
+<ol>
+<li>动态方法解析（动态注册SEL的IMP，如果返回YES表示不进入下一步消息转发流程）</li>
+<li>消息转发给备用接收者（快速消息转发，只需要重定向消息的接收者）</li>
+<li>完整消息转发（同时可在利用它模拟多继承特性）</li>
+</ol>
+<img src="/archives/c6605a39/media/15620470479138/15638650514435.jpg">
+<h3 id="消息转发"><a href="#消息转发" class="headerlink" title="消息转发"></a>消息转发</h3><p>消息转发流程一般被认为有两个流程：</p>
+<ul>
+<li>快速消息转发</li>
+<li>完整消息转发</li>
+</ul>
+<h4 id="快速消息转发阶段"><a href="#快速消息转发阶段" class="headerlink" title="快速消息转发阶段"></a>快速消息转发阶段</h4><p>快速消息转发通过重载NSObject的<code>-(void)forwardingTargetForSelector:</code>这个方法实现在一个消息进入完整转发流程前给这个消息提供一个备用接收对象（Recvier)。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// 显然你要是把self传入会导致死循环</span><br><span class="line">- (id)forwardingTargetForSelector:(SEL)aSelector &#123;</span><br><span class="line">    if (aSelector == @selector(test)) &#123;</span><br><span class="line">        MyTest *myObject = [[MyTest alloc] init];</span><br><span class="line">        return myObject;</span><br><span class="line">    &#125;</span><br><span class="line">    return [super forwardingTargetForSelector:aSelector];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>当快速消息转发流程也失败的时候，Runtime就会进入完整消息转发流程。</p>
+<h4 id="完整消息转发阶段"><a href="#完整消息转发阶段" class="headerlink" title="完整消息转发阶段"></a>完整消息转发阶段</h4><p>当一个消息没有对应的IMP的时候在抛出<code>doesNotRecognizeSelector</code>异常之前，这个流程提供最后的挽救机会，这个流程所有的具体实现细节都被封装好了在上层接口中只提供了两个Hook方法来介入它，首先需要通过重载<code>methodSignatureForSelector:</code>提供一个方法实现签名以生成NSInvocation对象然后传递到<code>forwardInvocation:</code>中进行处理。</p>
+<p>官网使用一个很简单的示例来描述这个流程，假设有两个类Warrior和Diplomat，当给Warrior发送一个negotiate消息的时候通过这套流程转发给Diplomat的实例对象去处理。<br><img src="/archives/c6605a39/media/15620470479138/15639470627349.jpg"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">- (NSMethodSignature*)methodSignatureForSelector:(SEL)selector &#123;</span><br><span class="line">    NSMethodSignature* signature = [super methodSignatureForSelector:selector];</span><br><span class="line">    if (!signature) &#123;</span><br><span class="line">       // 能够处理这个消息的委托对象的方法实现IMP签名</span><br><span class="line">       Diplomat *diplomat = [Diplomat new];</span><br><span class="line">       signature = [diplomat methodSignatureForSelector:selector];</span><br><span class="line">    &#125;</span><br><span class="line">    return signature;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)forwardInvocation:(NSInvocation *)anInvocation &#123;</span><br><span class="line">    Diplomat *diplomat = [Diplomat new];</span><br><span class="line">    if ([diplomat respondsToSelector:[anInvocation selector]]) &#123;</span><br><span class="line">        [anInvocation invokeWithTarget:diplomat];</span><br><span class="line">    &#125;</span><br><span class="line">    else &#123;</span><br><span class="line">        [super forwardInvocation:anInvocation];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="模拟多继承特性"><a href="#模拟多继承特性" class="headerlink" title="模拟多继承特性"></a>模拟多继承特性</h4><blockquote>
+<p>面向对象编程中的多重继承（英语：multiple inheritance，缩写：MI）指的是一个类别可以同时从多于一个父类继承行为与特征的功能。与单一继承相对，单一继承指一个类别只可以继承自一个父类。</p>
+</blockquote>
+<p>Objective-C语言层级是不存在多继承特性的，原因也很简单，因为OC中方法选择器SEL和方法实现IMP是动态绑定的，所以难以避开来自多个基类对象的多个方法命名同名问题。但想要实现它有多种方式，这里介绍两种：</p>
+<ol>
+<li>上述的完整消息转发阶段</li>
+<li>使用NSProxy类直接定义消息分发机制</li>
+</ol>
+<p>一般的OC对象都是继承于NSObject的，而Apple在Foundation中为我们提供NSProxy类用来做纯粹的消息分发。NSProxy主要有几点特征：</p>
+<ul>
+<li>NSProxy没有父类，是顶级类(根类)，跟NSObject同等地位</li>
+<li>NSProxy和NSObject一样都实现了<nsobject>协议</nsobject></li>
+<li>NSProxy被设计成一个”抽象类”，专门用于转发消息</li>
+</ul>
+<p>在NSProxy中同样是通过重载 <code>- (NSMethodSignature*)methodSignatureForSelector:(SEL)selector</code> 和 <code>- (void)forwardInvocation:(NSInvocation *)anInvocation</code>这两个方法实现消息转发流程。</p>
+<h3 id="类型编码"><a href="#类型编码" class="headerlink" title="类型编码"></a>类型编码</h3><p>从官方文档上介绍，编译器利用类型编码将每个方法Method（IMP + SEL）的返回值，参数类型，这些信息保存在一个字符串里，从而利用这个字符串和方法选择器SEL关联起来。而更加深层次的原因可以看这篇文章的介绍——<a href="https://blog.sunnyxx.com/2016/08/13/reunderstanding-runtime-1/" target="_blank" rel="noopener">重识 Objective-C Runtime - 看透 Type 与 Value</a></p>
+<p>在Runtime中使用这项技术应该是用来优化方法选择器SEL的访问速度，同时我们在其他应用场景也可以通过<code>@encode()</code>这个关键词来进行编码，下面是通过类型编码对应的结果字符串。<br><img src="/archives/c6605a39/media/15620470479138/15639551168913.jpg"></p>
+<h3 id="声明的属性"><a href="#声明的属性" class="headerlink" title="声明的属性"></a>声明的属性</h3><p>我们知道在Obejctive-C中可以通过<code>@property</code>为一个类/协议/类别添加一个属性（默认编译器会帮你生成ivar和getter/setter方法），这个过程中Runtime又做了什么工作呢？</p>
+<p>Runtime将为每个属性生成与封闭类，类别或协议相关的描述性元数据</p>
+<ul>
+<li>你可以在类或协议上按名称查找属性</li>
+<li><p>属性的元数据实际上就是通过<code>@encode()</code>编码出来的字符串</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">const char *property_getAttributes(objc_property_t property)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>每个类和协议都有一个声明的属性列表，你可以遍历属性列表并通过<code>property_getAttributes(objc_property_t)</code>来访问属性的元数据信息</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">id LenderClass = objc_getClass(&quot;Lender&quot;);</span><br><span class="line">unsigned int outCount, i;</span><br><span class="line">objc_property_t *properties = class_copyPropertyList(LenderClass, &amp;outCount);</span><br><span class="line">for (i = 0; i &lt; outCount; i++) &#123;</span><br><span class="line">    objc_property_t property = properties[i];</span><br><span class="line">    fprintf(stdout, &quot;%s %s\n&quot;, property_getName(property), property_getAttributes(property));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="Runtime应用之Method-Swizzling"><a href="#Runtime应用之Method-Swizzling" class="headerlink" title="Runtime应用之Method Swizzling"></a>Runtime应用之Method Swizzling</h2><p><code>Method Swizzling</code>本质上就是利用Runtime的工作流程实现类/实例对象内部结构的修改，是iOS AOP编程中常用到的技术。<code>Method Swizzling</code>顾明思议就是实现把Objective-C中的某个方法（SEL + IMP）中的方法实现（IMP）和另外一个方法的IMP进行交换。</p>
+<img src="/archives/c6605a39/media/15620470479138/15641105678938.jpg">
+<p>ps：美图开源的<a href="https://github.com/meitu/MTHawkeye" target="_blank" rel="noopener">MTHawkeye</a>里面有很大一部分特性就是通过这项技术实现非代码入侵式的性能监控。</p>
+<h3 id="合适的Method-Swizzling时机"><a href="#合适的Method-Swizzling时机" class="headerlink" title="合适的Method Swizzling时机"></a>合适的Method Swizzling时机</h3><p>根据<a href="https://developer.apple.com/documentation/objectivec/nsobject/1418815-load?language=occ" target="_blank" rel="noopener">官方文档</a>的描述，在Objective-C Runtime框架中为我们预留了<code>+ (void)load</code>方法以实现在类、类别加载到Runtime系统时自定义一些特定行为。当一个Objective-C程序镜像运行时初始化会经历以下四个过程：</p>
+<ol>
+<li>镜像所链接的Framework的全部构造器</li>
+<li>镜像中所有的<code>+load</code>方法</li>
+<li>镜像中C++静态初始化器和C/C++<code>__attribute__(constructor)</code>函数</li>
+<li>镜像中链接的所有构造器</li>
+</ol>
+<p>在iOS中一个程序镜像的加载过程如下图所示：<br><img src="/archives/c6605a39/media/15620470479138/15641265241781.jpg"></p>
+<p>而我们在<code>+load</code>中动态修改类的结构可以保证它还未进行其他的函数调用，从而不会造成其他的副作用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">#import &quot;NSObject+Swizzle.h&quot;</span><br><span class="line">#import &lt;objc/runtime.h&gt;</span><br><span class="line"></span><br><span class="line">@implementation NSObject (Swizzle)</span><br><span class="line"></span><br><span class="line">+ (void)load&#123;</span><br><span class="line">   //调换IMP</span><br><span class="line">    Method originalMethod = class_getInstanceMethod([NSObject class], @selector(description));</span><br><span class="line">    Method myMethod = class_getInstanceMethod([NSObject class], @selector(swizzle_description));</span><br><span class="line">    method_exchangeImplementations(originalMethod, myMethod);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)swizzle_description &#123;</span><br><span class="line">    NSLog(@&quot;description 被 Swizzle 了&quot;);</span><br><span class="line">    return [self swizzle_description];    </span><br><span class="line">&#125;</span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<h3 id="更完善的Method-Swizzling"><a href="#更完善的Method-Swizzling" class="headerlink" title="更完善的Method Swizzling"></a>更完善的Method Swizzling</h3><p>直接在<code>+load</code>中使用Runtime的<code>method_exchangeImplementations</code>函数进行方法交换在简单的场景下是完全可行的，但是在实际业务场景中会存在种种问题（具体可参考<a href="https://stackoverflow.com/questions/5339276/what-are-the-dangers-of-method-swizzling-in-objective-c?answertab=active#tab-top" target="_blank" rel="noopener">What are the Dangers of Method Swizzling in Objective C?</a>）。</p>
+<blockquote>
+<ul>
+<li>Method swizzling 并不是原子操作</li>
+<li>改变了不是我们自己代码的行为</li>
+<li>有可能出现命名冲突</li>
+<li>Swizzling 改变方法的参数</li>
+<li>Swizzles 顺序问题</li>
+<li>难于理解</li>
+<li>难于Debug</li>
+</ul>
+</blockquote>
+<p>这里介绍使用<a href="https://github.com/rabovik/RSSwizzle" target="_blank" rel="noopener">RSSwizzle</a>来更安全的实现方法交换。</p>
+<p>上述提到一个使用经典swizzle方式出错场景：在swizzle<code>touchesBegan:withEvent:</code>这个touch方法的时候会发现由于它内部使用<code>_cmd</code>来获取当前SEL会导致swizzle异常崩溃，而现在改用RSSwizzle来修改就可以完美避开这个问题。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[RSSwizzle swizzleInstanceMethod:@selector(touchesBegan:withEvent:) inClass:[ViewController class] newImpFactory:^id(RSSwizzleInfo *swizzleInfo) &#123;</span><br><span class="line">    return ^(__unsafe_unretained id self,NSSet* touches,UIEvent* event)&#123;</span><br><span class="line">        NSLog(@&quot;touchesBegan:withEvent:被Swizzle了&quot;);</span><br><span class="line">    &#125;;</span><br><span class="line">&#125; mode:RSSwizzleModeAlways key:NULL];</span><br></pre></td></tr></table></figure></p>
+<h2 id="Runtime应用之KVO"><a href="#Runtime应用之KVO" class="headerlink" title="Runtime应用之KVO"></a>Runtime应用之KVO</h2><p>参考官网文档<a href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/KeyValueObserving/KeyValueObserving.html" target="_blank" rel="noopener">Key-Value-Observing</a>中的定义，KVO是一种观察者模式，能够通知观察者被观察属性的变化。本质上它就是通过Runtime实现运行时动态生成一个被观察者子类对象并为这个新的子类重写被观察属性<code>keyPath</code>的Setter方法，在Setter方法中实现通知观察对象属性的改变状况。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">当观察一个叫做name的属性时，KVO所生成的子类对象内部实际上就是做了这么一件事</span><br><span class="line">- (void)setName:(NSString *)newName &#123; </span><br><span class="line">      [self willChangeValueForKey:@&quot;name&quot;];    //KVO 在调用存取方法之前总调用 </span><br><span class="line">      [super setValue:newName forKey:@&quot;name&quot;]; //调用父类的存取方法 </span><br><span class="line">      [self didChangeValueForKey:@&quot;name&quot;];     //KVO 在调用存取方法之后总调用</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://yulingtianxia.com/blog/2016/06/15/Objective-C-Message-Sending-and-Forwarding/" target="_blank" rel="noopener">Objective-C 消息发送与转发机制原理</a><br><a href="https://juejin.im/post/57a133587db2a2005a736c08" target="_blank" rel="noopener">结合category 工作原理分析 OC2.0 中的Runtime</a><br><a href="https://zhangbuhuai.com/post/runtime.html" target="_blank" rel="noopener">Objective-C Runtime分析</a><br><a href="https://juejin.im/post/5ac0a6116fb9a028de44d717" target="_blank" rel="noopener">iOS Runtime详解</a><br><a href="https://www.jianshu.com/p/27ee04f3ed7b" target="_blank" rel="noopener">iOS底层原理总结 - 探寻Runtime本质（二）</a><br><a href="https://www.jianshu.com/p/8e700673202b" target="_blank" rel="noopener">NSProxy——少见却神奇的类</a><br><a href="https://juejin.im/post/5bfd087be51d457a013940e8" target="_blank" rel="noopener">Swift中的动态特性</a><br><a href="https://www.skyfly.xyz/2015/12/20/Swift/Swift%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E5%8A%A8%E6%80%81%E7%89%B9%E6%80%A7/" target="_blank" rel="noopener">Swift学习笔记-动态特性</a></p>
+<p><a href="http://cplusplus.bordoon.com/static_initialization.html" target="_blank" rel="noopener">C++ Static initialization is powerful but dangerous</a><br><a href="https://dmanager.github.io/ios/2019/05/27/%E8%AE%A1%E7%AE%97load%E8%80%97%E6%97%B6/" target="_blank" rel="noopener">计算Load耗时</a><br><a href="https://maimieng.com/posts/2019/+load_in_ios/" target="_blank" rel="noopener">iOS中的load方法</a><br><a href="https://www.jianshu.com/p/c14987eee107" target="_blank" rel="noopener">如何精确度量 iOS App 的启动时间</a></p>
+<p><a href="https://junyixie.github.io/2017/12/04/safeSwizzleRSSwizzleAnalyze/" target="_blank" rel="noopener">Method Swizzling 的正确途径</a></p>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="http://jslibs.wuxubj.cn/sweetalert_mini/jquery-1.7.1.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/archives/c6605a39.html">Objective-C的运行时Runtime</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
+  <p><span>发布时间:</span>2019年07月27日 - 15:07</p>
+  <p><span>最后更新:</span>2019年07月27日 - 15:07</p>
+  <p><span>原始链接:</span><a href="/archives/c6605a39.html" title="Objective-C的运行时Runtime">https://hello-david.github.io/archives/c6605a39.html</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/c6605a39.html"  aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
+</div>
+<script> 
+    var clipboard = new Clipboard('.fa-clipboard');
+    clipboard.on('success', $(function(){
+      $(".fa-clipboard").click(function(){
+        swal({   
+          title: "",   
+          text: '复制成功',   
+          html: false,
+          timer: 500,   
+          showConfirmButton: false
+        });
+      });
+    }));  
+</script>
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/iOS工作原理/" rel="tag"># iOS工作原理</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/archives/4569df37.html" rel="next" title="iOS调试和性能优化技巧">
+                <i class="fa fa-chevron-left"></i> iOS调试和性能优化技巧
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">David Dai</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Objective-C-Runtime-Programming相关话题"><span class="nav-number">1.</span> <span class="nav-text">Objective-C Runtime Programming相关话题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Runtime的版本和平台"><span class="nav-number">1.1.</span> <span class="nav-text">Runtime的版本和平台</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#与Runtime交互"><span class="nav-number">1.2.</span> <span class="nav-text">与Runtime交互</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#消息"><span class="nav-number">1.3.</span> <span class="nav-text">消息</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Key1：消息-SEL-直到运行时才绑定到对应的方法实现-IMP"><span class="nav-number">1.3.1.</span> <span class="nav-text">Key1：消息(SEL)直到运行时才绑定到对应的方法实现(IMP)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Key2：消息传递的关键在于每个类的结构和它的实例对象之间的联系"><span class="nav-number">1.3.2.</span> <span class="nav-text">Key2：消息传递的关键在于每个类的结构和它的实例对象之间的联系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Key3：可通过Self和-cmd传递消息"><span class="nav-number">1.3.3.</span> <span class="nav-text">Key3：可通过Self和_cmd传递消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Key4：规避动态绑定-Dynamic-Binding-的唯一方法是获取方法的地址并直接调用它"><span class="nav-number">1.3.4.</span> <span class="nav-text">Key4：规避动态绑定(Dynamic Binding)的唯一方法是获取方法的地址并直接调用它</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#动态方法解析"><span class="nav-number">1.4.</span> <span class="nav-text">动态方法解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#消息转发"><span class="nav-number">1.5.</span> <span class="nav-text">消息转发</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#快速消息转发阶段"><span class="nav-number">1.5.1.</span> <span class="nav-text">快速消息转发阶段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#完整消息转发阶段"><span class="nav-number">1.5.2.</span> <span class="nav-text">完整消息转发阶段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#模拟多继承特性"><span class="nav-number">1.5.3.</span> <span class="nav-text">模拟多继承特性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#类型编码"><span class="nav-number">1.6.</span> <span class="nav-text">类型编码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#声明的属性"><span class="nav-number">1.7.</span> <span class="nav-text">声明的属性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Runtime应用之Method-Swizzling"><span class="nav-number">2.</span> <span class="nav-text">Runtime应用之Method Swizzling</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#合适的Method-Swizzling时机"><span class="nav-number">2.1.</span> <span class="nav-text">合适的Method Swizzling时机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更完善的Method-Swizzling"><span class="nav-number">2.2.</span> <span class="nav-text">更完善的Method Swizzling</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Runtime应用之KVO"><span class="nav-number">3.</span> <span class="nav-text">Runtime应用之KVO</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">David Dai</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+-->
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
