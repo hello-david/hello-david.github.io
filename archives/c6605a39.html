@@ -93,7 +93,7 @@
 <meta property="og:image" content="https://hello-david.github.io/archives/c6605a39/media/15620470479138/15639551168913.jpg">
 <meta property="og:image" content="https://hello-david.github.io/archives/c6605a39/media/15620470479138/15641105678938.jpg">
 <meta property="og:image" content="https://hello-david.github.io/archives/c6605a39/media/15620470479138/15641265241781.jpg">
-<meta property="og:updated_time" content="2019-07-27T07:30:10.193Z">
+<meta property="og:updated_time" content="2019-08-28T02:28:44.125Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Objective-C的运行时Runtime">
 <meta name="twitter:description" content="Objective-C Runtime顾名思义就是Objective-C的一个运行时库，它提供对Objective-C语言的动态特性的支持。 我们知道在比如C/C++/Swift这种静态语言一大特征就是在编译阶段就确定了对象的结构，而动态语言则在运行时还能够修改对象的结构，其中Objective-C正是利用Runtime这个技术来表现它的动态特性。 可以说Runtime是整个Objective-C">
@@ -418,6 +418,12 @@
 <li>消息转发给备用接收者（快速消息转发，只需要重定向消息的接收者）</li>
 <li>完整消息转发（同时可在利用它模拟多继承特性）</li>
 </ol>
+<p>总结这三个流程：</p>
+<ol>
+<li>在本类中动态实现IMP（动态方法解析），如果没有定义这种操作则进入消息转发流程。</li>
+<li>把消息转给我们已知具有这个SEL的类当做备胎（快速消息转发），如果假如这个备胎的IMP可能也是未存在的话则进入更完整的消息转发流程。</li>
+<li>这一步比上一步的区别在于它提供校验这个备胎的Method是否有实现IMP（完整消息转发）。</li>
+</ol>
 <img src="/archives/c6605a39/media/15620470479138/15638650514435.jpg">
 <h3 id="消息转发"><a href="#消息转发" class="headerlink" title="消息转发"></a>消息转发</h3><p>消息转发流程一般被认为有两个流程：</p>
 <ul>
@@ -507,7 +513,7 @@
   <p><span>本文标题:</span><a href="/archives/c6605a39.html">Objective-C的运行时Runtime</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
   <p><span>发布时间:</span>2019年07月27日 - 15:07</p>
-  <p><span>最后更新:</span>2019年07月27日 - 15:07</p>
+  <p><span>最后更新:</span>2019年08月28日 - 10:08</p>
   <p><span>原始链接:</span><a href="/archives/c6605a39.html" title="Objective-C的运行时Runtime">https://hello-david.github.io/archives/c6605a39.html</a>
     <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/c6605a39.html"  aria-label="复制成功！"></i></span>
   </p>
@@ -643,7 +649,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-count">22</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="工作原理," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="之前系统性的把Objective-C的Runtime机制过了一遍，深感iOS编码中强大的动态特性。接下来学一下也时常可以用到的另外一个动态能力KVC，打开官方文档Key-Value-Coding第一句描述给它的定义就是KVC是一种利用NSKeyValueCoding协议实现的允许对象间接访问它属性的机制。 我们打开Foundation中NSKeyValueCoding.h这个文件，果不其然它的定义">
+<meta name="keywords" content="工作原理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS中的Key-Value-Coding">
+<meta property="og:url" content="https://hello-david.github.io/archives/98bfdabd.html">
+<meta property="og:site_name" content="David&#39;Blog">
+<meta property="og:description" content="之前系统性的把Objective-C的Runtime机制过了一遍，深感iOS编码中强大的动态特性。接下来学一下也时常可以用到的另外一个动态能力KVC，打开官方文档Key-Value-Coding第一句描述给它的定义就是KVC是一种利用NSKeyValueCoding协议实现的允许对象间接访问它属性的机制。 我们打开Foundation中NSKeyValueCoding.h这个文件，果不其然它的定义">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://hello-david.github.io/archives/98bfdabd/media/15638729619169/15656662934929.png">
+<meta property="og:image" content="https://hello-david.github.io/archives/98bfdabd/media/15638729619169/15656663960366.png">
+<meta property="og:image" content="https://hello-david.github.io/archives/98bfdabd/media/15638729619169/15654358775413.jpg">
+<meta property="og:image" content="https://hello-david.github.io/archives/98bfdabd/media/15638729619169/15657785408810.png">
+<meta property="og:image" content="https://hello-david.github.io/archives/98bfdabd/media/15638729619169/15657786142062.png">
+<meta property="og:updated_time" content="2019-09-01T08:31:05.453Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS中的Key-Value-Coding">
+<meta name="twitter:description" content="之前系统性的把Objective-C的Runtime机制过了一遍，深感iOS编码中强大的动态特性。接下来学一下也时常可以用到的另外一个动态能力KVC，打开官方文档Key-Value-Coding第一句描述给它的定义就是KVC是一种利用NSKeyValueCoding协议实现的允许对象间接访问它属性的机制。 我们打开Foundation中NSKeyValueCoding.h这个文件，果不其然它的定义">
+<meta name="twitter:image" content="https://hello-david.github.io/archives/98bfdabd/media/15638729619169/15656662934929.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hello-david.github.io/archives/98bfdabd.html"/>
+
+
+
+<meta name="google-site-verification" content="xPc40P1FFnuv2Aer8rA72v2doNkgf1bEhU79GGlStmE" />
+
+
+  <title>iOS中的Key-Value-Coding | David'Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">David'Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/98bfdabd.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="David Dai">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="David'Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">iOS中的Key-Value-Coding</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-09-01T16:22:23+08:00">
+                2019-09-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/工作原理/" itemprop="url" rel="index">
+                    <span itemprop="name">工作原理</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>之前系统性的把Objective-C的Runtime机制过了一遍，深感iOS编码中强大的动态特性。接下来学一下也时常可以用到的另外一个动态能力KVC，打开官方文档<a href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/KeyValueCoding/index.html" target="_blank" rel="noopener">Key-Value-Coding</a>第一句描述给它的定义就是KVC是一种利用<code>NSKeyValueCoding</code>协议实现的允许对象间接访问它属性的机制。</p>
+<p>我们打开Foundation中<code>NSKeyValueCoding.h</code>这个文件，果不其然它的定义就是NSObject / NSArray / NSMutableDictionary / NSOrderedSet / NSSet的拓展分类<code>NSKeyValueCoding</code>，KVC机制补充了Ivar实例变量和它的选择器方法的访问方式。</p>
+<p>同时Key-value Coding还是许多其他Cocoa技术的基础，例如Key-value observing，Cocoa bindings，CoreData和AppleScript-ability。在某些情况下，KVC还有助于简化代码。</p>
+<p>ps：Swift中原本属于NSObject对象还是存在KVC能力的。</p>
+<h2 id="Key-value-Coding的能力及其应用场景"><a href="#Key-value-Coding的能力及其应用场景" class="headerlink" title="Key-value Coding的能力及其应用场景"></a>Key-value Coding的能力及其应用场景</h2><p>根据文档上的描述，KVC有以下几项功能：</p>
+<ul>
+<li>访问对象属性，KVC允许我们<code>valueForKey:</code>和<code>setValue:forKey:</code>用于通过存取器的方法名（属性名）访问一个对象的属性值。</li>
+<li>操纵集合属性，允许我们通过Key获得容器的一组可变集合。</li>
+<li>在集合对象上调用集合运算符。</li>
+<li>访问非对象属性，基本数据结构/结构体可以通过NSValue来转换到OC对象中。</li>
+<li>按key path访问属性，KVC让我们能够通过关系来访问属性，key path是一个以点（“.”）分割Key的字符串，通过指定一连串的对象属性去获取这个最终的属性。</li>
+</ul>
+<p>在KVC中可以通过<code>Key</code>或者<code>KeyPath</code>访问属性。<code>Key</code>是一个用于识别对象中特定的属性的字符串。<code>Key</code>与存取器的方法名（属性名）或者实例变量名保持一致，使用两种方法:</p>
+<ul>
+<li>valueForKey: 获取对象中指定的属性值</li>
+<li>setValue:forKey: 给对象中指定的属性赋值</li>
+</ul>
+<p>而<code>KeyPath</code>则是一种以点（”.”）分割<code>Key</code>的字符串，可以通过这种方式访问多级属性。具体通过以下两种方法：</p>
+<ul>
+<li>valueForKeyPath: 获取键路径指定的属性值</li>
+<li>setValue:forKeyPath: 给键路径指定的属性赋值</li>
+</ul>
+<h2 id="访问对象属性"><a href="#访问对象属性" class="headerlink" title="访问对象属性"></a>访问对象属性</h2><p>一个类通常声明的属性是以下三种类型：</p>
+<ul>
+<li>值属性，如number、strings、NSColor等这种表示数值的属性。</li>
+<li>一对一关系属性，如自定义一个类作为属性。</li>
+<li>多对多关系属性，如使用NSArray容器作为属性。</li>
+</ul>
+<p>比如下方这个Demo中：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">@interface Transaction : NSObject</span><br><span class="line">@property (nonatomic) NSNumber *payee;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@interface BankAccount : NSObject</span><br><span class="line">@property (nonatomic) NSNumber* currentBalance; // An attribute</span><br><span class="line">@property (nonatomic) Person* owner; // A to-one relation</span><br><span class="line">@property (nonatomic) NSArray&lt; Transaction* &gt;* transactions; // A to-many relation</span><br><span class="line">@end</span><br></pre></td></tr></table></figure></p>
+<p>我们可以通过<code>Key</code>或者<code>KeyPath</code>访问属性:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[account setValue:@(100.0) forKey:@&quot;currentBalance&quot;];</span><br><span class="line">id transactions = [account mutableArrayValueForKeyPath:@&quot;transactions&quot;];</span><br></pre></td></tr></table></figure></p>
+<p>这种是最简单的使用一个Key/KeyPath来访问属性，对于没有Key的时候可以这个类定义<code>setValue:forUndefinedKey:</code>、<code>valueForUndefinedKey:</code>来处理这种情况。假如最后还没有处理而系统则会报<code>NSUndefinedKeyException</code>异常。</p>
+<p>而同时KVC中还提供<code>dictionaryWithValuesForKeys:</code>和<code>setValuesForKeysWithDictionary</code>用于使用多个Key批量访问属性的方式。</p>
+<h3 id="应用场景——访问系统框架中不开放的属性"><a href="#应用场景——访问系统框架中不开放的属性" class="headerlink" title="应用场景——访问系统框架中不开放的属性"></a>应用场景——访问系统框架中不开放的属性</h3><p>在维护公司基于PhotoKit编写的相册库的时候，发现它的API在极端情况下会存在性能问题。比如假如iPhone中存在数万个资源对象的时候使用获取原始数据的接口<code>requestImageDataForAsset:</code>以及<code>requestPlayerItemForVideo:</code>处理时间就特别久。同时由于业务上需要通过原始数据获得完整的元数据（访问相册资源的metadata,filename,url等信息真的很不方便），这里只能尝试使用其他方式去处理。</p>
+<p>比如PHAsset的<code>filename</code>通过PHAssetResource中的<code>originalFilename</code>获取，单个对象需要5~8ms的耗时，而直接使用KVC获取则几乎没有损耗。这里存在一个隐患，当有新系统的时候，框架内部该实例变量可能被取消掉，这里我们可以简单拓展一个分类方法来捕获这个异常判断是否有这个Key以用于判断是否能够使用这种方式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">@implementation NSObject (Key)</span><br><span class="line">- (BOOL)objectHaveKey:(NSString *)key &#123;</span><br><span class="line">    if (!key.length) &#123;</span><br><span class="line">        return NO;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    BOOL haveKey = YES;</span><br><span class="line">    @try &#123;</span><br><span class="line">        [self valueForKey:key];</span><br><span class="line">    &#125; @catch (NSException *exception) &#123;</span><br><span class="line">        haveKey = NO;</span><br><span class="line">    &#125;</span><br><span class="line">    return haveKey;</span><br><span class="line">&#125;</span><br><span class="line">@end</span><br></pre></td></tr></table></figure></p>
+<h2 id="操纵集合属性"><a href="#操纵集合属性" class="headerlink" title="操纵集合属性"></a>操纵集合属性</h2><p>KVC默认为NSArray/NSSet/NSOrderSet提供了修改容器的方法，它会直接在原有容器的基础上进行修改，比使用<code>valueForKey:</code>获取非可变集合对象再创建具有更改内容的集合对象，最后使用<code>setValue:forKey:</code>将其设置回去更加高效。</p>
+<ul>
+<li><code>mutableArrayValueForKey:</code>和<code>mutableArrayValueForKeyPath:</code></li>
+<li><code>mutableSetValueForKey:</code>和<code>mutableSetValueForKeyPath:</code></li>
+<li><code>mutableOrderedSetValueForKey:</code>和<code>mutableOrderedSetValueForKeyPath:</code></li>
+</ul>
+<p>文档中提到这种实现方式在许多情况下比直接使用可变属性更有效，为KVO提供便利的方式。</p>
+<h3 id="应用场景——修改不可变容器"><a href="#应用场景——修改不可变容器" class="headerlink" title="应用场景——修改不可变容器"></a>应用场景——修改不可变容器</h3><p>这里直接使用前面提到的类做一个简单的示例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">BankAccount *account = [[BankAccount alloc] init];</span><br><span class="line">[account setTransactions:@[</span><br><span class="line">    [Transition transitionWith:@(0)],</span><br><span class="line">    [Transition transitionWith:@(1)],</span><br><span class="line">    [Transition transitionWith:@(2)],</span><br><span class="line">    [Transition transitionWith:@(3)],</span><br><span class="line">    [Transition transitionWith:@(4)]</span><br><span class="line">]];</span><br><span class="line"></span><br><span class="line">NSMutableArray&lt;Transition *&gt; *transactions = [account mutableArrayValueForKey:@&quot;transactions&quot;];</span><br><span class="line">[transactions firstObject].payee = @(111);</span><br><span class="line">[transactions removeLastObject];</span><br></pre></td></tr></table></figure></p>
+<p>这将会直接修改BankAccount的<code>NSArray&lt; Transaction* &gt;*transactions</code>容器内容。<br><img src="/archives/98bfdabd/media/15638729619169/15656662934929.png"></p>
+<p>值得注意的是假如你要修改的属性实际上并非一个容器对象，但同时你又使用这种方式修改了这个对象，这将会把你的原有属性变为一个容器而不会进行类型校验并报错。比如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NSMutableArray&lt;NSNumber *&gt; *payees = [account mutableArrayValueForKeyPath:@&quot;transactions.payee&quot;];</span><br><span class="line">[payees removeLastObject];</span><br></pre></td></tr></table></figure></p>
+<img src="/archives/98bfdabd/media/15638729619169/15656663960366.png">
+<h2 id="在集合对象上调用集合运算符"><a href="#在集合对象上调用集合运算符" class="headerlink" title="在集合对象上调用集合运算符"></a>在集合对象上调用集合运算符</h2><p>当使用key path方式访问一个集合属性的时候，可以以如下格式内置相关的集合运算符到这个key path中实现直接对集合中的对象的某个属性进行运算。<br><img src="/archives/98bfdabd/media/15638729619169/15654358775413.jpg"></p>
+<p>集合运算可以分为三类：</p>
+<ul>
+<li>聚合运算(<a href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/KeyValueCoding/CollectionOperators.html#//apple_ref/doc/uid/20002176-SW5" target="_blank" rel="noopener">Aggregation Operators</a>)，以某种方式合并集合并返回出一个与右侧KeyPath属性类型一致的对象。(多-&gt;一)</li>
+<li>数组运算(<a href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/KeyValueCoding/CollectionOperators.html#//apple_ref/doc/uid/20002176-SW7" target="_blank" rel="noopener">Array Operators</a>)，返回一组包含该属性的子集NSArray。(多-&gt;多)</li>
+<li>嵌套运算(<a href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/KeyValueCoding/CollectionOperators.html#//apple_ref/doc/uid/20002176-SW9" target="_blank" rel="noopener">Nesting Operators</a>)，从嵌套的数组结构中返回一组包含该属性的子集NSArray。(多-&gt;多)</li>
+</ul>
+<p>聚合运算包括：</p>
+<ol>
+<li><code>@avg</code>将读取集合中指定的属性，将其转换为double（将0替换为nil值），并计算这些值的算术平均值。</li>
+<li><code>@count</code>返回集合中对象的数量NSNumber，右键路径（如果存在）将被忽略。</li>
+<li><code>@max</code>返回集合中最大值的对象，实际上通过Foundation中的<code>compare:</code>函数进行比较(NSDate/NSString/NSNumber等都有这个方法)。</li>
+<li><code>@min</code>返回集合中最小值的对象，也是通过<code>compare:</code>实现。</li>
+<li><code>@sum</code>将读取集合中指定的属性，将其转换为double（将0替换为nil值），并计算这些值的算术和。</li>
+</ol>
+<p>数组运算包括：</p>
+<ul>
+<li><code>@distinctUnionOfObjects</code>/ <code>@unionOfObjects</code>返回一个由操作符右边的key path所指定的对象属性组成的数组，<code>distinct</code>会进行对象去重。</li>
+</ul>
+<p>嵌套运算包括：</p>
+<ul>
+<li><code>@distinctUnionOfArrays</code>/<code>@unionOfArrays</code>/<code>@distinctUnionOfSets</code>和数组运算符相似，只是它允许从一个嵌套数组中赛选相关属性对象到一个数组中。</li>
+</ul>
+<p>这些运算使用<code>valueForKeyPath:</code>读取获取需要运算的属性如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">// 聚合运算</span><br><span class="line">NSNumber *avgPayee = [account valueForKeyPath:@&quot;transactions.@avg.payee&quot;];</span><br><span class="line">NSNumber *count = [account valueForKeyPath:@&quot;transactions.@count&quot;];</span><br><span class="line">NSNumber *max = [account valueForKeyPath:@&quot;transactions.@max.payee&quot;];</span><br><span class="line">NSNumber *min = [account valueForKeyPath:@&quot;transactions.@min.payee&quot;];</span><br><span class="line">NSNumber *sum = [account valueForKeyPath:@&quot;transactions.@sum.payee&quot;];</span><br><span class="line"></span><br><span class="line">// 数组运算</span><br><span class="line">NSArray &lt;NSNumber *&gt; *payees = [account valueForKeyPath:@&quot;transactions.@distinctUnionOfObjects.payee&quot;];</span><br><span class="line">// 默认处理数组中的对象必须包含这个属性可以为nil否则会导致异常</span><br><span class="line"></span><br><span class="line">// 嵌套运算</span><br><span class="line">NSArray &lt;NSNumber *&gt; *payees = [@[@[[Transition transitionWith:@(0)], [Transition transitionWith:@(1)]],@[[TransitionChild transitionWithChild:@(100)],[TransitionChild transitionWithChild:@(101)]]] valueForKeyPath:@&quot;@distinctUnionOfArrays.payee&quot;];</span><br><span class="line">// 假如某个数组中的指定属性全为nil则返回NSNull对象</span><br></pre></td></tr></table></figure></p>
+<h2 id="访问非对象的属性"><a href="#访问非对象的属性" class="headerlink" title="访问非对象的属性"></a>访问非对象的属性</h2><p>在Objective-C中KVC的这项能力还是非常好用的，它能够将C语言中的基础数据类型以及结构体转换成NSValue对象。</p>
+<p>对于标量数据类型:<br><img src="/archives/98bfdabd/media/15638729619169/15657785408810.png"><br>对于部分系统中的结构体：<br><img src="/archives/98bfdabd/media/15638729619169/15657786142062.png"><br>当然对于我们自定义的结构体还可以通过以下方式转换成NSValue对象：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">typedef struct &#123;</span><br><span class="line">    float x, y, z;</span><br><span class="line">&#125; ThreeFloats;</span><br><span class="line"> </span><br><span class="line">@interface MyClass</span><br><span class="line">@property (nonatomic) ThreeFloats threeFloats;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">// 可以如此访问这个结构体</span><br><span class="line">NSValue* result = [myClass valueForKey:@&quot;threeFloats&quot;];</span><br><span class="line"></span><br><span class="line">// 通过如下方式设置结构体的值</span><br><span class="line">ThreeFloats floats = &#123;1., 2., 3.&#125;;</span><br><span class="line">NSValue* value = [NSValue valueWithBytes:&amp;floats objCType:@encode(ThreeFloats)];</span><br><span class="line">[myClass setValue:value forKey:@&quot;threeFloats&quot;];</span><br></pre></td></tr></table></figure></p>
+<h2 id="验证属性"><a href="#验证属性" class="headerlink" title="验证属性"></a>验证属性</h2><p>在KVC中支持通过<code>validateValue:forKey:error:</code> 或者<code>validateValue:forKeyPath:error:</code>来验证一个属性是否有效,就像使用KVC通用方法一样,你也可以按key/key path验证一个属性。当调用了这两个方法，协议的默认实现会判断对象实例是否实现了<code>validate&lt;Key&gt;:error:</code>方法。如果对象没有实现此类方法，则默认验证成功，并返回YES。</p>
+<p>当一个对象实现了准守协议实现了上述的两种验证方法，一般是有以下三种用途：</p>
+<ol>
+<li>当通过验证方法判断一个值对象是否满足某些条件而为有效，不满足则返回。</li>
+<li>当通过验证方法认为值对象无效时，获取无效的原因NSError。</li>
+<li>当通过验证方法认为值对象无效时，会创建一个新的有效对象作为替换。从而实现属性有效纠错。</li>
+</ol>
+<p>这里提供一个简单的示例，用于进行属性有效性校验：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">Person* person = [[Person alloc] init];</span><br><span class="line">NSError* error;</span><br><span class="line">NSString* name = @&quot;John&quot;;</span><br><span class="line">if (![person validateValue:&amp;name forKey:@&quot;name&quot; error:&amp;error]) &#123;</span><br><span class="line">    NSLog(@&quot;%@&quot;,error);</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">- (BOOL)validateName:(id *)ioValue error:(NSError * __autoreleasing *)outError&#123;</span><br><span class="line">    if ((*ioValue == nil) || ([(NSString *)*ioValue length] &lt; 2)) &#123;</span><br><span class="line">        if (outError != NULL) &#123;</span><br><span class="line">            *outError = [NSError errorWithDomain:PersonErrorDomain</span><br><span class="line">                                            code:PersonInvalidNameCode</span><br><span class="line">                                        userInfo:@&#123; NSLocalizedDescriptionKey</span><br><span class="line">                                                    : @&quot;Name too short&quot; &#125;];</span><br><span class="line">        &#125;</span><br><span class="line">        return NO;</span><br><span class="line">    &#125;</span><br><span class="line">    return YES;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="访问器的实现细节"><a href="#访问器的实现细节" class="headerlink" title="访问器的实现细节"></a>访问器的实现细节</h2><p>在前面我们利用<code>NSKeyValueCoding</code>默认实现的访问器<code>valueForKey:</code>或者<code>valueForKeyPath:</code>来存取对象属性，一般而言我们不会去修改这些访问器的实现。但是通过了解它们的实现有助于跟踪KVC对象的行为。</p>
+<h3 id="基础Getter访问器（valueForKey-）"><a href="#基础Getter访问器（valueForKey-）" class="headerlink" title="基础Getter访问器（valueForKey:）"></a>基础Getter访问器（valueForKey:）</h3><p>我们知道在使用<code>@property</code>声明一个属性的时候，编译器会自动为我们默认生成相应的Getter 、Setter方法。而<code>valueForKey:</code>访问器将会以下面几个步骤实现：</p>
+<ol>
+<li>通过<code>get&lt;Key&gt;, &lt;key&gt;, is&lt;Key&gt;, _&lt;key&gt;</code>这样的顺序搜索对应实例的方法函数，如果检索成功则直接进入第5步，否则进入第2步看这个属性是否被当成一个有序集合来处理。</li>
+<li>如果实现了<code>countOf&lt;Key&gt;</code>和<code>objectIn&lt;Key&gt;AtIndex:</code>或者<code>&lt;key&gt;AtIndexes:</code>中两个方法则会被当做一个NSArray对象来处理，还可通过实现<code>get&lt;Key&gt;:range:</code>提高效率，否则进入第3步看这个属性是否被当做一个无序集合来处理。</li>
+<li>如果实现了<code>countOf&lt;Key&gt;</code>和<code>enumeratorOf&lt;Key&gt;</code>以及<code>memberOf&lt;Key&gt;</code>这三个方法则会被当成一个NSSet对象来处理，否则进入第4步。</li>
+<li>当一个属性既不会被当成NSArray处理，也不想被当成NSSet处理，则<code>accessInstanceVariablesDirectly</code>方法返回YES表明它只是一个默认实现的搜索器，如果通过第1步提到的方法找到则进入第5步，否则进入第6步。</li>
+<li>如果搜索到结果是一个指针则直接返回结果，如果值是NSNumber支持的标量则返回一个NSNumber对象，如果值NSNumber不支持则返回NSValue。</li>
+<li>如果所有其他方法都失败了则调用<code>valueForUndefinedKey:</code>，默认情况下会引发异常。</li>
+</ol>
+<h3 id="基础Setter访问器（setValue-forKey-）"><a href="#基础Setter访问器（setValue-forKey-）" class="headerlink" title="基础Setter访问器（setValue:forKey:）"></a>基础Setter访问器（setValue:forKey:）</h3><p>对于基础的Setter访问器实现流程上就相对简单了一些：</p>
+<ol>
+<li>如果<code>set&lt;Key&gt;:</code>或者<code>_set&lt;Key&gt;</code>方法被定义了则直接使用它进行设值。</li>
+<li>如果找不到第一步的访问器，则<code>accessInstanceVariablesDirectly</code>返回YES，并通过搜索<code>_&lt;key&gt;, _is&lt;Key&gt;&lt;key&gt;，&lt;Key&gt;</code>找到对应的实例变量并设值。</li>
+<li>如果找不到访问器也找不到类似的实例变量则会触发<code>setValue:forUndefinedKey:</code>，默认情况会引发异常。</li>
+</ol>
+<p>同时需要注意的是，如果对于非对象的属性(标量)，需要对设置为nil的情况通<code>setNilValueForKey:</code>进行处理，例如我们有BOOL类型的hidden:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">- (void)setNilValueForKey:(NSString *)theKey &#123;</span><br><span class="line">    if ([theKey isEqualToString:@&quot;hidden&quot;]) &#123;</span><br><span class="line">        [self setValue:@YES forKey:@&quot;hidden&quot;];</span><br><span class="line">    &#125;</span><br><span class="line">    else &#123;</span><br><span class="line">        [super setNilValueForKey:theKey];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="可变集合类型访问器"><a href="#可变集合类型访问器" class="headerlink" title="可变集合类型访问器"></a>可变集合类型访问器</h3><p>上面学到，KVC还提供三个操纵集合属性的方法对于它们的实现细节大同小异，都是通过实现某些方法使得属性的行为表现得类似MutableArray/MutableOrderSet/MutableSet。这里就详细表述了，可参考<a href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/KeyValueCoding/SearchImplementation.html#//apple_ref/doc/uid/20000955-CJBBBFFA" target="_blank" rel="noopener">官方文档</a>。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://www.aopod.com/2016/07/21/key-value-coding/" target="_blank" rel="noopener">Key-value Coding</a><br><a href="https://www.jianshu.com/p/a50ea091e1f4" target="_blank" rel="noopener">iOS KVC</a><br><a href="https://juejin.im/post/5c948d6a6fb9a070eb267a08" target="_blank" rel="noopener">简单易懂KVC基础篇</a></p>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="http://jslibs.wuxubj.cn/sweetalert_mini/jquery-1.7.1.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/archives/98bfdabd.html">iOS中的Key-Value-Coding</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
+  <p><span>发布时间:</span>2019年09月01日 - 16:09</p>
+  <p><span>最后更新:</span>2019年09月01日 - 16:09</p>
+  <p><span>原始链接:</span><a href="/archives/98bfdabd.html" title="iOS中的Key-Value-Coding">https://hello-david.github.io/archives/98bfdabd.html</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/98bfdabd.html"  aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
+</div>
+<script> 
+    var clipboard = new Clipboard('.fa-clipboard');
+    clipboard.on('success', $(function(){
+      $(".fa-clipboard").click(function(){
+        swal({   
+          title: "",   
+          text: '复制成功',   
+          html: false,
+          timer: 500,   
+          showConfirmButton: false
+        });
+      });
+    }));  
+</script>
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/工作原理/" rel="tag"># 工作原理</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/archives/f116047e.html" rel="next" title="滤镜Shader——LookUpTable">
+                <i class="fa fa-chevron-left"></i> 滤镜Shader——LookUpTable
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">David Dai</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Key-value-Coding的能力及其应用场景"><span class="nav-number">1.</span> <span class="nav-text">Key-value Coding的能力及其应用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#访问对象属性"><span class="nav-number">2.</span> <span class="nav-text">访问对象属性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#应用场景——访问系统框架中不开放的属性"><span class="nav-number">2.1.</span> <span class="nav-text">应用场景——访问系统框架中不开放的属性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#操纵集合属性"><span class="nav-number">3.</span> <span class="nav-text">操纵集合属性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#应用场景——修改不可变容器"><span class="nav-number">3.1.</span> <span class="nav-text">应用场景——修改不可变容器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在集合对象上调用集合运算符"><span class="nav-number">4.</span> <span class="nav-text">在集合对象上调用集合运算符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#访问非对象的属性"><span class="nav-number">5.</span> <span class="nav-text">访问非对象的属性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#验证属性"><span class="nav-number">6.</span> <span class="nav-text">验证属性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#访问器的实现细节"><span class="nav-number">7.</span> <span class="nav-text">访问器的实现细节</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基础Getter访问器（valueForKey-）"><span class="nav-number">7.1.</span> <span class="nav-text">基础Getter访问器（valueForKey:）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基础Setter访问器（setValue-forKey-）"><span class="nav-number">7.2.</span> <span class="nav-text">基础Setter访问器（setValue:forKey:）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#可变集合类型访问器"><span class="nav-number">7.3.</span> <span class="nav-text">可变集合类型访问器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">David Dai</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+-->
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
