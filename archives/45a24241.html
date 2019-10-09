@@ -87,18 +87,18 @@
 <meta property="og:site_name" content="David&#39;Blog">
 <meta property="og:description" content="之前在这篇文章学习了如何在OpenGL中是如何构建一个空间描述物体的信息而又是如何投射到渲染屏幕上的过程。  OpenGL采用的是相机模型，就是把视图变换操作类比为使用照相机拍摄照片的过程，具体步骤如下：1.将准备拍摄的对象移动到场景中指定位置。（模型变换，Model Transform）2.将相机移动到准备拍摄的位置，将它对准某个方向。（视图变换，View Transform）3.设置相机的焦距">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://hello-david.github.io/archives/45a24241/media/15514045809468/15514046211265.png">
-<meta property="og:image" content="https://hello-david.github.io/archives/45a24241/media/15514045809468/15542804264475.jpg">
-<meta property="og:image" content="https://hello-david.github.io/archives/45a24241/media/15514045809468/15544741516585.jpg">
-<meta property="og:image" content="https://hello-david.github.io/archives/45a24241/media/15514045809468/15544828533534.jpg">
-<meta property="og:image" content="https://hello-david.github.io/archives/45a24241/media/15514045809468/15544846969708.jpg">
-<meta property="og:image" content="https://hello-david.github.io/archives/45a24241/media/15514045809468/15544846825302.jpg">
-<meta property="og:image" content="https://hello-david.github.io/archives/45a24241/media/15514045809468/15544851664524.jpg">
-<meta property="og:updated_time" content="2019-05-28T14:22:05.263Z">
+<meta property="og:image" content="https://hello-david.github.io/images/15514046211265.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15542804264475.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15544741516585.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15544828533534.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15544846969708.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15544846825302.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15544851664524.jpg">
+<meta property="og:updated_time" content="2019-10-09T10:33:14.527Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OpenGL学习——再探坐标系与矩阵">
 <meta name="twitter:description" content="之前在这篇文章学习了如何在OpenGL中是如何构建一个空间描述物体的信息而又是如何投射到渲染屏幕上的过程。  OpenGL采用的是相机模型，就是把视图变换操作类比为使用照相机拍摄照片的过程，具体步骤如下：1.将准备拍摄的对象移动到场景中指定位置。（模型变换，Model Transform）2.将相机移动到准备拍摄的位置，将它对准某个方向。（视图变换，View Transform）3.设置相机的焦距">
-<meta name="twitter:image" content="https://hello-david.github.io/archives/45a24241/media/15514045809468/15514046211265.png">
+<meta name="twitter:image" content="https://hello-david.github.io/images/15514046211265.png">
 
 
 
@@ -360,11 +360,9 @@
 <blockquote>
 <p>OpenGL采用的是相机模型，就是把视图变换操作类比为使用照相机拍摄照片的过程，具体步骤如下：<br>1.将准备拍摄的对象移动到场景中指定位置。（模型变换，Model Transform）<br>2.将相机移动到准备拍摄的位置，将它对准某个方向。（视图变换，View Transform）<br>3.设置相机的焦距，或者调整缩放比例。（投影变换，Projection Transform）<br>4.拍摄照片并变换到需要的图片大小。（这个是视口变换，glViewPort）</p>
 </blockquote>
-<p>接下来深刻学习如何将<strong>模型坐标系-&gt;世界坐标系-&gt;视图坐标系-&gt;裁剪空间</strong>最终到屏幕空间的过程，以及在渲染引擎中的具体操作。</p>
-<img src="/archives/45a24241/media/15514045809468/15514046211265.png">
+<p>接下来深刻学习如何将<strong>模型坐标系-&gt;世界坐标系-&gt;视图坐标系-&gt;裁剪空间</strong>最终到屏幕空间的过程，以及在渲染引擎中的具体操作。<br><img src="/images/15514046211265.png" alt=""></p>
 <h2 id="矩阵与坐标系"><a href="#矩阵与坐标系" class="headerlink" title="矩阵与坐标系"></a>矩阵与坐标系</h2><p>在OpenGL中所有的<strong>图形变化</strong>都可以通过矩阵来表示（通过一个4x4的矩阵来表示空间信息），下图中前三列表示一个三维空间中<strong>(x, y, z)三个向量</strong>，最后一列表示这个坐标系以哪个坐标为<strong>原点(一般为0,0,0)</strong>，而最后一位表示这个三维坐标系的<strong>齐次坐标</strong>。</p>
-<p>我们通过这个矩阵的前三列来实现对一个坐标系的<strong>旋转</strong>和<strong>缩放</strong>，最后一列来实现<strong>平移</strong>，最后通过齐次坐标来表示观察者的远近（在投影变换里面需要用到）。</p>
-<img src="/archives/45a24241/media/15514045809468/15542804264475.jpg">
+<p>我们通过这个矩阵的前三列来实现对一个坐标系的<strong>旋转</strong>和<strong>缩放</strong>，最后一列来实现<strong>平移</strong>，最后通过齐次坐标来表示观察者的远近（在投影变换里面需要用到）。<br><img src="/images/15542804264475.jpg" alt=""></p>
 <p>那么显然一个模型的原始顶点<strong>(x, y, z)向量坐标</strong>到裁剪空间的顶点坐标可以看做是它的坐标系经过一系列的平移，旋转，缩放，投影变换得到的。</p>
 <p>这三个变换过程又可以细分成6个过程，在世界坐标系中进行平移旋转缩放，在视图坐标系中进行平移旋转，以及投射到平面上。</p>
 <p>我们想要得到一个最终输入的顶点坐标（裁剪空间），只需要将它的过程变换坐标系矩阵相乘得到最终坐标系矩阵再乘于原始顶点就能得到了，这也是OpenGL中坐标变换的基本原理了。</p>
@@ -375,11 +373,10 @@
 </blockquote>
 <p>回到最初的视角上，我们准备把拍摄的对象摆放到指定位置上（模型变换）。这个过程可以看做一个模型本身在世界坐标系中<strong>平移，旋转，缩放</strong>的过程。</p>
 <p>我们在<strong>模型空间</strong>那些顶点都是基于<strong>模型原点</strong>所描绘出来的，那么我们只要找到这个模型的模型原点相对世界坐标系原点的位置不就可以在这个世界坐标系中描绘出这个模型了吗？</p>
-<p>其中OpenGL中世界坐标系是<strong>固定以(0, 0, 0)为原点</strong>的，而一个模型的基本变换过程如下图所示。</p>
-<img src="/archives/45a24241/media/15514045809468/15544741516585.jpg">
+<p>其中OpenGL中世界坐标系是<strong>固定以(0, 0, 0)为原点</strong>的，而一个模型的基本变换过程如下图所示。<br><img src="/images/15544741516585.jpg" alt=""></p>
 <p>其中模型可以绕x,y,z三个轴分别做旋转所以会有三个旋转矩阵可选择：</p>
 <p>$$Rx = \left[<br> \begin{matrix}<br>   1 &amp; 0 &amp; 0 &amp; 0\\<br>   0 &amp; Cosθ &amp; -Sinθ &amp; 0\\<br>   0 &amp; Sinθ &amp; Cosθ &amp; 0\\<br>   0 &amp; 0 &amp; 0 &amp; 1<br>  \end{matrix}<br>\right]<br>Ry = \left[<br> \begin{matrix}<br>   Cosθ  &amp; 0 &amp; -Sinθ &amp; 0\\<br>   0 &amp; 1 &amp; 0 &amp; 0\\<br>   Sinθ  &amp; 0 &amp; Cosθ &amp; 0\\<br>   0 &amp; 0 &amp; 0 &amp; 1<br>  \end{matrix}<br>\right]<br>Rz = \left[<br> \begin{matrix}<br>   Cosθ &amp; -Sinθ &amp; 0 &amp; 0\\<br>   Sinθ &amp; Cosθ &amp; 0 &amp; 0\\<br>   0 &amp; 0 &amp; 1 &amp; 0\\<br>   0 &amp; 0 &amp; 0 &amp; 1<br>  \end{matrix}<br>\right]<br>$$</p>
-<p>合成一个旋转矩阵：<br><img src="/archives/45a24241/media/15514045809468/15544828533534.jpg"></p>
+<p>合成一个旋转矩阵：<br><img src="/images/15544828533534.jpg" alt=""></p>
 <p>最终，模型变换过程可以用下面这个数学公式来概括，需要注意的是我们使用左乘矩阵<strong>依次进行缩放-&gt;旋转-&gt;平移</strong>才能得到正确的结果（矩阵不满足交换律）。</p>
 <p>$$<br>Model =<br>\left[<br> \begin{matrix}<br>   1 &amp; 0 &amp; 0 &amp; Position X\\<br>   0 &amp; 1 &amp; 0 &amp; Position Y\\<br>   0 &amp; 0 &amp; 1 &amp; Position Z\\<br>   0 &amp; 0 &amp; 0 &amp; 1<br>  \end{matrix}<br>\right]<br>\left[Rotate<br>\right]<br>\left[<br> \begin{matrix}<br>   Scale X &amp; 0 &amp; 0 &amp; 0\\<br>   0 &amp;  Scale Y &amp; 0 &amp; 0\\<br>   0 &amp; 0 &amp;  Scale Z &amp; 0\\<br>   0 &amp; 0 &amp; 0 &amp; 1<br>  \end{matrix}<br>\right]<br>$$</p>
 <h3 id="从世界坐标系到视图坐标系-视图变换"><a href="#从世界坐标系到视图坐标系-视图变换" class="headerlink" title="从世界坐标系到视图坐标系(视图变换)"></a>从世界坐标系到视图坐标系(视图变换)</h3><blockquote>
@@ -397,10 +394,8 @@
 <p>投影矩阵会将在这个指定的范围内的坐标变换为标准化设备坐标(NDC)的范围[-1.0, 1.0]，超出这个范围的坐标则被舍弃掉，这也就是<strong>裁剪</strong>的过程。</p>
 </blockquote>
 <p>接下来我们要按下相机的快门拍下一张物体的快照了（投影变换），而通过相机能观察到的范围我们称作<strong>视椎体(view frustum)</strong>，然后我们按下快门后会将视椎体中的内容映射到相片上，而映射的方式可以选择<strong>透视投影(perspective projection)</strong>或者<strong>正交投影(orthographic projection)</strong>。</p>
-<p>对于透视投影：</p>
-<img src="/archives/45a24241/media/15514045809468/15544846969708.jpg">
-<p>对于正交投影：</p>
-<img src="/archives/45a24241/media/15514045809468/15544846825302.jpg">
+<p>对于透视投影：<br><img src="/images/15544846969708.jpg" alt=""></p>
+<p>对于正交投影：<br><img src="/images/15544846825302.jpg" alt=""></p>
 <p>在经过这上诉的矩阵变换后我们终于把模型空间中的坐标送到OpenGL能接受的裁剪空间里面了。通过实践会发现在这一步我们获得的坐标已经转换成了NDC范围里面的坐标了，接着只需要再进行一步到屏幕的映射就完成了整个渲染过程。</p>
 <h3 id="裁剪空间到屏幕"><a href="#裁剪空间到屏幕" class="headerlink" title="裁剪空间到屏幕"></a>裁剪空间到屏幕</h3><blockquote>
 <p>裁剪后需要进行真正的投影，需要把视椎体投影到屏幕空间(screen space)得到像素位置。</p>
@@ -409,9 +404,8 @@
 <p>这里将利用透视除法(Perspective Division)进行最后的映射工作，透视除法就是将位置向量的x，y，z分量分别除以位置向量的齐次w分量。</p>
 </blockquote>
 <blockquote>
-<p>在OpenGL中使用glViewPort内部的参数来将标准化设备坐标(NDC)映射到屏幕坐标，从而让每个坐标关联上屏幕相应的点，这个过程称为视口变换。</p>
+<p>在OpenGL中使用glViewPort内部的参数来将标准化设备坐标(NDC)映射到屏幕坐标，从而让每个坐标关联上屏幕相应的点，这个过程称为视口变换。<br><img src="/images/15544851664524.jpg" alt=""></p>
 </blockquote>
-<img src="/archives/45a24241/media/15514045809468/15544851664524.jpg">
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://zhangwenli.com/blog/2015/08/28/opengl-matrix-transformations/" target="_blank" rel="noopener">OpenGL矩阵变换</a><br><a href="https://gameinstitute.qq.com/community/detail/127995" target="_blank" rel="noopener">U3D中的坐标系变换</a><br><a href="https://www.cnblogs.com/caster99/p/4780984.html" target="_blank" rel="noopener">模型和视图变换</a><br><a href="https://www.cnblogs.com/caster99/p/4783386.html" target="_blank" rel="noopener">投影变换</a><br><a href="https://www.cnblogs.com/caster99/p/4787988.html" target="_blank" rel="noopener">法线变换</a><br><a href="https://www.jianshu.com/p/0a4011d852d2" target="_blank" rel="noopener">数学原理1</a><br><a href="https://www.jianshu.com/p/a294a864f4f5" target="_blank" rel="noopener">数学原理2</a><br><a href="http://www.songho.ca/opengl/gl_transform.html#example1" target="_blank" rel="noopener">参考示例</a></p>
 
       
@@ -431,7 +425,7 @@
   <p><span>本文标题:</span><a href="/archives/45a24241.html">OpenGL学习——再探坐标系与矩阵</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
   <p><span>发布时间:</span>2019年04月06日 - 02:04</p>
-  <p><span>最后更新:</span>2019年05月28日 - 22:05</p>
+  <p><span>最后更新:</span>2019年10月09日 - 18:10</p>
   <p><span>原始链接:</span><a href="/archives/45a24241.html" title="OpenGL学习——再探坐标系与矩阵">https://hello-david.github.io/archives/45a24241.html</a>
     <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/45a24241.html"  aria-label="复制成功！"></i></span>
   </p>

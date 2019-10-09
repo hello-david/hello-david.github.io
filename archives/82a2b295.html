@@ -87,12 +87,12 @@
 <meta property="og:site_name" content="David&#39;Blog">
 <meta property="og:description" content="这里从原理上如何实现iOS的逆向工程的，以及如何从工程化的角度去实现逆向一个iPA。在我看来整体的流程上就三个步骤：砸壳-&amp;gt;注入-&amp;gt;重签安装。 砸壳从AppStore上(官方渠道)分发的ipa包都是经过加密的，逆向的第一步就是对这个应用进行解密。不过在现如今，实施这个过程的前提条件:  一台越狱iOS设备  一条命令实现dump砸壳应用，Frida-ios-dump一键砸壳菜鸡版 照着">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://hello-david.github.io/archives/82a2b295/media/15553161853757/15595550106471.png">
-<meta property="og:updated_time" content="2019-07-27T07:31:17.196Z">
+<meta property="og:image" content="https://hello-david.github.io/images/15595550106471.png">
+<meta property="og:updated_time" content="2019-10-09T10:26:36.844Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS逆向工程三板斧:砸壳-注入-重签">
 <meta name="twitter:description" content="这里从原理上如何实现iOS的逆向工程的，以及如何从工程化的角度去实现逆向一个iPA。在我看来整体的流程上就三个步骤：砸壳-&amp;gt;注入-&amp;gt;重签安装。 砸壳从AppStore上(官方渠道)分发的ipa包都是经过加密的，逆向的第一步就是对这个应用进行解密。不过在现如今，实施这个过程的前提条件:  一台越狱iOS设备  一条命令实现dump砸壳应用，Frida-ios-dump一键砸壳菜鸡版 照着">
-<meta name="twitter:image" content="https://hello-david.github.io/archives/82a2b295/media/15553161853757/15595550106471.png">
+<meta name="twitter:image" content="https://hello-david.github.io/images/15595550106471.png">
 
 
 
@@ -372,8 +372,7 @@
 <blockquote>
 <p>这种做法使得在 OS X 和 iOS 上的任何可执行二进制文件都可以被设置签名：不论是动态库，命令行工具，还是 .app 后缀的程序包。这也意味着设置签名的过程实际上会改动可执行文件的文件内容，将签名数据写入二进制文件中。</p>
 </blockquote>
-<p>关于证书签名(Code Signing) / 授权机制(Entitlements) / 配置文件(Provisioning)的区别和实现原理可以参考<a href="http://blog.cnbang.net/tech/3386/" target="_blank" rel="noopener">iOS App签名的原理</a>和<a href="https://objccn.io/issue-17-2/" target="_blank" rel="noopener">代码签名探析</a>。</p>
-<img src="/archives/82a2b295/media/15553161853757/15595550106471.png">
+<p>关于证书签名(Code Signing) / 授权机制(Entitlements) / 配置文件(Provisioning)的区别和实现原理可以参考<a href="http://blog.cnbang.net/tech/3386/" target="_blank" rel="noopener">iOS App签名的原理</a>和<a href="https://objccn.io/issue-17-2/" target="_blank" rel="noopener">代码签名探析</a>。<br><img src="/images/15595550106471.png" alt=""></p>
 <p>通过上面的文章可以知道：</p>
 <ul>
 <li>钥匙分为公钥和私钥，它们基于RSA算法，是一种不对称的加密方式。通过公钥进行签名(加密)的数据只能通过私钥验证(解密)，反之亦然。</li>
@@ -409,7 +408,7 @@
   <p><span>本文标题:</span><a href="/archives/82a2b295.html">iOS逆向工程三板斧:砸壳-注入-重签</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
   <p><span>发布时间:</span>2019年06月10日 - 11:06</p>
-  <p><span>最后更新:</span>2019年07月27日 - 15:07</p>
+  <p><span>最后更新:</span>2019年10月09日 - 18:10</p>
   <p><span>原始链接:</span><a href="/archives/82a2b295.html" title="iOS逆向工程三板斧:砸壳-注入-重签">https://hello-david.github.io/archives/82a2b295.html</a>
     <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/82a2b295.html"  aria-label="复制成功！"></i></span>
   </p>

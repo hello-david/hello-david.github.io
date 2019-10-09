@@ -87,21 +87,21 @@
 <meta property="og:site_name" content="David&#39;Blog">
 <meta property="og:description" content="之前的文章我们理解了OpenGL运行的基本原理和绘制过程。我们可以通过编写着色器脚本来实现每一个像素点的绘制操作，但是我们如何实现图片的渲染呢(总不能图片也要我们一个点一个点操作吧)。这里通过引入纹理这个概念来实现图片的渲染。 所以，什么是纹理呢？ 纹理基本概念材质贴图，又称纹理贴图，在计算机图形学中是把存储在内存里的位图包裹到3D渲染物体的表面。纹理贴图给物体提供了丰富的细节，用简单的方式模拟出">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://hello-david.github.io/archives/2f24deed/media/15360262248129/texel.png">
-<meta property="og:image" content="https://hello-david.github.io/archives/2f24deed/media/15360262248129/15407968680724.jpg">
-<meta property="og:image" content="https://hello-david.github.io/archives/2f24deed/media/15360262248129/15408814351196.jpg">
-<meta property="og:image" content="https://hello-david.github.io/archives/2f24deed/media/15360262248129/15408841177717.jpg">
-<meta property="og:image" content="https://hello-david.github.io/archives/2f24deed/media/15360262248129/15408845425275.jpg">
-<meta property="og:image" content="https://hello-david.github.io/archives/2f24deed/media/15360262248129/15408853117002.jpg">
-<meta property="og:image" content="https://hello-david.github.io/archives/2f24deed/media/15360262248129/15408853236428.jpg">
-<meta property="og:image" content="https://hello-david.github.io/archives/2f24deed/media/15360262248129/15408860760877.jpg">
-<meta property="og:image" content="https://hello-david.github.io/archives/2f24deed/media/15360262248129/15408896124680.jpg">
-<meta property="og:image" content="https://hello-david.github.io/archives/2f24deed/media/15360262248129/15408884907477.jpg">
-<meta property="og:updated_time" content="2018-12-14T03:58:18.236Z">
+<meta property="og:image" content="https://hello-david.github.io/images/texel.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15407968680724.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15408814351196.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15408841177717.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15408845425275.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15408853117002.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15408853236428.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15408860760877.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15408896124680.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15408884907477.jpg">
+<meta property="og:updated_time" content="2019-10-09T10:27:45.057Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OpenGL学习——纹理">
 <meta name="twitter:description" content="之前的文章我们理解了OpenGL运行的基本原理和绘制过程。我们可以通过编写着色器脚本来实现每一个像素点的绘制操作，但是我们如何实现图片的渲染呢(总不能图片也要我们一个点一个点操作吧)。这里通过引入纹理这个概念来实现图片的渲染。 所以，什么是纹理呢？ 纹理基本概念材质贴图，又称纹理贴图，在计算机图形学中是把存储在内存里的位图包裹到3D渲染物体的表面。纹理贴图给物体提供了丰富的细节，用简单的方式模拟出">
-<meta name="twitter:image" content="https://hello-david.github.io/archives/2f24deed/media/15360262248129/texel.png">
+<meta name="twitter:image" content="https://hello-david.github.io/images/texel.png">
 
 
 
@@ -364,12 +364,11 @@
 <h2 id="纹理基本概念"><a href="#纹理基本概念" class="headerlink" title="纹理基本概念"></a>纹理基本概念</h2><p>材质贴图，又称纹理贴图，在计算机图形学中是把存储在内存里的位图包裹到3D渲染物体的表面。纹理贴图给物体提供了丰富的细节，用简单的方式模拟出了复杂的外观。一张图像（纹理）被贴(映射)到场景中的一个简单形体上，就像印花贴到一个平面上一样。这大大减少了在场景中制作形体和纹理的计算量。</p>
 <p>这是Wiki上的说法，简单的说纹理就是一副只读图像，而把一副图像映射到图形上的过程叫做<strong>纹理映射</strong>。从另一个角度来说它是一个只读数据容器，而通常它用于存储图像信息。</p>
 <p>纹理图像数据存在多种<strong>色彩格式(Pixelformat)</strong>和多种的<strong>存储格式(PixelType)</strong>。</p>
-<img src="/archives/2f24deed/media/15360262248129/texel.png">
+<p><img src="/images/texel.png" alt=""></p>
 <p>这两个属性共同决定了纹理中的每一个数据单元–<strong>纹素(Texel)</strong>的构成。所以值得注意的是当我们加载一张纹理的时候必须要注意图像的输入输出格式是否和OpenGL中一一对应。</p>
 <h2 id="纹理坐标"><a href="#纹理坐标" class="headerlink" title="纹理坐标"></a>纹理坐标</h2><p>当渲染纹理时,纹理的坐标将成为索引。GL_TEXTURE_2D纹理的坐标轴分别是(s,t)或者(u,v)。</p>
-<p>2D纹理的坐标系是从<strong>左下角为原点向上为t轴,向右为s轴的坐标系</strong>。这个坐标系的y方向和GL坐标系相反，所以默认按顶点坐标系方向输入的图像是倒置的。<br><img src="/archives/2f24deed/media/15360262248129/15407968680724.jpg"></p>
-<p>如果想要让纹理正向显示，我们需要做的一步工作便是将输入的纹理坐标或者顶点坐标进行y轴方向的倒置。</p>
-<img src="/archives/2f24deed/media/15360262248129/15408814351196.jpg">
+<p>2D纹理的坐标系是从<strong>左下角为原点向上为t轴,向右为s轴的坐标系</strong>。这个坐标系的y方向和GL坐标系相反，所以默认按顶点坐标系方向输入的图像是倒置的。<br><img src="/images/15407968680724.jpg" alt=""></p>
+<p>如果想要让纹理正向显示，我们需要做的一步工作便是将输入的纹理坐标或者顶点坐标进行y轴方向的倒置。<br><img src="/images/15408814351196.jpg" alt=""></p>
 <h2 id="纹理-处理-单元"><a href="#纹理-处理-单元" class="headerlink" title="纹理(处理)单元"></a>纹理(处理)单元</h2><p>这里存在两个概念:</p>
 <ul>
 <li>纹理目标（一张纹理图像）</li>
@@ -401,27 +400,25 @@
 </tr>
 </tbody>
 </table>
-<p>下图从左到右依次是这三种效果：<br>GL_CLAMP_TO_EDGE，GL_REPEAT，GL_MIRRORED_REPEAT<br><img src="/archives/2f24deed/media/15360262248129/15408841177717.jpg"></p>
+<p>下图从左到右依次是这三种效果：<br>GL_CLAMP_TO_EDGE，GL_REPEAT，GL_MIRRORED_REPEAT<br><img src="/images/15408841177717.jpg" alt=""></p>
 <p>同时需要注意的是，在iOS中GL_REPEAT，GL_MIRRORED_REPEAT这两种环绕模式是不支持长或宽非2^n 大小的图（会渲染失败完全黑掉）。</p>
 <p>我们通过glTexParameteri指定Texture的环绕模式，可以看见它是可以在S,T两个方向上独立设置的。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// 设置Texutre的环绕模式</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);</span><br></pre></td></tr></table></figure></p>
 <p>假如我们在不同方向上设置不同的环绕模式，便会有不同的效果。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// 设置Texutre的环绕模式</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);</span><br></pre></td></tr></table></figure></p>
-<img src="/archives/2f24deed/media/15360262248129/15408845425275.jpg">
+<p><img src="/images/15408845425275.jpg" alt=""></p>
 <h2 id="纹理滤波"><a href="#纹理滤波" class="headerlink" title="纹理滤波"></a>纹理滤波</h2><p>纹理坐标不依赖于分辨率(Resolution)，它可以是任意浮点值，所以OpenGL需要知道怎样将纹理像素(Texture Pixel–Texel)映射到纹理坐标。</p>
 <p>当你有一个很大的物体但是纹理的分辨率很低的时候这就变得很重要了（如何处理低分辨率的像素锯齿）。OpenGL对于上述情况会进行纹理过滤(Texture Filtering)，在ES中支持GL_NEAREST和GL_LINEAR，这两种滤波方式依据不同的算法会得出不同的像素结果。</p>
 <ul>
-<li><p>GL_NEAREST（也叫邻近过滤，Nearest Neighbor Filtering）是OpenGL默认的纹理过滤方式。当设置为GL_NEAREST的时候，OpenGL会选择中心点最接近纹理坐标的那个像素。</p>
-<img src="/archives/2f24deed/media/15360262248129/15408853117002.jpg">
+<li><p>GL_NEAREST（也叫邻近过滤，Nearest Neighbor Filtering）是OpenGL默认的纹理过滤方式。当设置为GL_NEAREST的时候，OpenGL会选择中心点最接近纹理坐标的那个像素。<br><img src="/images/15408853117002.jpg" alt=""></p>
 </li>
-<li><p>GL_LINEAR（也叫线性过滤，(Bi)linear Filtering）它会基于纹理坐标附近的纹理像素，计算出一个插值，近似出这些纹理像素之间的颜色。一个纹理像素的中心距离纹理坐标越近，那么这个纹理像素的颜色对最终的样本颜色的贡献越大。</p>
-<img src="/archives/2f24deed/media/15360262248129/15408853236428.jpg">
+<li><p>GL_LINEAR（也叫线性过滤，(Bi)linear Filtering）它会基于纹理坐标附近的纹理像素，计算出一个插值，近似出这些纹理像素之间的颜色。一个纹理像素的中心距离纹理坐标越近，那么这个纹理像素的颜色对最终的样本颜色的贡献越大。<br><img src="/images/15408853236428.jpg" alt=""></p>
 </li>
 </ul>
-<p>下图从左到右依次是这两种效果：<br>GL_NEAREST，GL_LINEAR<br><img src="/archives/2f24deed/media/15360262248129/15408860760877.jpg"></p>
+<p>下图从左到右依次是这两种效果：<br>GL_NEAREST，GL_LINEAR<br><img src="/images/15408860760877.jpg" alt=""></p>
 <p>可以很直观的看出来，这两种滤波方式的不同。同时这两个参数也可以从两个方向设置，当进行放大(Magnify)和缩小(Minify)操作的时候可以设置纹理过滤的方式。如下，放大纹理和缩小纹理的时候都进行线性滤波。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// 设置Texutre的滤波方式</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);</span><br></pre></td></tr></table></figure></p>
 <h3 id="多级渐远纹理（Mipmap）"><a href="#多级渐远纹理（Mipmap）" class="headerlink" title="多级渐远纹理（Mipmap）"></a>多级渐远纹理（Mipmap）</h3><p>假如我们将一张图缩小非常多倍的时候这时候，由于远处的物体可能只产生很少的片段，OpenGL从高分辨率纹理中为这些片段获取正确的颜色值就很困难，因为它需要对一个跨过纹理很大部分的片段只拾取一个纹理颜色。在小物体上这会产生不真实的感觉，更不用说对它们使用高分辨率纹理浪费内存的问题了。</p>
 <p>OpenGL使用一种叫做多级渐远纹理(Mipmap)的概念来解决这个问题，它简单来说就是一系列的纹理图像，后一个纹理图像是前一个的二分之一。多级渐远纹理背后的理念很简单：距观察者的距离超过一定的阈值，OpenGL会使用不同的多级渐远纹理，即最适合物体的距离的那个。</p>
-<p>由于距离远，解析度不高也不会被用户注意到。同时，多级渐远纹理另一加分之处是它的性能非常好。<br><img src="/archives/2f24deed/media/15360262248129/15408896124680.jpg"></p>
-<p>可以看到多级渐远纹理（Mipmap）是建立在<strong>缩小(Minify)</strong>纹理这种情况下的。<br><img src="/archives/2f24deed/media/15360262248129/15408884907477.jpg"></p>
+<p>由于距离远，解析度不高也不会被用户注意到。同时，多级渐远纹理另一加分之处是它的性能非常好。<br><img src="/images/15408896124680.jpg" alt=""></p>
+<p>可以看到多级渐远纹理（Mipmap）是建立在<strong>缩小(Minify)</strong>纹理这种情况下的。<br><img src="/images/15408884907477.jpg" alt=""></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">// 纹理单元开启MipMap</span><br><span class="line">glTexParameterf(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);</span><br><span class="line">glGenerateMipmap(GL_TEXTURE_2D);</span><br><span class="line">    </span><br><span class="line">// 设置Texutre的滤波方式</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);</span><br></pre></td></tr></table></figure>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Demo工程:<a href="https://github.com/hello-david/OpenGLDemo.git" target="_blank" rel="noopener">OpenGL学习实例</a><br>这篇文章介绍了OpenGL中纹理的基本概念和它的一些基本参数。</p>
 
@@ -442,7 +439,7 @@
   <p><span>本文标题:</span><a href="/archives/2f24deed.html">OpenGL学习——纹理</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
   <p><span>发布时间:</span>2018年10月30日 - 16:10</p>
-  <p><span>最后更新:</span>2018年12月14日 - 11:12</p>
+  <p><span>最后更新:</span>2019年10月09日 - 18:10</p>
   <p><span>原始链接:</span><a href="/archives/2f24deed.html" title="OpenGL学习——纹理">https://hello-david.github.io/archives/2f24deed.html</a>
     <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/2f24deed.html"  aria-label="复制成功！"></i></span>
   </p>

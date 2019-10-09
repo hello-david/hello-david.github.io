@@ -87,17 +87,17 @@
 <meta property="og:site_name" content="David&#39;Blog">
 <meta property="og:description" content="Objective-C Runtime顾名思义就是Objective-C的一个运行时库，它提供对Objective-C语言的动态特性的支持。 我们知道在比如C/C++/Swift这种静态语言一大特征就是在编译阶段就确定了对象的结构，而动态语言则在运行时还能够修改对象的结构，其中Objective-C正是利用Runtime这个技术来表现它的动态特性。 可以说Runtime是整个Objective-C">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://hello-david.github.io/archives/c6605a39/media/15620470479138/15634622726048.jpg">
-<meta property="og:image" content="https://hello-david.github.io/archives/c6605a39/media/15620470479138/15638650514435.jpg">
-<meta property="og:image" content="https://hello-david.github.io/archives/c6605a39/media/15620470479138/15639470627349.jpg">
-<meta property="og:image" content="https://hello-david.github.io/archives/c6605a39/media/15620470479138/15639551168913.jpg">
-<meta property="og:image" content="https://hello-david.github.io/archives/c6605a39/media/15620470479138/15641105678938.jpg">
-<meta property="og:image" content="https://hello-david.github.io/archives/c6605a39/media/15620470479138/15641265241781.jpg">
-<meta property="og:updated_time" content="2019-08-28T02:28:44.125Z">
+<meta property="og:image" content="https://hello-david.github.io/images/15634622726048.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15638650514435.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15639470627349.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15639551168913.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15641105678938.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15641265241781.jpg">
+<meta property="og:updated_time" content="2019-10-09T10:33:54.993Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Objective-C的运行时Runtime">
 <meta name="twitter:description" content="Objective-C Runtime顾名思义就是Objective-C的一个运行时库，它提供对Objective-C语言的动态特性的支持。 我们知道在比如C/C++/Swift这种静态语言一大特征就是在编译阶段就确定了对象的结构，而动态语言则在运行时还能够修改对象的结构，其中Objective-C正是利用Runtime这个技术来表现它的动态特性。 可以说Runtime是整个Objective-C">
-<meta name="twitter:image" content="https://hello-david.github.io/archives/c6605a39/media/15620470479138/15634622726048.jpg">
+<meta name="twitter:image" content="https://hello-david.github.io/images/15634622726048.jpg">
 
 
 
@@ -401,8 +401,7 @@
 <h4 id="Key2：消息传递的关键在于每个类的结构和它的实例对象之间的联系"><a href="#Key2：消息传递的关键在于每个类的结构和它的实例对象之间的联系" class="headerlink" title="Key2：消息传递的关键在于每个类的结构和它的实例对象之间的联系"></a>Key2：消息传递的关键在于每个类的结构和它的实例对象之间的联系</h4><p>每个类的结构有两个关键元素：</p>
 <ul>
 <li>指向父类的指针</li>
-<li>类的调度表（这个表中存储着SEL和IMP的关联结构列表<code>method_list_t</code>）<br>当一个对象被实例化之后，它的内存结构中包含它的实例变量以及指向其类结构的指针(isa)。消息传递的基本过程（除此之外还有消息转发的流程之后会讲到）如下图所示：<img src="/archives/c6605a39/media/15620470479138/15634622726048.jpg">
-</li>
+<li>类的调度表（这个表中存储着SEL和IMP的关联结构列表<code>method_list_t</code>）<br>当一个对象被实例化之后，它的内存结构中包含它的实例变量以及指向其类结构的指针(isa)。消息传递的基本过程（除此之外还有消息转发的流程之后会讲到）如下图所示：<br><img src="/images/15634622726048.jpg" alt=""></li>
 </ul>
 <p>消息传递的流程可以总结为当一个对象接收一个消息的时候，从这个对象的类及其父类结构的调度表中递归找到相应的选择器(SEL)，直到它到达NSObject类。一旦通过<code>method_t</code>找到相应的选择器，objc_msgSend就会调用<code>method_t</code>中和这个选择器(SEL)所对应的方法(IMP)并将接收对象(Reciver)的数据结构传递给它。</p>
 <p>为了加速消息传递过程，每个类都有一个单独的缓存，它包含继承方法的选择器(SEL)以及类中定义的方法(IMP)，Runtime会先通过高速缓存去加速消息传递流程。</p>
@@ -422,9 +421,8 @@
 <ol>
 <li>在本类中动态实现IMP（动态方法解析），如果没有定义这种操作则进入消息转发流程。</li>
 <li>把消息转给我们已知具有这个SEL的类当做备胎（快速消息转发），如果假如这个备胎的IMP可能也是未存在的话则进入更完整的消息转发流程。</li>
-<li>这一步比上一步的区别在于它提供校验这个备胎的Method是否有实现IMP（完整消息转发）。</li>
+<li>这一步比上一步的区别在于它提供校验这个备胎的Method是否有实现IMP（完整消息转发）。<br><img src="/images/15638650514435.jpg" alt=""></li>
 </ol>
-<img src="/archives/c6605a39/media/15620470479138/15638650514435.jpg">
 <h3 id="消息转发"><a href="#消息转发" class="headerlink" title="消息转发"></a>消息转发</h3><p>消息转发流程一般被认为有两个流程：</p>
 <ul>
 <li>快速消息转发</li>
@@ -433,7 +431,7 @@
 <h4 id="快速消息转发阶段"><a href="#快速消息转发阶段" class="headerlink" title="快速消息转发阶段"></a>快速消息转发阶段</h4><p>快速消息转发通过重载NSObject的<code>-(void)forwardingTargetForSelector:</code>这个方法实现在一个消息进入完整转发流程前给这个消息提供一个备用接收对象（Recvier)。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// 显然你要是把self传入会导致死循环</span><br><span class="line">- (id)forwardingTargetForSelector:(SEL)aSelector &#123;</span><br><span class="line">    if (aSelector == @selector(test)) &#123;</span><br><span class="line">        MyTest *myObject = [[MyTest alloc] init];</span><br><span class="line">        return myObject;</span><br><span class="line">    &#125;</span><br><span class="line">    return [super forwardingTargetForSelector:aSelector];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>当快速消息转发流程也失败的时候，Runtime就会进入完整消息转发流程。</p>
 <h4 id="完整消息转发阶段"><a href="#完整消息转发阶段" class="headerlink" title="完整消息转发阶段"></a>完整消息转发阶段</h4><p>当一个消息没有对应的IMP的时候在抛出<code>doesNotRecognizeSelector</code>异常之前，这个流程提供最后的挽救机会，这个流程所有的具体实现细节都被封装好了在上层接口中只提供了两个Hook方法来介入它，首先需要通过重载<code>methodSignatureForSelector:</code>提供一个方法实现签名以生成NSInvocation对象然后传递到<code>forwardInvocation:</code>中进行处理。</p>
-<p>官网使用一个很简单的示例来描述这个流程，假设有两个类Warrior和Diplomat，当给Warrior发送一个negotiate消息的时候通过这套流程转发给Diplomat的实例对象去处理。<br><img src="/archives/c6605a39/media/15620470479138/15639470627349.jpg"></p>
+<p>官网使用一个很简单的示例来描述这个流程，假设有两个类Warrior和Diplomat，当给Warrior发送一个negotiate消息的时候通过这套流程转发给Diplomat的实例对象去处理。<br><img src="/images/15639470627349.jpg" alt=""></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">- (NSMethodSignature*)methodSignatureForSelector:(SEL)selector &#123;</span><br><span class="line">    NSMethodSignature* signature = [super methodSignatureForSelector:selector];</span><br><span class="line">    if (!signature) &#123;</span><br><span class="line">       // 能够处理这个消息的委托对象的方法实现IMP签名</span><br><span class="line">       Diplomat *diplomat = [Diplomat new];</span><br><span class="line">       signature = [diplomat methodSignatureForSelector:selector];</span><br><span class="line">    &#125;</span><br><span class="line">    return signature;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)forwardInvocation:(NSInvocation *)anInvocation &#123;</span><br><span class="line">    Diplomat *diplomat = [Diplomat new];</span><br><span class="line">    if ([diplomat respondsToSelector:[anInvocation selector]]) &#123;</span><br><span class="line">        [anInvocation invokeWithTarget:diplomat];</span><br><span class="line">    &#125;</span><br><span class="line">    else &#123;</span><br><span class="line">        [super forwardInvocation:anInvocation];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h4 id="模拟多继承特性"><a href="#模拟多继承特性" class="headerlink" title="模拟多继承特性"></a>模拟多继承特性</h4><blockquote>
 <p>面向对象编程中的多重继承（英语：multiple inheritance，缩写：MI）指的是一个类别可以同时从多于一个父类继承行为与特征的功能。与单一继承相对，单一继承指一个类别只可以继承自一个父类。</p>
@@ -451,7 +449,7 @@
 </ul>
 <p>在NSProxy中同样是通过重载 <code>- (NSMethodSignature*)methodSignatureForSelector:(SEL)selector</code> 和 <code>- (void)forwardInvocation:(NSInvocation *)anInvocation</code>这两个方法实现消息转发流程。</p>
 <h3 id="类型编码"><a href="#类型编码" class="headerlink" title="类型编码"></a>类型编码</h3><p>从官方文档上介绍，编译器利用类型编码将每个方法Method（IMP + SEL）的返回值，参数类型，这些信息保存在一个字符串里，从而利用这个字符串和方法选择器SEL关联起来。而更加深层次的原因可以看这篇文章的介绍——<a href="https://blog.sunnyxx.com/2016/08/13/reunderstanding-runtime-1/" target="_blank" rel="noopener">重识 Objective-C Runtime - 看透 Type 与 Value</a></p>
-<p>在Runtime中使用这项技术应该是用来优化方法选择器SEL的访问速度，同时我们在其他应用场景也可以通过<code>@encode()</code>这个关键词来进行编码，下面是通过类型编码对应的结果字符串。<br><img src="/archives/c6605a39/media/15620470479138/15639551168913.jpg"></p>
+<p>在Runtime中使用这项技术应该是用来优化方法选择器SEL的访问速度，同时我们在其他应用场景也可以通过<code>@encode()</code>这个关键词来进行编码，下面是通过类型编码对应的结果字符串。<br><img src="/images/15639551168913.jpg" alt=""></p>
 <h3 id="声明的属性"><a href="#声明的属性" class="headerlink" title="声明的属性"></a>声明的属性</h3><p>我们知道在Obejctive-C中可以通过<code>@property</code>为一个类/协议/类别添加一个属性（默认编译器会帮你生成ivar和getter/setter方法），这个过程中Runtime又做了什么工作呢？</p>
 <p>Runtime将为每个属性生成与封闭类，类别或协议相关的描述性元数据</p>
 <ul>
@@ -463,8 +461,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">id LenderClass = objc_getClass(&quot;Lender&quot;);</span><br><span class="line">unsigned int outCount, i;</span><br><span class="line">objc_property_t *properties = class_copyPropertyList(LenderClass, &amp;outCount);</span><br><span class="line">for (i = 0; i &lt; outCount; i++) &#123;</span><br><span class="line">    objc_property_t property = properties[i];</span><br><span class="line">    fprintf(stdout, &quot;%s %s\n&quot;, property_getName(property), property_getAttributes(property));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
-<h2 id="Runtime应用之Method-Swizzling"><a href="#Runtime应用之Method-Swizzling" class="headerlink" title="Runtime应用之Method Swizzling"></a>Runtime应用之Method Swizzling</h2><p><code>Method Swizzling</code>本质上就是利用Runtime的工作流程实现类/实例对象内部结构的修改，是iOS AOP编程中常用到的技术。<code>Method Swizzling</code>顾明思议就是实现把Objective-C中的某个方法（SEL + IMP）中的方法实现（IMP）和另外一个方法的IMP进行交换。</p>
-<img src="/archives/c6605a39/media/15620470479138/15641105678938.jpg">
+<h2 id="Runtime应用之Method-Swizzling"><a href="#Runtime应用之Method-Swizzling" class="headerlink" title="Runtime应用之Method Swizzling"></a>Runtime应用之Method Swizzling</h2><p><code>Method Swizzling</code>本质上就是利用Runtime的工作流程实现类/实例对象内部结构的修改，是iOS AOP编程中常用到的技术。<code>Method Swizzling</code>顾明思议就是实现把Objective-C中的某个方法（SEL + IMP）中的方法实现（IMP）和另外一个方法的IMP进行交换。<br><img src="/images/15641105678938.jpg" alt=""></p>
 <p>ps：美图开源的<a href="https://github.com/meitu/MTHawkeye" target="_blank" rel="noopener">MTHawkeye</a>里面有很大一部分特性就是通过这项技术实现非代码入侵式的性能监控。</p>
 <h3 id="合适的Method-Swizzling时机"><a href="#合适的Method-Swizzling时机" class="headerlink" title="合适的Method Swizzling时机"></a>合适的Method Swizzling时机</h3><p>根据<a href="https://developer.apple.com/documentation/objectivec/nsobject/1418815-load?language=occ" target="_blank" rel="noopener">官方文档</a>的描述，在Objective-C Runtime框架中为我们预留了<code>+ (void)load</code>方法以实现在类、类别加载到Runtime系统时自定义一些特定行为。当一个Objective-C程序镜像运行时初始化会经历以下四个过程：</p>
 <ol>
@@ -473,7 +470,7 @@
 <li>镜像中C++静态初始化器和C/C++<code>__attribute__(constructor)</code>函数</li>
 <li>镜像中链接的所有构造器</li>
 </ol>
-<p>在iOS中一个程序镜像的加载过程如下图所示：<br><img src="/archives/c6605a39/media/15620470479138/15641265241781.jpg"></p>
+<p>在iOS中一个程序镜像的加载过程如下图所示：<br><img src="/images/15641265241781.jpg" alt=""></p>
 <p>而我们在<code>+load</code>中动态修改类的结构可以保证它还未进行其他的函数调用，从而不会造成其他的副作用。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">#import &quot;NSObject+Swizzle.h&quot;</span><br><span class="line">#import &lt;objc/runtime.h&gt;</span><br><span class="line"></span><br><span class="line">@implementation NSObject (Swizzle)</span><br><span class="line"></span><br><span class="line">+ (void)load&#123;</span><br><span class="line">   //调换IMP</span><br><span class="line">    Method originalMethod = class_getInstanceMethod([NSObject class], @selector(description));</span><br><span class="line">    Method myMethod = class_getInstanceMethod([NSObject class], @selector(swizzle_description));</span><br><span class="line">    method_exchangeImplementations(originalMethod, myMethod);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)swizzle_description &#123;</span><br><span class="line">    NSLog(@&quot;description 被 Swizzle 了&quot;);</span><br><span class="line">    return [self swizzle_description];    </span><br><span class="line">&#125;</span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
 <h3 id="更完善的Method-Swizzling"><a href="#更完善的Method-Swizzling" class="headerlink" title="更完善的Method Swizzling"></a>更完善的Method Swizzling</h3><p>直接在<code>+load</code>中使用Runtime的<code>method_exchangeImplementations</code>函数进行方法交换在简单的场景下是完全可行的，但是在实际业务场景中会存在种种问题（具体可参考<a href="https://stackoverflow.com/questions/5339276/what-are-the-dangers-of-method-swizzling-in-objective-c?answertab=active#tab-top" target="_blank" rel="noopener">What are the Dangers of Method Swizzling in Objective C?</a>）。</p>
@@ -513,7 +510,7 @@
   <p><span>本文标题:</span><a href="/archives/c6605a39.html">Objective-C的运行时Runtime</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
   <p><span>发布时间:</span>2019年07月27日 - 15:07</p>
-  <p><span>最后更新:</span>2019年08月28日 - 10:08</p>
+  <p><span>最后更新:</span>2019年10月09日 - 18:10</p>
   <p><span>原始链接:</span><a href="/archives/c6605a39.html" title="Objective-C的运行时Runtime">https://hello-david.github.io/archives/c6605a39.html</a>
     <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/c6605a39.html"  aria-label="复制成功！"></i></span>
   </p>

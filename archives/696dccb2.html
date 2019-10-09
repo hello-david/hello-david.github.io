@@ -87,14 +87,14 @@
 <meta property="og:site_name" content="David&#39;Blog">
 <meta property="og:description" content="像素卷积变换，常见的滤镜效果包括边缘检测、高斯模糊、锐化等。从我的理解上卷积就是一种数学运算，它运用在图像处理中可以让不同的图像滤波器通过卷积运算而获得相应的滤波效果。 接下来详细学习一下卷积的概念以及如何通过它实现几个滤镜效果，这里代码部分就使用之前编写的Metal滤镜处理框架。 卷积运算 数字图像是一个二维的离散信号，对数字图像做卷积操作其实就是利用卷积核（卷积模板）在图像上滑动，将图像点上的">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://hello-david.github.io/archives/696dccb2/media/15474306601702/convolution.gif">
-<meta property="og:image" content="https://hello-david.github.io/archives/696dccb2/media/15474306601702/conv_simulation.gif">
-<meta property="og:image" content="https://hello-david.github.io/archives/696dccb2/media/15474306601702/15581472212106.jpg">
-<meta property="og:updated_time" content="2019-05-20T15:20:58.083Z">
+<meta property="og:image" content="https://hello-david.github.io/images/convolution.gif">
+<meta property="og:image" content="https://hello-david.github.io/images/conv_simulation.gif">
+<meta property="og:image" content="https://hello-david.github.io/images/15581472212106.jpg">
+<meta property="og:updated_time" content="2019-10-09T10:25:37.643Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="滤镜Shader——像素卷积变换">
 <meta name="twitter:description" content="像素卷积变换，常见的滤镜效果包括边缘检测、高斯模糊、锐化等。从我的理解上卷积就是一种数学运算，它运用在图像处理中可以让不同的图像滤波器通过卷积运算而获得相应的滤波效果。 接下来详细学习一下卷积的概念以及如何通过它实现几个滤镜效果，这里代码部分就使用之前编写的Metal滤镜处理框架。 卷积运算 数字图像是一个二维的离散信号，对数字图像做卷积操作其实就是利用卷积核（卷积模板）在图像上滑动，将图像点上的">
-<meta name="twitter:image" content="https://hello-david.github.io/archives/696dccb2/media/15474306601702/convolution.gif">
+<meta name="twitter:image" content="https://hello-david.github.io/images/convolution.gif">
 
 
 
@@ -359,8 +359,7 @@
 <p>还有一种说法，图像卷积就是一个加权平均的过程。</p>
 </blockquote>
 <p>正如下图我们使用下面这个卷积模板进行图像卷积运算，其结果就如动图那样，每个像素值都进行了加权平均运算。<br>$$<br> \left[<br> \begin{matrix}<br>   1 &amp; 0 &amp; 1 \\<br>   0 &amp; 1 &amp; 0 \\<br>   1 &amp; 0 &amp; 1<br>  \end{matrix}<br>  \right]<br>$$</p>
-<img src="/archives/696dccb2/media/15474306601702/convolution.gif"> 
-<img src="/archives/696dccb2/media/15474306601702/conv_simulation.gif">
+<p><img src="/images/convolution.gif" alt=""><img src="/images/conv_simulation.gif" alt="-l"></p>
 <h2 id="几种不同卷积核实现的效果"><a href="#几种不同卷积核实现的效果" class="headerlink" title="几种不同卷积核实现的效果"></a>几种不同卷积核实现的效果</h2><p>下面几种效果的本质区别只在于它们进行卷积运算的卷积模板（或者说它们在频域处理用的滤波器）不同。</p>
 <h3 id="边缘检测"><a href="#边缘检测" class="headerlink" title="边缘检测"></a>边缘检测</h3><blockquote>
 <p>边缘检测是图像处理和计算机视觉中的基本问题，边缘检测的目的是标识数字图像中亮度变化明显的点。图像属性中的显著变化通常反映了属性的重要事件和变化。这些包括深度上的不连续、表面方向不连续、物质属性变化和场景照明变化。 </p>
@@ -372,7 +371,7 @@
 <p>这里我们使用<code>Prewitt</code>算子的做一个简单的边缘检测，其中<code>Prewitt</code>算子是一种一阶微分算子，它的基本原理就是利用差分的定义<code>f&#39;(x) = f(x + 1) - f(x)</code>。</p>
 <p>将它转化一阶矩阵表示就是[-1 <em> f(x-1)，0 </em> f(x)，1 * f(x+1)]，提取出系数[-1, 0, 1]再转为二阶矩阵即可表示为矩阵形式:<br>$$<br> \left[<br> \begin{matrix}<br>   -1 &amp; 0 &amp; 1 \\<br>   -1 &amp; 0 &amp; 1 \\<br>   -1 &amp; 0 &amp; 1<br>  \end{matrix}<br>  \right]\tag{水平方向}<br>$$</p>
 <p>$$<br> \left[<br> \begin{matrix}<br>   1 &amp; 1 &amp; 1 \\<br>   0 &amp; 0 &amp; 0 \\<br>   -1 &amp; -1 &amp; -1<br>  \end{matrix}<br>  \right]\tag{垂直方向}<br>$$</p>
-<h3 id="高斯模糊"><a href="#高斯模糊" class="headerlink" title="高斯模糊"></a>高斯模糊</h3><p>高斯模糊效果是让图像与正太分布做卷积运算使得图像呈现出模糊的效果。通过利用正太分布曲线以待处理的像素点为中心原点对它四周像素按照权重进行重新采样。<br><img src="/archives/696dccb2/media/15474306601702/15581472212106.jpg"></p>
+<h3 id="高斯模糊"><a href="#高斯模糊" class="headerlink" title="高斯模糊"></a>高斯模糊</h3><p>高斯模糊效果是让图像与正太分布做卷积运算使得图像呈现出模糊的效果。通过利用正太分布曲线以待处理的像素点为中心原点对它四周像素按照权重进行重新采样。<br><img src="/images/15581472212106.jpg" alt=""></p>
 <h3 id="锐化"><a href="#锐化" class="headerlink" title="锐化"></a>锐化</h3><p>锐化效果是让图像的边缘上的像素比周围的像素有更高的对比度，使用下面的边缘锐化卷积模板生成的边缘锐化效果。<br> $$<br> \left[<br> \begin{matrix}<br>   0 &amp; -1 &amp; 0 \\<br>   -1 &amp; 5*n &amp; -1 \\<br>   0 &amp; -1 &amp; 0<br>  \end{matrix}<br>  \right]<br>$$</p>
 <h2 id="一个通用的卷积处理模板"><a href="#一个通用的卷积处理模板" class="headerlink" title="一个通用的卷积处理模板"></a>一个通用的卷积处理模板</h2><p>这里我们参考<code>Metal Performance Shaders</code>框架中的<code>MPSImageConvolution</code>实现一个简单的卷积运算滤镜。</p>
 <p>根据<code>MPSImageConvolution</code>中的描述，它的卷积模板规定为奇数的宽度和高度，对于3x3, 5x5, 7x7, 9x9, 11x11, 1xN和Nx1这种常见的卷积模板进行了算法复杂度优化而其他情况则是MxN的算法复杂度，同时一个卷积模板还可以分解为两个向量进行叠加运算。</p>
@@ -399,7 +398,7 @@
   <p><span>本文标题:</span><a href="/archives/696dccb2.html">滤镜Shader——像素卷积变换</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
   <p><span>发布时间:</span>2019年05月20日 - 22:05</p>
-  <p><span>最后更新:</span>2019年05月20日 - 23:05</p>
+  <p><span>最后更新:</span>2019年10月09日 - 18:10</p>
   <p><span>原始链接:</span><a href="/archives/696dccb2.html" title="滤镜Shader——像素卷积变换">https://hello-david.github.io/archives/696dccb2.html</a>
     <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/696dccb2.html"  aria-label="复制成功！"></i></span>
   </p>
