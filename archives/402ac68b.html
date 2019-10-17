@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="工作原理," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="同学，听过while(1){}吗？在iOS系统中存在这么一套线程事件驱动模型——Runloop，用于高效的循环处理事件。接下来让我们从官方文档开始深入学习Runloop的一些话题。 在iOS系统中系统默认为主线程开启了Runloop，而其他线程默认不开启Runloop事件循环机制。 Runloop的设计细节在Runloop中有两类的事件触发源：输入源(Input Sources)和定时器源(Tim">
+<meta name="keywords" content="工作原理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS并发编程之Runloop">
+<meta property="og:url" content="https://hello-david.github.io/archives/402ac68b.html">
+<meta property="og:site_name" content="David&#39;Blog">
+<meta property="og:description" content="同学，听过while(1){}吗？在iOS系统中存在这么一套线程事件驱动模型——Runloop，用于高效的循环处理事件。接下来让我们从官方文档开始深入学习Runloop的一些话题。 在iOS系统中系统默认为主线程开启了Runloop，而其他线程默认不开启Runloop事件循环机制。 Runloop的设计细节在Runloop中有两类的事件触发源：输入源(Input Sources)和定时器源(Tim">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://hello-david.github.io/images/15712942820609.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15712996582332.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15712159423839.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15613422803160.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15713030031111.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15712140767048.png">
+<meta property="og:updated_time" content="2019-10-17T09:19:16.221Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS并发编程之Runloop">
+<meta name="twitter:description" content="同学，听过while(1){}吗？在iOS系统中存在这么一套线程事件驱动模型——Runloop，用于高效的循环处理事件。接下来让我们从官方文档开始深入学习Runloop的一些话题。 在iOS系统中系统默认为主线程开启了Runloop，而其他线程默认不开启Runloop事件循环机制。 Runloop的设计细节在Runloop中有两类的事件触发源：输入源(Input Sources)和定时器源(Tim">
+<meta name="twitter:image" content="https://hello-david.github.io/images/15712942820609.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hello-david.github.io/archives/402ac68b.html"/>
+
+
+
+<meta name="google-site-verification" content="xPc40P1FFnuv2Aer8rA72v2doNkgf1bEhU79GGlStmE" />
+
+
+  <title>iOS并发编程之Runloop | David'Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">David'Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/402ac68b.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="David Dai">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="David'Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">iOS并发编程之Runloop</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-17T17:12:51+08:00">
+                2019-10-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/工作原理/" itemprop="url" rel="index">
+                    <span itemprop="name">工作原理</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>同学，听过while(1){}吗？在iOS系统中存在这么一套线程事件驱动模型——Runloop，用于高效的循环处理事件。接下来让我们从<a href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Multithreading/RunLoopManagement/RunLoopManagement.html" target="_blank" rel="noopener">官方文档</a>开始深入学习Runloop的一些话题。</p>
+<p>在iOS系统中系统默认为主线程开启了Runloop，而其他线程默认不开启Runloop事件循环机制。</p>
+<h2 id="Runloop的设计细节"><a href="#Runloop的设计细节" class="headerlink" title="Runloop的设计细节"></a>Runloop的设计细节</h2><p>在Runloop中有两类的事件触发源：输入源(Input Sources)和定时器源(Timer Sources)。<br><img src="/images/15712942820609.jpg" alt=""></p>
+<p>从上面这张图可发现细分下来就这几种事件触发源：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Input Sources:</span><br><span class="line">    CFMutableSetRef _sources0 // 非基于Port的自定义源与Cocoa Perform Selector源</span><br><span class="line">    CFMutableSetRef _sources1 // 基于Port的触发源，监视应用程序的Mach端口</span><br><span class="line">    </span><br><span class="line">Timer Sources:</span><br><span class="line">    定时器触发源Timer的时间并非精确时间，受当前RunloopMode是否支持该Timer Source以及当前Runloop是否在执行其他操作影响。</span><br></pre></td></tr></table></figure></p>
+<p>Runloop依赖于这些事件触发源进行工作，当有事件的时候唤醒线程处理，没有事件的时候睡眠线程，这就是它的基本工作原理，同时Runloop还有多种工作模式(Runloop Modes)。iOS系统中允许线程在多种Runlop工作模式下工作，不同的场景可能会切换到不同的Runloop工作模式下，同一时刻下只能运行在一种工作模式下，接下来我们就继续探究Runloop Modes的一些问题。</p>
+<h3 id="Runloop中的工作模式Runloop-Modes"><a href="#Runloop中的工作模式Runloop-Modes" class="headerlink" title="Runloop中的工作模式Runloop Modes"></a>Runloop中的工作模式Runloop Modes</h3><p>从CoreFoundation的RunloopMode源码看，每一个工作模式内部主要都包含三部分：输入触发源(source0、source1) + 观察者(observers) + 定时器触发源(timers)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">struct __CFRunLoopMode &#123;</span><br><span class="line">    CFRuntimeBase _base;</span><br><span class="line">    pthread_mutex_t _lock;	/* must have the run loop locked before locking this */</span><br><span class="line">    CFStringRef _name;</span><br><span class="line">    Boolean _stopped;</span><br><span class="line">    char _padding[3];</span><br><span class="line">    CFMutableSetRef _sources0;</span><br><span class="line">    CFMutableSetRef _sources1;</span><br><span class="line">    CFMutableArrayRef _observers;</span><br><span class="line">    CFMutableArrayRef _timers;</span><br><span class="line">    CFMutableDictionaryRef _portToV1SourceMap;</span><br><span class="line">    __CFPortSet _portSet;</span><br><span class="line">    CFIndex _observerMask;</span><br><span class="line">#if DEPLOYMENT_TARGET_MACOSX || DEPLOYMENT_TARGET_EMBEDDED</span><br><span class="line">    mach_port_t _timerPort;</span><br><span class="line">#endif</span><br><span class="line">#if DEPLOYMENT_TARGET_WINDOWS</span><br><span class="line">    HANDLE _timerPort;</span><br><span class="line">    DWORD _msgQMask;</span><br><span class="line">    void (*_msgPump)(void);</span><br><span class="line">#endif</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p><img src="/images/15712996582332.jpg" alt="-w300"></p>
+<p>其中触发源就是之前提到用来驱动Runloop工作的对象，而我们可以利用观察模式观测每一个工作模式下Runloop的工作细节状态(这个在后面细节分析)。在官方文档中对外公开的Core Foundation / Cocoa中5种工作模式：<br><img src="/images/15712159423839.jpg" alt=""></p>
+<p>而在API层面上iOS中对外声明出来的只有<code>kCFRunLoopDefaultMode</code>和<code>kCFRunLoopCommonModes</code>这两种工作模式的字符串，同时对外公开的Runloop Mode管理也只暴露了下面这两个接口：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CFRunLoopAddCommonMode(CFRunLoopRef runloop, CFStringRef modeName);</span><br><span class="line">CFRunLoopRunInMode(CFStringRef modeName, ...);</span><br></pre></td></tr></table></figure></p>
+<p>而Runloop Mode内部的触发源/监听者管理的接口有下面几个：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">CFRunLoopAddSource(CFRunLoopRef rl, CFRunLoopSourceRef source, CFStringRef modeName);</span><br><span class="line">CFRunLoopAddObserver(CFRunLoopRef rl, CFRunLoopObserverRef observer, CFStringRef modeName);</span><br><span class="line">CFRunLoopAddTimer(CFRunLoopRef rl, CFRunLoopTimerRef timer, CFStringRef mode);</span><br><span class="line">CFRunLoopRemoveSource(CFRunLoopRef rl, CFRunLoopSourceRef source, CFStringRef modeName);</span><br><span class="line">CFRunLoopRemoveObserver(CFRunLoopRef rl, CFRunLoopObserverRef observer, CFStringRef modeName);</span><br><span class="line">CFRunLoopRemoveTimer(CFRunLoopRef rl, CFRunLoopTimerRef timer, CFStringRef mode);</span><br></pre></td></tr></table></figure></p>
+<p>可以看到Apple并不希望开发者过多得介入到Runloop的工作细节中，我们只能够通过Runloop Mode的名称字符串来操作/监听在这个工作模式下的Runloop。如同在<a href="https://github.com/meitu/MTHawkeye" target="_blank" rel="noopener">MTHawkeye</a>中的ANR模块通过<code>@&quot;UIInitializationRunLoopMode&quot;</code>和<code>kCFRunLoopCommonModes</code>这两个字符串监听这两个工作状态下Runloop的工作细节：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">- (void)registerObserver &#123;</span><br><span class="line">    CFRunLoopObserverContext context = &#123;0, (__bridge void *)self, NULL, NULL&#125;;</span><br><span class="line">    </span><br><span class="line">    if (!self.highPriorityObserverRef) &#123;</span><br><span class="line">        CFRunLoopObserverRef observer = CFRunLoopObserverCreate(kCFAllocatorDefault, kCFRunLoopAllActivities, YES, LONG_MIN, &amp;mthanr_runLoopHighPriorityObserverCallBack, &amp;context);</span><br><span class="line">        CFRunLoopAddObserver(CFRunLoopGetMain(), observer, kCFRunLoopCommonModes);</span><br><span class="line">        self.highPriorityObserverRef = observer;</span><br><span class="line">    &#125;</span><br><span class="line">....</span><br><span class="line">    if (!self.highPriorityInitObserverRef) &#123;</span><br><span class="line">        CFRunLoopObserverRef observer = CFRunLoopObserverCreate(kCFAllocatorDefault, kCFRunLoopAllActivities, YES, LONG_MIN, &amp;mthanr_runLoopHighPriorityObserverCallBack, &amp;context);</span><br><span class="line">        CFRunLoopAddObserver(CFRunLoopGetMain(), observer, (CFRunLoopMode) @&quot;UIInitializationRunLoopMode&quot;);</span><br><span class="line">        self.highPriorityInitObserverRef = observer;</span><br><span class="line">    &#125;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="每个Runloop-Mode中的工作循环细节"><a href="#每个Runloop-Mode中的工作循环细节" class="headerlink" title="每个Runloop Mode中的工作循环细节"></a>每个Runloop Mode中的工作循环细节</h3><p>对于开发者们，系统留给我们了Observer用于监听Runloop的运行时候的关键状态切换。在一个Runloop Mode的工作循环中会经历以下几个阶段：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity) &#123;</span><br><span class="line">    kCFRunLoopEntry = (1UL &lt;&lt; 0),        // 进入</span><br><span class="line">    kCFRunLoopBeforeTimers = (1UL &lt;&lt; 1), // 即将处理Timers</span><br><span class="line">    kCFRunLoopBeforeSources = (1UL &lt;&lt; 2),// 即将处理Source0</span><br><span class="line">    kCFRunLoopBeforeWaiting = (1UL &lt;&lt; 5),// 即将进入休眠</span><br><span class="line">    kCFRunLoopAfterWaiting = (1UL &lt;&lt; 6), // 唤醒了</span><br><span class="line">    kCFRunLoopExit = (1UL &lt;&lt; 7),         // 退出</span><br><span class="line">    kCFRunLoopAllActivities = 0x0FFFFFFFU</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>具体的代码我就不贴了，这里借用一张总结归纳得很好的流程图：<br><img src="/images/15613422803160.png" alt=""></p>
+<p>可以看到在同一个Runloop工作循环的周期跑下来会受到代码执行效率的影响，所以我们通常认为NSTimer这种基于Runloop实现的Timer是不精准的，但是如果在这个工作循环中的工作负担并不十分严重的时候，姑且可以认为定时器计时有效。<br><img src="/images/15713030031111.png" alt=""></p>
+<h2 id="应用场景——侦测App的卡顿-卡死-OOM情况"><a href="#应用场景——侦测App的卡顿-卡死-OOM情况" class="headerlink" title="应用场景——侦测App的卡顿/卡死/OOM情况"></a>应用场景——侦测App的卡顿/卡死/OOM情况</h2><p>接下来从<a href="https://github.com/meitu/MTHawkeye" target="_blank" rel="noopener">MTHawkeye</a>的ANR Trace模块学一学如何利用Runloop来侦测App运行过程中出现的卡顿/卡死情况。</p>
+<p>这个模块的基本设计思路：通过子线程检测主线程的Runloop各个环节以达到监控主线程的工作是否正常。</p>
+<p>当子线程触发检测（默认每0.1s触发一次）的时候通过比对当前时间戳与Runloop一次工作循环的<strong>起始时间戳</strong>判断主线程是否处于了Runloop卡顿（默认认为Runloop工作循环事件 &gt; 0.4s即为卡顿），若果是卡顿则开始生成卡顿快照（主线程堆栈信息），就这样子直到Runloop恢复正常的时候这之后，子线程发现目前存在<code>Record</code>则开始将卡顿快照匹配到<code>Record</code>中补足卡顿信息并回调出去给外部，让它们获知目前出现卡顿了。</p>
+<p>其中子线程负责生成主线程卡顿快照记录，Runloop负责生成卡顿<code>Records</code>。实际上我们认为Runloop一次工作循环的时间间隔大于卡顿时间才是真正的卡顿状态，而子线程这边的判断并不是完全精确的，所以这里子线程只用于补充卡顿记录信息。<br><img src="/images/15712140767048.png" alt=""></p>
+<p>目前我们认为在主线程的Runloop中<strong>最低优先级观察者</strong>的即将进入休眠<code>kCFRunLoopBeforeWaiting</code>或者即将退出目前这个Runloop模式<code>kCFRunLoopExit</code>的时候Runloop是非工作状态，而<strong>最高优先级观察者</strong>的其他时候是工作状态。这里我们在每一次Runloop从非工作状态更新到工作状态的时候刷新它这次循环的起始时间戳。当处于非工作状态开始判断这一次循环是不是运行超时了(卡顿)，如果卡顿则新增一个<code>Record标记</code>这个Runloop卡顿的基本时间信息，最后在子线程里面把数据补全再上报。</p>
+<p>这是这个模块判断卡顿的主要逻辑，那么应该如何认为App是被卡死或者OOM崩溃的呢？这里Hawkeye针对这个问题的改进受到了<a href="http://mrpeak.cn/blog/ios-hard-stall-detection/" target="_blank" rel="noopener">如何检测 iOS app 卡顿导致的系统强杀</a>这篇文章的启发，编写了<code>MTHANRTracingBufferRunner</code>这个模块用于完整地记录了运行时候一小段区间内的App状态和发生卡顿时候的堆栈记录并且通过mmap写到文件中。</p>
+<p>在下次app打开的时候可以通过读取最近一次记录来判断区分卡死、OOM这两种异常，其中<br><code>isAppStillActiveTheLastMoment</code>表示没有收到正常的应用退出通知，可能是因为崩溃/卡死用户主动关闭/OOM等异常退出。需要结合<code>isDuringHardStall</code>字段判断是否为卡死，当它为true时，表示上一次应用退出的原因就是卡死导致的（可能被用户手动关闭)。这里可以参考<a href="https://github.com/meitu/MTHawkeye/blob/develop/doc/time-consuming/anr-tracer-cn.md" target="_blank" rel="noopener">MTHawkeye-ANR的说明文档</a></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://github.com/meitu/MTHawkeye/blob/develop/doc/time-consuming/anr-tracer-cn.md" target="_blank" rel="noopener">Hawkeye - ANR Tracer</a><br><a href="https://blog.ibireme.com/2015/05/18/runloop/#more-41710" target="_blank" rel="noopener">深入理解RunLoop</a><br><a href="https://cotin.tech/iOS/RunLoop/" target="_blank" rel="noopener">理解iOS Runloop</a><br><a href="https://www.jianshu.com/p/a6d69af6468d" target="_blank" rel="noopener">RunLoop F.A.Q</a><br><a href="https://juejin.im/post/5aca2b0a6fb9a028d700e1f8" target="_blank" rel="noopener">iOS RunLoop详解</a><br><a href="https://mp.weixin.qq.com/s?__biz=MzAwNDY1ODY2OQ==&amp;mid=207890859&amp;idx=1&amp;sn=e98dd604cdb854e7a5808d2072c29162&amp;scene=4" target="_blank" rel="noopener">微信iOS卡顿监控系统</a></p>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="http://jslibs.wuxubj.cn/sweetalert_mini/jquery-1.7.1.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/archives/402ac68b.html">iOS并发编程之Runloop</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
+  <p><span>发布时间:</span>2019年10月17日 - 17:10</p>
+  <p><span>最后更新:</span>2019年10月17日 - 17:10</p>
+  <p><span>原始链接:</span><a href="/archives/402ac68b.html" title="iOS并发编程之Runloop">https://hello-david.github.io/archives/402ac68b.html</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/402ac68b.html"  aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
+</div>
+<script> 
+    var clipboard = new Clipboard('.fa-clipboard');
+    clipboard.on('success', $(function(){
+      $(".fa-clipboard").click(function(){
+        swal({   
+          title: "",   
+          text: '复制成功',   
+          html: false,
+          timer: 500,   
+          showConfirmButton: false
+        });
+      });
+    }));  
+</script>
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/工作原理/" rel="tag"># 工作原理</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/archives/e94ffa1c.html" rel="next" title="iOS中的内存布局与管理">
+                <i class="fa fa-chevron-left"></i> iOS中的内存布局与管理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">David Dai</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Runloop的设计细节"><span class="nav-number">1.</span> <span class="nav-text">Runloop的设计细节</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Runloop中的工作模式Runloop-Modes"><span class="nav-number">1.1.</span> <span class="nav-text">Runloop中的工作模式Runloop Modes</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#每个Runloop-Mode中的工作循环细节"><span class="nav-number">1.2.</span> <span class="nav-text">每个Runloop Mode中的工作循环细节</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#应用场景——侦测App的卡顿-卡死-OOM情况"><span class="nav-number">2.</span> <span class="nav-text">应用场景——侦测App的卡顿/卡死/OOM情况</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">David Dai</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+-->
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
