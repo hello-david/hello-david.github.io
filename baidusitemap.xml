@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://hello-david.github.io/archives/d8f63008.html</loc>
+    <lastmod>2019-12-24T09:31:55.177Z</lastmod>
+  </url>  <url>
+    <loc>https://hello-david.github.io/archives/98dc9fea.html</loc>
+    <lastmod>2019-12-24T08:16:02.076Z</lastmod>
+  </url>  <url>
+    <loc>https://hello-david.github.io/archives/662d09a.html</loc>
+    <lastmod>2019-12-24T08:15:59.949Z</lastmod>
+  </url>  <url>
     <loc>https://hello-david.github.io/archives/402ac68b.html</loc>
     <lastmod>2019-10-17T09:19:16.221Z</lastmod>
   </url>  <url>
@@ -21,9 +30,6 @@
   </url>  <url>
     <loc>https://hello-david.github.io/archives/6819375.html</loc>
     <lastmod>2019-10-09T10:34:54.435Z</lastmod>
-  </url>  <url>
-    <loc>https://hello-david.github.io/archives/98dc9fea.html</loc>
-    <lastmod>2019-10-09T10:34:31.130Z</lastmod>
   </url>  <url>
     <loc>https://hello-david.github.io/archives/c6605a39.html</loc>
     <lastmod>2019-10-09T10:33:54.993Z</lastmod>
@@ -69,8 +75,5 @@
   </url>  <url>
     <loc>https://hello-david.github.io/archives/f9b28799.html</loc>
     <lastmod>2019-03-25T11:10:42.654Z</lastmod>
-  </url>  <url>
-    <loc>https://hello-david.github.io/archives/662d09a.html</loc>
-    <lastmod>2019-01-16T07:06:38.498Z</lastmod>
   </url>
 </urlset>
