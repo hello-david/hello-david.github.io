@@ -250,6 +250,158 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/4397956c.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="David Dai">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="David'Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/archives/4397956c.html" itemprop="url">iOS中的并发编程与GCD的一些认知</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-04T20:59:46+08:00">
+                2020-02-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/工作原理/" itemprop="url" rel="index">
+                    <span itemprop="name">工作原理</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          在现代的计算机系统中CPU是多核多线程的架构，理论上我们可以在同一时间同时执行多条指令。而在软件设计中为了达到这个目的就发明了许多的并发编程方案。
+其中在iOS中主要存在四个并发编程方案：pthread、NSThread、GCD、NSOperation。这里借用以下这张图来描述它们各自的主要特征。可以看到pthread和NSThread实际上就是线程这个概念在iOS中的抽象，使用这两个库需要开发者
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/archives/4397956c.html#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+    <div>
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/61787736.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1617,163 +1769,6 @@ Cocoapods注入脚本为了实现以上的需求，最先想到的就是希望�
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/82a2b295.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="David Dai">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="David'Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/archives/82a2b295.html" itemprop="url">iOS逆向工程三板斧:砸壳-注入-重签</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-10T11:17:10+08:00">
-                2019-06-10
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/工程上的二三事/" itemprop="url" rel="index">
-                    <span itemprop="name">工程上的二三事</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          这里从原理上如何实现iOS的逆向工程的，以及如何从工程化的角度去实现逆向一个iPA。在我看来整体的流程上就三个步骤：砸壳-&gt;注入-&gt;重签安装。
-砸壳从AppStore上(官方渠道)分发的ipa包都是经过加密的，逆向的第一步就是对这个应用进行解密。不过在现如今，实施这个过程的前提条件:
-
-一台越狱iOS设备
-
-一条命令实现dump砸壳应用，Frida-ios-dump一键砸壳菜鸡版
-照着
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/archives/82a2b295.html#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-    <div>
-      
-    </div>
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1824,7 +1819,7 @@ Cocoapods注入脚本为了实现以上的需求，最先想到的就是希望�
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">26</span>
+                  <span class="site-state-item-count">27</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
