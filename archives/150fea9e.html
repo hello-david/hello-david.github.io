@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="OpenGL," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前一篇文章总结了我对OpenGL引擎的总体工作流程的理解。接下来就开始使用OpenGL渲染引擎来实现一些图形图像的渲染展示。OpenGL是一个多平台的框架，而我们知道不同平台有自己不同的屏幕渲染实现，那么，它是如何和各个系统结合起来的呢？ OpenGL通过EGL（Embedded Graphics Library）在本地窗口系统之间定义了一套中间接口层，具体由各个厂商实现。EGL提供如下机制：">
+<meta name="keywords" content="OpenGL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenGL学习——环境搭建">
+<meta property="og:url" content="https://hello-david.github.io/archives/150fea9e.html">
+<meta property="og:site_name" content="David&#39;Blog">
+<meta property="og:description" content="前一篇文章总结了我对OpenGL引擎的总体工作流程的理解。接下来就开始使用OpenGL渲染引擎来实现一些图形图像的渲染展示。OpenGL是一个多平台的框架，而我们知道不同平台有自己不同的屏幕渲染实现，那么，它是如何和各个系统结合起来的呢？ OpenGL通过EGL（Embedded Graphics Library）在本地窗口系统之间定义了一套中间接口层，具体由各个厂商实现。EGL提供如下机制：">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://hello-david.github.io/images/15362034587146.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15362025043238.jpg">
+<meta property="og:updated_time" content="2019-10-09T10:30:16.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="OpenGL学习——环境搭建">
+<meta name="twitter:description" content="前一篇文章总结了我对OpenGL引擎的总体工作流程的理解。接下来就开始使用OpenGL渲染引擎来实现一些图形图像的渲染展示。OpenGL是一个多平台的框架，而我们知道不同平台有自己不同的屏幕渲染实现，那么，它是如何和各个系统结合起来的呢？ OpenGL通过EGL（Embedded Graphics Library）在本地窗口系统之间定义了一套中间接口层，具体由各个厂商实现。EGL提供如下机制：">
+<meta name="twitter:image" content="https://hello-david.github.io/images/15362034587146.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hello-david.github.io/archives/150fea9e.html"/>
+
+
+
+<meta name="google-site-verification" content="xPc40P1FFnuv2Aer8rA72v2doNkgf1bEhU79GGlStmE" />
+
+
+  <title>OpenGL学习——环境搭建 | David'Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">David'Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/150fea9e.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="David Dai">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="David'Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">OpenGL学习——环境搭建</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-25T16:46:44+08:00">
+                2018-09-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/图像处理/" itemprop="url" rel="index">
+                    <span itemprop="name">图像处理</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>前一篇文章总结了我对OpenGL引擎的总体工作流程的理解。接下来就开始使用OpenGL渲染引擎来实现一些图形图像的渲染展示。OpenGL是一个多平台的框架，而我们知道不同平台有自己不同的屏幕渲染实现，那么，它是如何和各个系统结合起来的呢？</p>
+<p>OpenGL通过EGL（Embedded Graphics Library）在本地窗口系统之间定义了一套中间接口层，具体由各个厂商实现。<br>EGL提供如下机制：</p>
+<ul>
+<li>与设备的原生窗口系统通信</li>
+<li>查询绘图表面的可用类型和配置</li>
+<li>创建绘图表面</li>
+<li>在OpenGL ES和其他图形渲染API之间同步渲染</li>
+<li>管理纹理贴图等渲染资源</li>
+</ul>
+<p>在iOS中通过EAGL将OpenGL和UIKit链接起来，同时还封装了一套GLKit用于OpenGL绘制操作。话说回来，虽然在iOS12之后Apple将废弃OpenGL改用自家的Metal，但是图形编程的一些概念（渲染管线，着色器）还是差不多的，所以从OpenGL迁移到Metal成本相对低点。<br><img src="/images/15362034587146.png" alt=""></p>
+<blockquote>
+<p>iOS中EAGL的构成</p>
+</blockquote>
+<p><img src="/images/15362025043238.jpg" alt=""></p>
+<blockquote>
+<p>在Android中通过SurfaceView将OpenGL链接到UI层框架里面。</p>
+</blockquote>
+<h2 id="EGL链接OpenGL和本地UI框架"><a href="#EGL链接OpenGL和本地UI框架" class="headerlink" title="EGL链接OpenGL和本地UI框架"></a>EGL链接OpenGL和本地UI框架</h2><p>EGL可以看做是各个厂商实现的一套OpenGL运行环境中间层接口，它将OpenGL和本地UI框架联系起来。</p>
+<p>我所了解到的在iOS,Andorid中编写OpenGL程序的方式主要以下几种：</p>
+<ul>
+<li><strong>链接EGL到UIView中</strong>（iOS）</li>
+<li><strong>使用GLKit</strong>（iOS）</li>
+<li><strong>链接EGL到SurfaceView</strong>（Android）</li>
+<li><strong>GLSurfaceView</strong>（Android）</li>
+</ul>
+<p>那么在此，我将尝试实现上述四种解决方案来构建OpenGL的渲染环境。<br><a href="https://developer.apple.com/library/archive/documentation/3DDrawing/Conceptual/OpenGLES_ProgrammingGuide/Introduction/Introduction.html#//apple_ref/doc/uid/TP40008793?language=objc" target="_blank" rel="noopener">Apple OpenGLES文档</a><br><a href="https://developer.android.com/guide/topics/graphics/opengl" target="_blank" rel="noopener">Andoird OpenGLES文档</a><br>阅读文档是个好习惯，如何在iOS和Android中使用OpenGL引擎文档中都有介绍。下面我将根据我的理解来搭建一个简单OpenGL渲染视图。</p>
+<p>Demo工程：<a href="https://github.com/hello-david/OpenGLDemo.git" target="_blank" rel="noopener">OpenGL学习实例</a></p>
+<h3 id="基于EAGL的UIView"><a href="#基于EAGL的UIView" class="headerlink" title="基于EAGL的UIView"></a>基于EAGL的UIView</h3><p>打开iOS上的OpenGL框架中EAGL.h文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">/* EAGL rendering API */</span><br><span class="line">typedef NS_ENUM(NSUInteger, EAGLRenderingAPI)</span><br><span class="line">&#123;</span><br><span class="line">	kEAGLRenderingAPIOpenGLES1 = 1,</span><br><span class="line">	kEAGLRenderingAPIOpenGLES2 = 2,</span><br><span class="line">	kEAGLRenderingAPIOpenGLES3 = 3,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">@interface EAGLContext : NSObject</span><br><span class="line">&#123;</span><br><span class="line">@public</span><br><span class="line">	struct _EAGLContextPrivate *_private;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (nullable instancetype) init NS_UNAVAILABLE;</span><br><span class="line">- (nullable instancetype) initWithAPI:(EAGLRenderingAPI) api;</span><br><span class="line">- (nullable instancetype) initWithAPI:(EAGLRenderingAPI) api sharegroup:(EAGLSharegroup*) sharegroup NS_DESIGNATED_INITIALIZER;</span><br><span class="line"></span><br><span class="line">+ (BOOL)                     setCurrentContext:(nullable EAGLContext*) context;</span><br><span class="line">+ (nullable EAGLContext*)    currentContext;</span><br><span class="line"></span><br><span class="line">@property (readonly)          EAGLRenderingAPI   API;</span><br><span class="line">@property (nonnull, readonly) EAGLSharegroup*    sharegroup;</span><br><span class="line"></span><br><span class="line">@property (nullable, copy, nonatomic) NSString* debugLabel NS_AVAILABLE_IOS(6_0);</span><br><span class="line">@property (getter=isMultiThreaded, nonatomic) BOOL multiThreaded NS_AVAILABLE_IOS(7_1);</span><br><span class="line">@end</span><br></pre></td></tr></table></figure></p>
+<p>可以看到这个文件的封装非常简单，提供了支持的OpenGL API等级和OpenGL Context（这里记得吧，OpenGL是一个状态机，所以这里抽象出OpenGL的执行环境作为外部接口，意味着在iOS上OpenGL的执行代码都是运行在这些Context中的）。</p>
+<p>OpenGL部分的接口有了，那么UIKit的呢？怎么将它们联系起来呢？首先，我们知道UIView中的渲染功能实际上是由CAlayer来完成的，然后再查一下文档发现有一个CALayer叫<strong>CAEAGLLayer</strong>。也就意味着UIKit中和OpenGL对接的部分就是通过这个Layer来完成的。</p>
+<p>一边是EAGLContext，一边是CAEAGLLayer。OpenGL和UIView的接口都有了，那么具体如何将它们联系在一起呢？</p>
+<p>仔细看一下CAEAGLLayer.h这个文件，可以发现这个Layer遵循一个叫EAGLDrawable的协议。意味着这个Layer将通过EAGLDrawable中的方法将OpenGL和Layer联系在一起，简单的说这个Layer内部实现了EAGLDrawable的方法实现利用OpenGL引擎来渲染图形图像。而我们只需要向CAEAGLLayer喂渲染数据就行了。（这里EGL就实现了，接口相当简洁吧！）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">@interface CAEAGLLayer : CALayer &lt;EAGLDrawable&gt;</span><br><span class="line">&#123;</span><br><span class="line">@private</span><br><span class="line">  struct _CAEAGLNativeWindow *_win;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/* When false (the default value) changes to the layer&apos;s render buffer</span><br><span class="line"> * appear on-screen asynchronously to normal layer updates. When true,</span><br><span class="line"> * changes to the GLES content are sent to the screen via the standard</span><br><span class="line"> * CATransaction mechanisms. */</span><br><span class="line"></span><br><span class="line">@property BOOL presentsWithTransaction CA_AVAILABLE_IOS_STARTING (9.0, 9.0, 2.0);</span><br><span class="line"></span><br><span class="line">/* Note: the default value of the `opaque&apos; property in this class is true,</span><br><span class="line"> * not false as in CALayer. */</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure></p>
+<p>打开EAGLDrawable.h这个文件，发现它定义的方法列表页很简单，可以看到它的每个函数名都跟Renderbuffer相关。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">@protocol EAGLDrawable</span><br><span class="line"></span><br><span class="line">/* Contains keys from kEAGLDrawableProperty* above */</span><br><span class="line">@property(nullable, copy) NSDictionary&lt;NSString*, id&gt;* drawableProperties;</span><br><span class="line"></span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">/* Extends EAGLContext interface */</span><br><span class="line">@interface EAGLContext (EAGLContextDrawableAdditions)</span><br><span class="line"></span><br><span class="line">/* Attaches an EAGLDrawable as storage for the OpenGL ES renderbuffer object bound to &lt;target&gt; */</span><br><span class="line">- (BOOL)renderbufferStorage:(NSUInteger)target fromDrawable:(nullable id&lt;EAGLDrawable&gt;)drawable;</span><br><span class="line"></span><br><span class="line">/* Request the native window system display the OpenGL ES renderbuffer bound to &lt;target&gt; */</span><br><span class="line">- (BOOL)presentRenderbuffer:(NSUInteger)target;</span><br><span class="line"></span><br><span class="line">/* Request the native window system display the OpenGL ES renderbuffer bound to &lt;target&gt; at specified time */</span><br><span class="line">- (BOOL)presentRenderbuffer:(NSUInteger)target atTime:(CFTimeInterval)presentationTime;</span><br><span class="line"></span><br><span class="line">/* Request the native window system display the OpenGL ES renderbuffer bound to &lt;target&gt; after the previous frame is presented for at least duration time */</span><br><span class="line">- (BOOL)presentRenderbuffer:(NSUInteger)target afterMinimumDuration:(CFTimeInterval)duration;</span><br></pre></td></tr></table></figure></p>
+<p>回忆一下，OpenGL的引擎的渲染流程是咋样的呢？从外部输入顶点数据一直到将处理完毕的渲染数据传递到Renderbuffer（渲染缓存帧）的过程。也就是OpenGL执行链的尾端是渲染缓存帧，刚好，EAGLDrawable这个协议规定了一个函数：</p>
+<p><code>- (BOOL)renderbufferStorage:(NSUInteger)target fromDrawable:(nullable id&lt;EAGLDrawable&gt;)drawable;</code></p>
+<p>意味着我们通过这个协议方法将渲染数据传递到这个Layer的Renderbuffer上整个流程的逻辑链就完整了。</p>
+<p>接下来开始实践一下：<br>Renderbuffer显示区域的大小是在绑定的时候就确定的，如果想变更大小只有重新创建绑定一遍。所以当UIView在layoutSubviews的时候要检查一下frame大小是否改变了，并重新绑定Renderbuffer。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// Layout的时候重新适配一个Renderbuffer</span><br><span class="line">- (void)layoutSubviews &#123;</span><br><span class="line">    [super layoutSubviews];</span><br><span class="line">    </span><br><span class="line">    CGSize size = self.frame.size;</span><br><span class="line">    if (CGSizeEqualToSize(self.oldSize, CGSizeZero) || !CGSizeEqualToSize(_oldSize, size)) &#123;</span><br><span class="line">        [self linkOpenGLBuffer];</span><br><span class="line">        self.oldSize = size;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>接下来就是framebuffer<->GL_FRAMEBUFFER<->GL_RENDERBUFFER<->renderbuffer的绑定流程：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">- (void)linkOpenGLBuffer &#123;</span><br><span class="line">    // 用于显示的layer</span><br><span class="line">    self.eaglLayer = (CAEAGLLayer *)self.layer;</span><br><span class="line">    </span><br><span class="line">    // CALayer默认是透明的，而透明的层对性能负荷很大。所以将其关闭。</span><br><span class="line">    self.eaglLayer.opaque = YES;</span><br><span class="line">    </span><br><span class="line">    // 释放旧的renderbuffer</span><br><span class="line">    if (_renderbuffer) &#123;</span><br><span class="line">        glDeleteRenderbuffers(1, &amp;_renderbuffer);</span><br><span class="line">        _renderbuffer = 0;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    // 释放旧的framebuffer</span><br><span class="line">    if (_framebuffer) &#123;</span><br><span class="line">        glDeleteFramebuffers(1, &amp;_framebuffer);</span><br><span class="line">        _framebuffer = 0;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    // 生成renderbuffer</span><br><span class="line">    glGenRenderbuffers(1, &amp;_renderbuffer);</span><br><span class="line">    </span><br><span class="line">    // 绑定_renderbuffer到当前OpenGL Context的GL_RENDERBUFFER中</span><br><span class="line">    glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);</span><br><span class="line">    </span><br><span class="line">    // 绑定_renderbuffer到eaglLayer上</span><br><span class="line">    [_eaglContext renderbufferStorage:GL_RENDERBUFFER fromDrawable:_eaglLayer];</span><br><span class="line">    </span><br><span class="line">    // 生成framebuffer(之后OpenGL的数据均传递到这个framebuffer中)</span><br><span class="line">    glGenFramebuffers(1, &amp;_framebuffer);</span><br><span class="line">    </span><br><span class="line">    // 绑定_framebuffer到当前OpenGL Context的GL_FRAMEBUFFER中</span><br><span class="line">    glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);</span><br><span class="line">    </span><br><span class="line">    // 绑定当前OpenGL Context的GL_FRAMEBUFFER和GL_RENDERBUFFER</span><br><span class="line">    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, _renderbuffer);</span><br><span class="line">    </span><br><span class="line">    // 在此完成_framebuffer&lt;---&gt;GL_FRAMEBUFFER&lt;---&gt;GL_RENDERBUFFER&lt;---&gt;_renderbuffer的绑定</span><br><span class="line">    </span><br><span class="line">    // 检查framebuffer是否创建成功</span><br><span class="line">    NSError *error;</span><br><span class="line">    NSAssert1([self checkFramebuffer:&amp;error], @&quot;%@&quot;,error.userInfo[@&quot;ErrorMessage&quot;]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></-></-></-></p>
+<p>那么我们现在我们已经将fbo和rbo以及Layer串起来了。之后要做的事便是向fbo提供数据了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">- (void)drawSampleToFramebuffer &#123;</span><br><span class="line">    // 保证是在当前Context中</span><br><span class="line">    if ([EAGLContext currentContext] != _eaglContext) &#123;</span><br><span class="line">        [EAGLContext setCurrentContext:_eaglContext];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    // 保证GL_RENDERBUFFER和GL_FRAMEBUFFER绑定的对象是正确的</span><br><span class="line">    glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);</span><br><span class="line">    glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);</span><br><span class="line">    </span><br><span class="line">    // 给framebuffer画上背景色（最简单的fbo操作)</span><br><span class="line">    glClearColor(0, 0, 0, 0);</span><br><span class="line">    glClear(GL_COLOR_BUFFER_BIT);</span><br><span class="line">    </span><br><span class="line">    // 告知eaglContext可以renderbuffer</span><br><span class="line">    [self.eaglContext presentRenderbuffer:GL_RENDERBUFFER];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里主要是介绍在iOS中如何将OpenGL和UIKit结合起来。而我们用OpenGL的工作重心是在绘制各种图形图像到FBO(Framebuffer)上。</p>
+<h3 id="基于GLKView的OpenGL"><a href="#基于GLKView的OpenGL" class="headerlink" title="基于GLKView的OpenGL"></a>基于GLKView的OpenGL</h3><p>GLKView中就封装了EGL和UIKit的链接过程和绘制画面刷新功能，在上层只需要给它设置一个Contex就可以开始进行OpenGL绘制了。<br>自定义GLKView的话就在它的drawRect中编写GL代码。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">- (instancetype)initWithFrame:(CGRect)frame &#123;</span><br><span class="line">    if (self = [super initWithFrame:frame]) &#123;</span><br><span class="line">        self.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];</span><br><span class="line">    &#125;</span><br><span class="line">    return self;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)drawRect:(CGRect)rect &#123;</span><br><span class="line">    [super drawRect:rect];</span><br><span class="line">    </span><br><span class="line">    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);</span><br><span class="line">    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>外部使用的话可以使用它的代理方法<code>- (void)glkView:(GLKView *)view drawInRect:(CGRect)rect;</code></p>
+<h3 id="基于EGL的SurfaceView"><a href="#基于EGL的SurfaceView" class="headerlink" title="基于EGL的SurfaceView"></a>基于EGL的SurfaceView</h3><p>在Android中EGL可以配置的地方就很多了。它的EGL由三个部分组成：Display(渲染设备，即Renderbuffer)，Surface(缓存帧，即Framebuffer)，Context(上下文环境)。这三部分在Android中均是可以配置的。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line">GLContext::GLContext(GLRenderAPI apiLevel, ANativeWindow *window) &#123;</span><br><span class="line"></span><br><span class="line">    // EGL配置</span><br><span class="line">    EGLint confAttr[15] = &#123;</span><br><span class="line">            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,// very important!</span><br><span class="line">            EGL_SURFACE_TYPE, EGL_WINDOW_BIT,       // we will create a pixelbuffer surface</span><br><span class="line">            EGL_RED_SIZE,   8,</span><br><span class="line">            EGL_GREEN_SIZE, 8,</span><br><span class="line">            EGL_BLUE_SIZE,  8,</span><br><span class="line">            EGL_ALPHA_SIZE, 8, // if you need the alpha channel</span><br><span class="line">            EGL_DEPTH_SIZE, 16,// if you need the depth buffer</span><br><span class="line">            EGL_NONE</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    // EGL Context配置</span><br><span class="line">    EGLint ctxAttr[3] = &#123;</span><br><span class="line">            EGL_CONTEXT_CLIENT_VERSION, 2, // very important!</span><br><span class="line">            EGL_NONE</span><br><span class="line">    &#125;;</span><br><span class="line">    switch (apiLevel) &#123;</span><br><span class="line">        case GLRenderAPIES2 :</span><br><span class="line">            confAttr[1] = EGL_OPENGL_ES2_BIT;</span><br><span class="line">            ctxAttr[1] = 2;</span><br><span class="line">            break;</span><br><span class="line">        case GLRenderAPIES3:</span><br><span class="line">            confAttr[1] = EGL_OPENGL_ES3_BIT_KHR;</span><br><span class="line">            ctxAttr[1] = 3;</span><br><span class="line">            break;</span><br><span class="line">        default:</span><br><span class="line">            break;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // 获取默认EGL显示窗口</span><br><span class="line">    EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);</span><br><span class="line">    checkEglError(&quot;eglCreateWindowSurface&quot;);</span><br><span class="line">    if (display == EGL_NO_DISPLAY) &#123;</span><br><span class="line">        throw &quot;eglGetDisplay failed&quot;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // 初始化EGL</span><br><span class="line">    EGLint eglMajVers, eglMinVers;</span><br><span class="line">    EGLBoolean initResult = eglInitialize(display, &amp;eglMajVers, &amp;eglMinVers);</span><br><span class="line">    assert(initResult);</span><br><span class="line"></span><br><span class="line">    // 配置EGL</span><br><span class="line">    EGLConfig config  = NULL;</span><br><span class="line">    EGLint numConfigs = 0;</span><br><span class="line">    if (!eglChooseConfig(display, confAttr, &amp;config, 1, &amp;numConfigs) || numConfigs != 1) &#123;</span><br><span class="line">        if (apiLevel == GLRenderAPIES3) &#123;</span><br><span class="line">            confAttr[1] = EGL_OPENGL_ES2_BIT;</span><br><span class="line">            ctxAttr[1] = 2;</span><br><span class="line">            mRenderAPI = GLRenderAPIES2;</span><br><span class="line">            if (!eglChooseConfig(display, confAttr, &amp;config, 1, &amp;numConfigs) || numConfigs != 1) &#123;</span><br><span class="line">                assert(false);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; else&#123;</span><br><span class="line">            assert(false);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // 创建Surface</span><br><span class="line">    int surfaceAttribs[] = &#123; EGL_NONE &#125;;</span><br><span class="line">    EGLSurface surface = eglCreateWindowSurface(display, config, window, surfaceAttribs);</span><br><span class="line">    checkEglError(&quot;eglCreateWindowSurface&quot;);</span><br><span class="line"></span><br><span class="line">    // 创建EGL Context</span><br><span class="line">    EGLContext context = eglCreateContext(display, config, nullptr, ctxAttr);</span><br><span class="line">    if (context == EGL_NO_CONTEXT) &#123;</span><br><span class="line">        assert(false);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    mWindow  = window;</span><br><span class="line">    mSurface = surface;</span><br><span class="line">    mContext = context;</span><br><span class="line">    mDisplay = display;</span><br><span class="line">    mConfig  = config;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看见Android中是直接为SurfaceView在创建Surface（Framebuffer）的时候将Surface和Display（Renderbuffer）联系起来。</p>
+<p>之后在使用这个SurfaceView的OpenGL的时候需要进行上下文的切换和渲染帧刷新。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">void GLContext::swapToScreen() &#123;</span><br><span class="line">    eglSwapBuffers(mDisplay, mSurface);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void GLContext::use() &#123;</span><br><span class="line">    eglMakeCurrent(mDisplay, mSurface, mSurface , mContext);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>到这一步Android中的EGL就完成了，接下来就需要通过控制SurfaceView的周期来实现对渲染控制。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这里主要是学习EGL是如何跟本地窗口系统链接的。iOS和Android的操作侧重点略有不同，iOS申请一个Contex非常简单，复杂的是链接Framebuffer到Layer上的过程，而Android申请一个Context需要填一堆参数相对繁琐一些。</p>
+<p>从OpenGL的顶点输入到渲染缓存帧输出再到本地的窗口系统。OpenGL引擎运行在Context中，将引擎输出结果到Framebuffer中存储再输出到Renderbuffer中显示，让Renderbuffer和本地窗口系统联系在一起，那么整个流程就可以实现OpenGL的渲染了。</p>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="http://jslibs.wuxubj.cn/sweetalert_mini/jquery-1.7.1.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/archives/150fea9e.html">OpenGL学习——环境搭建</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
+  <p><span>发布时间:</span>2018年09月25日 - 16:09</p>
+  <p><span>最后更新:</span>2019年10月09日 - 18:10</p>
+  <p><span>原始链接:</span><a href="/archives/150fea9e.html" title="OpenGL学习——环境搭建">https://hello-david.github.io/archives/150fea9e.html</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/150fea9e.html"  aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
+</div>
+<script> 
+    var clipboard = new Clipboard('.fa-clipboard');
+    clipboard.on('success', $(function(){
+      $(".fa-clipboard").click(function(){
+        swal({   
+          title: "",   
+          text: '复制成功',   
+          html: false,
+          timer: 500,   
+          showConfirmButton: false
+        });
+      });
+    }));  
+</script>
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/OpenGL/" rel="tag"># OpenGL</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/archives/b0b8e2a2.html" rel="next" title="OpenGL学习——概述">
+                <i class="fa fa-chevron-left"></i> OpenGL学习——概述
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/archives/e8814f3.html" rel="prev" title="OpenGL学习——着色器绘制与坐标系">
+                OpenGL学习——着色器绘制与坐标系 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">David Dai</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#EGL链接OpenGL和本地UI框架"><span class="nav-number">1.</span> <span class="nav-text">EGL链接OpenGL和本地UI框架</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基于EAGL的UIView"><span class="nav-number">1.1.</span> <span class="nav-text">基于EAGL的UIView</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基于GLKView的OpenGL"><span class="nav-number">1.2.</span> <span class="nav-text">基于GLKView的OpenGL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基于EGL的SurfaceView"><span class="nav-number">1.3.</span> <span class="nav-text">基于EGL的SurfaceView</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">2.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">David Dai</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+-->
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

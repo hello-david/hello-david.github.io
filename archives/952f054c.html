@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="工程上的二三事," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="这篇文档用于总结日常工作中如何分析Crash Report的一些思路，首先我们可以从官方文档得到一些关于Crash Report的基本情况。 一份完整的Crash Report(已符号化过)中包含的几部分信息中，头部描述信息和线程调用堆栈是我们最为关注的两个部分。 通过这两部分可以获知这次崩溃现场的触发原因和线程回溯，然后通过这些信息我们就可以开始动手修复这份Crash了。接下来先来看几类在工作中">
+<meta name="keywords" content="工程上的二三事">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Crash及其分析技巧的一点心得">
+<meta property="og:url" content="https://hello-david.github.io/archives/952f054c.html">
+<meta property="og:site_name" content="David&#39;Blog">
+<meta property="og:description" content="这篇文档用于总结日常工作中如何分析Crash Report的一些思路，首先我们可以从官方文档得到一些关于Crash Report的基本情况。 一份完整的Crash Report(已符号化过)中包含的几部分信息中，头部描述信息和线程调用堆栈是我们最为关注的两个部分。 通过这两部分可以获知这次崩溃现场的触发原因和线程回溯，然后通过这些信息我们就可以开始动手修复这份Crash了。接下来先来看几类在工作中">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://hello-david.github.io/images/%E4%BC%81%E4%B8%9A%E5%BE%AE%E4%BF%A1%E6%88%AA%E5%9B%BE_c6f0ca79-a42f-4f8b-9e93-07990113ed88.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15870010478670.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15869397614143.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15870017052760.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15870044052041.jpg">
+<meta property="og:updated_time" content="2020-04-16T02:48:52.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Crash及其分析技巧的一点心得">
+<meta name="twitter:description" content="这篇文档用于总结日常工作中如何分析Crash Report的一些思路，首先我们可以从官方文档得到一些关于Crash Report的基本情况。 一份完整的Crash Report(已符号化过)中包含的几部分信息中，头部描述信息和线程调用堆栈是我们最为关注的两个部分。 通过这两部分可以获知这次崩溃现场的触发原因和线程回溯，然后通过这些信息我们就可以开始动手修复这份Crash了。接下来先来看几类在工作中">
+<meta name="twitter:image" content="https://hello-david.github.io/images/%E4%BC%81%E4%B8%9A%E5%BE%AE%E4%BF%A1%E6%88%AA%E5%9B%BE_c6f0ca79-a42f-4f8b-9e93-07990113ed88.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hello-david.github.io/archives/952f054c.html"/>
+
+
+
+<meta name="google-site-verification" content="xPc40P1FFnuv2Aer8rA72v2doNkgf1bEhU79GGlStmE" />
+
+
+  <title>Crash及其分析技巧的一点心得 | David'Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">David'Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/952f054c.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="David Dai">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="David'Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Crash及其分析技巧的一点心得</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-16T10:36:02+08:00">
+                2020-04-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/工程上的二三事/" itemprop="url" rel="index">
+                    <span itemprop="name">工程上的二三事</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这篇文档用于总结日常工作中如何分析Crash Report的一些思路，首先我们可以从<a href="https://developer.apple.com/library/archive/technotes/tn2151/_index.html" target="_blank" rel="noopener">官方文档</a>得到一些关于Crash Report的基本情况。</p>
+<p>一份完整的Crash Report(已符号化过)中包含的几部分信息中，<strong>头部描述信息</strong>和<strong>线程调用堆栈</strong>是我们最为关注的两个部分。<br><img src="/images/%E4%BC%81%E4%B8%9A%E5%BE%AE%E4%BF%A1%E6%88%AA%E5%9B%BE_c6f0ca79-a42f-4f8b-9e93-07990113ed88.png" alt=""></p>
+<p>通过这两部分可以获知这次崩溃现场的触发原因和线程回溯，然后通过这些信息我们就可以开始动手修复这份Crash了。接下来先来看几类在工作中遇到的Crash修复示例。</p>
+<h2 id="未捕获异常（EXC-CRASH）"><a href="#未捕获异常（EXC-CRASH）" class="headerlink" title="未捕获异常（EXC_CRASH）"></a>未捕获异常（EXC_CRASH）</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Exception Type:  EXC_CRASH (SIGABRT)</span><br><span class="line">Exception Codes: 0x0000000000000000, 0x0000000000000000</span><br><span class="line">Exception Note:  EXC_CORPSE_NOTIFY</span><br></pre></td></tr></table></figure>
+<p>头部信息中告知是一个未捕获的异常崩溃，是由于Objective-C/C/C++的Exception或者调用Abort()引起的崩溃。这类问题也是线上/自动化Crash最为常见的一类，需要仔细分析才能看出端倪。比如下面：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">Exception Type:  EXC_CRASH (SIGKILL)</span><br><span class="line">Exception Codes: 0x0000000000000000, 0x0000000000000000</span><br><span class="line">Exception Note:  EXC_CORPSE_NOTIFY</span><br><span class="line">Termination Reason: Namespace ASSERTIOND, Code 0xbada5e47</span><br><span class="line">Triggered by Thread:  0</span><br><span class="line"></span><br><span class="line">Filtered syslog:</span><br><span class="line">None found</span><br><span class="line"></span><br><span class="line">hread 0 name:  Dispatch queue: com.apple.main-thread</span><br><span class="line">Thread 0 Crashed:</span><br><span class="line">0   libsystem_kernel.dylib        	0x000000018377c138 __psynch_mutexwait + 8</span><br><span class="line">1   libsystem_pthread.dylib       	0x0000000183897960 _pthread_mutex_lock_wait + 96</span><br><span class="line">2   libsystem_pthread.dylib       	0x00000001838978a4 _pthread_mutex_lock_slow$VARIANT$armv81 + 244</span><br><span class="line">3   UIKit                         	0x000000018d1971f8 _addBackgroundTask + 540</span><br><span class="line">4   UIKit                         	0x000000018d3c97f0 -[UIApplication _beginBackgroundTaskWithExpirationHandler:] + 24</span><br><span class="line">5   UIKit                         	0x000000018d19f844 -[UIApplication beginBackgroundTaskWithExpirationHandler:] + 72</span><br><span class="line">6   MTHawkeyeInjection            	0x0000000107f9c610 __66+[MTHBackgroundTaskObserver injectIntoUIAPPlicationBackgroundTask]_block_invoke_2 + 34320 (MTHBackgroundTaskObserver.m:43)</span><br><span class="line">7   XXXX                          	0x0000000104822c90 -[ALSAuxiliaryGainEffect setDoing] + 152</span><br><span class="line">8   CoreFoundation                	0x0000000183bfc33c __CFNOTIFICATIONCENTER_IS_CALLING_OUT_TO_AN_OBSERVER__ + 20</span><br><span class="line">9   CoreFoundation                	0x0000000183bfb8dc _CFXRegistrationPost + 420</span><br><span class="line">10  CoreFoundation                	0x0000000183bfb640 ___CFXNotificationPost_block_invoke + 60</span><br><span class="line">11  CoreFoundation                	0x0000000183c79024 -[_CFXNotificationRegistrar find:object:observer:enumerator:] + 1408</span><br><span class="line">12  CoreFoundation                	0x0000000183b31f60 _CFXNotificationPost + 380</span><br><span class="line">13  Foundation                    	0x000000018455f348 -[NSNotificationCenter postNotificationName:object:userInfo:] + 68</span><br><span class="line">14  UIKit                         	0x000000018d3b5b30 __47-[UIApplication _applicationDidEnterBackground]_block_invoke + 268</span><br><span class="line">15  UIKit                         	0x000000018d4c1ba8 +[UIViewController _performWithoutDeferringTransitions:] + 128</span><br><span class="line">16  UIKit                         	0x000000018d3b5988 -[UIApplication _applicationDidEnterBackground] + 112</span><br><span class="line">17  UIKit                         	0x000000018d64d20c -[__UICanvasLifecycleMonitor_Compatability deactivateEventsOnly:withContext:forceExit:completion:] + 996</span><br><span class="line">18  UIKit                         	0x000000018ddd1848 __82-[_UIApplicationCanvas _transitionLifecycleStateWithTransitionContext:completion:]_block_invoke + 380</span><br><span class="line">19  UIKit                         	0x000000018ddd1674 -[_UIApplicationCanvas _transitionLifecycleStateWithTransitionContext:completion:] + 448</span><br><span class="line">20  UIKit                         	0x000000018db3f2dc __125-[_UICanvasLifecycleSettingsDiffAction performActionsForCanvas:withUpdatedScene:settingsDiff:fromSettings:transitionContext:]_block_invoke + 220</span><br><span class="line">21  UIKit                         	0x000000018dcd83dc _performActionsWithDelayForTransitionContext + 112</span><br><span class="line">22  UIKit                         	0x000000018db3f18c -[_UICanvasLifecycleSettingsDiffAction performActionsForCanvas:withUpdatedScene:settingsDiff:fromSettings:transitionContext:] + 252</span><br><span class="line">23  UIKit                         	0x000000018d92378c -[_UICanvas scene:didUpdateWithDiff:transitionContext:completion:] + 364</span><br><span class="line">24  UIKit                         	0x000000018d7c52d4 -[UIApplicationSceneClientAgent scene:handleEvent:withCompletion:] + 468</span><br><span class="line">25  FrontBoardServices            	0x000000018632eca4 __80-[FBSSceneImpl updater:didUpdateSettings:withDiff:transitionContext:completion:]_block_invoke.362 + 212</span><br><span class="line">26  libdispatch.dylib             	0x00000001835e6a14 _dispatch_client_callout + 16</span><br><span class="line">27  libdispatch.dylib             	0x00000001836229c4 _dispatch_block_invoke_direct$VARIANT$armv81 + 280</span><br><span class="line">28  FrontBoardServices            	0x00000001863627f8 __FBSSERIALQUEUE_IS_CALLING_OUT_TO_A_BLOCK__ + 36</span><br><span class="line">29  FrontBoardServices            	0x000000018636249c -[FBSSerialQueue _performNext] + 404</span><br><span class="line">30  FrontBoardServices            	0x0000000186362a38 -[FBSSerialQueue _performNextFromRunLoopSource] + 56</span><br><span class="line">31  CoreFoundation                	0x0000000183c1297c __CFRUNLOOP_IS_CALLING_OUT_TO_A_SOURCE0_PERFORM_FUNCTION__ + 24</span><br><span class="line">32  CoreFoundation                	0x0000000183c128fc __CFRunLoopDoSource0 + 88</span><br><span class="line">33  CoreFoundation                	0x0000000183c12184 __CFRunLoopDoSources0 + 204</span><br><span class="line">34  CoreFoundation                	0x0000000183c0fd5c __CFRunLoopRun + 1048</span><br><span class="line">35  CoreFoundation                	0x0000000183b2fe58 CFRunLoopRunSpecific + 436</span><br><span class="line">36  GraphicsServices              	0x00000001859dcf84 GSEventRunModal + 100</span><br><span class="line">37  UIKit                         	0x000000018d1af67c UIApplicationMain + 236</span><br><span class="line">38  XXXXX                          	0x0000000102919690 main + 71312 (main.m:16)</span><br><span class="line">39  libdyld.dylib                 	0x000000018364c56c start + 4</span><br></pre></td></tr></table></figure>
+<p>这是一个比较有意思的Crash，在头部信息中<code>Termination Reason: Namespace ASSERTIOND, Code 0xbada5e47</code>这句话就可以发现这个问题的具体原因是由于后台任务过多导致的崩溃，对于这种Crash只能去调整相关业务代码才能避免，总的方向就是需要去降低相关业务的后台申请数量。</p>
+<hr>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">Exception Type:  EXC_CRASH (SIGKILL)</span><br><span class="line">Exception Codes: 0x0000000000000000, 0x0000000000000000</span><br><span class="line">Exception Note:  EXC_CORPSE_NOTIFY</span><br><span class="line">Termination Reason: Namespace SPRINGBOARD, Code 0x8badf00d</span><br><span class="line">Termination Description: SPRINGBOARD, scene-update watchdog.....</span><br><span class="line"></span><br><span class="line">Thread 0 name:  Dispatch queue: com.apple.main-thread</span><br><span class="line">Thread 0 Crashed:</span><br><span class="line">0   libsystem_kernel.dylib        	0x0000000183a69be4 __ulock_wait + 8</span><br><span class="line">1   libdispatch.dylib             	0x00000001838d741c _dispatch_unfair_lock_wait + 48</span><br><span class="line">2   libdispatch.dylib             	0x00000001838d7614 _dispatch_gate_wait_slow$VARIANT$mp + 132</span><br><span class="line">3   libdispatch.dylib             	0x00000001838d8334 dispatch_once_f$VARIANT$mp + 132</span><br><span class="line">4   XXXX                          	0x0000000104ea8204 +[XXXXX sharedManager] + 1262084 (once.h:84)</span><br><span class="line"></span><br><span class="line">........</span><br><span class="line"></span><br><span class="line">Thread 9 name:  Dispatch queue: com.apple.root.default-qos</span><br><span class="line">Thread 9:</span><br><span class="line">0   libsystem_kernel.dylib        	0x0000000183a69be4 __ulock_wait + 8</span><br><span class="line">1   libdispatch.dylib             	0x00000001838d7198 _dispatch_ulock_wait + 48</span><br><span class="line">2   libdispatch.dylib             	0x00000001838d72f8 _dispatch_thread_event_wait_slow$VARIANT$mp + 44</span><br><span class="line">3   libdispatch.dylib             	0x00000001838e2bbc _dispatch_sync_wait + 452</span><br><span class="line">4   CoreData                      	0x000000018697c3b4 _perform + 268</span><br><span class="line">5   CoreData                      	0x000000018698dd7c -[NSManagedObjectContext+ 953724 (_NestedContextSupport) managedObjectContextDidRegisterObjectsWithIDs:generation:] + 72</span><br><span class="line">6   CoreData                      	0x00000001868d4018 _PFFaultHandlerLookupRow + 564</span><br><span class="line">7   CoreData                      	0x00000001868d39f4 _PF_FulfillDeferredFault + 244</span><br><span class="line">8   CoreData                      	0x00000001868d3804 _sharedIMPL_pvfk_core + 116</span><br><span class="line">9   XXXX                          </span><br><span class="line">10  XXXX                          </span><br><span class="line">11  XXXX                          </span><br><span class="line">12  XXXX                          </span><br><span class="line">13  libdispatch.dylib             	0x00000001838d4ae4 _dispatch_client_callout + 16</span><br><span class="line">14  libdispatch.dylib             	0x00000001838d82ec dispatch_once_f$VARIANT$mp + 60</span><br><span class="line">15  XXXX                          	0x0000000104ea8204 +[XXXXX sharedManager] + 1262084 (once.h:84)</span><br></pre></td></tr></table></figure>
+<p>这个崩溃显然触发了看门狗超时，这种类型的问题出现的一般原因是主线程中存在死锁路径。比如这个例子就是由于dispatch_once的底层实现策略实际上存在不安全情况，同时在并发调用dispatch_once初始化过程可能会出现阻塞主线程导致死锁情况。</p>
+<hr>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">Exception Type:  00000020</span><br><span class="line">Exception Codes: 0x000000008badf00d</span><br><span class="line">Exception Note:  SIMULATED (this is NOT a crash)</span><br><span class="line">Highlighted by Thread:  0</span><br><span class="line"></span><br><span class="line">Application Specific Information: XXXX failed to scene-update after 10.00s</span><br><span class="line">Elapsed total CPU time (seconds): 6.430 (user 6.430, system 0.000), 32% CPU </span><br><span class="line">Elapsed application CPU time (seconds): 4.644, 23% CPU</span><br><span class="line"></span><br><span class="line">Thread 0 name:  Dispatch queue: com.apple.main-thread</span><br><span class="line">Thread 0:</span><br><span class="line">0   libsystem_kernel.dylib        	0x0000000182ad502c semaphore_timedwait_trap + 8</span><br><span class="line">1   libdispatch.dylib             	0x00000001829b2394 _dispatch_semaphore_wait_slow + 160</span><br><span class="line">2   QuartzCore                    	0x0000000185b86b40 -[CAMetalLayer nextDrawable] + 984</span><br><span class="line">3   MetalKit                      	0x0000000192d6e688 -[MTKView currentDrawable] + 80</span><br><span class="line">4   XXXX                         	0x00000001003891d8 -[xxxxx drawInMTKView:] + 3232216 (xxxx.m:0)</span><br><span class="line">5   MetalKit                      	0x0000000192d6f67c -[MTKView draw] + 208</span><br><span class="line">6   XXXX                         	0x0000000100389004 -[xxxxxxx showEffect] + 3231748 (xxxx.m:323)</span><br><span class="line">7   XXXX                         	0x0000000100387270 -[xxxxx layoutSubviews] + 3224176 (xxxx.m:96)</span><br><span class="line">8   UIKit                         	0x00000001880b01e4 -[UIView+ 66020 (CALayerDelegate) layoutSublayersOfLayer:] + 656</span><br><span class="line">9   QuartzCore                    	0x0000000185a4298c -[CALayer layoutSublayers] + 148</span><br><span class="line">10  QuartzCore                    	0x0000000185a3d5c8 CA::Layer::layout_if_needed+ 38344 (CA::Transaction*) + 292</span><br><span class="line">11  QuartzCore                    	0x0000000185a3d488 CA::Layer::layout_and_display_if_needed+ 38024 (CA::Transaction*) + 32</span><br><span class="line">12  QuartzCore                    	0x0000000185a3cab8 CA::Context::commit_transaction+ 35512 (CA::Transaction*) + 252</span><br><span class="line">13  QuartzCore                    	0x0000000185a3c818 CA::Transaction::commit+ 34840 () + 500</span><br><span class="line">14  QuartzCore                    	0x0000000185a35ddc CA::Transaction::observer_callback+ 7644 (__CFRunLoopObserver*, unsigned long, void*) + 80</span><br><span class="line">15  CoreFoundation                	0x0000000182f0c728 __CFRUNLOOP_IS_CALLING_OUT_TO_AN_OBSERVER_CALLBACK_FUNCTION__ + 32</span><br><span class="line">16  CoreFoundation                	0x0000000182f0a4cc __CFRunLoopDoObservers + 372</span><br><span class="line">17  CoreFoundation                	0x0000000182f0a8fc __CFRunLoopRun + 928</span><br><span class="line">18  CoreFoundation                	0x0000000182e34c50 CFRunLoopRunSpecific + 384</span><br><span class="line">19  GraphicsServices              	0x000000018471c088 GSEventRunModal + 180</span><br><span class="line">20  UIKit                         	0x000000018811e088 UIApplicationMain + 204</span><br><span class="line">21  XXXXX                         	0x000000010007b6e0 main + 30432 (main.m:18)</span><br><span class="line">22  libdyld.dylib                 	0x00000001829d28b8 start + 4</span><br></pre></td></tr></table></figure>
+<p>这是一个比较有意思的崩溃，原因上写着<code>SIMULATED (this is NOT a crash)</code>表明并不像上面的主线程阻塞死锁导致的。分析完崩溃上下文并在Xcode动态联调起来后发现是由于主线程代码上存在逻辑循环，在父控件的layoutSubviews里面绘制子控件，同时子控件的绘制动作又会触发父控件的layoutSubviews导致主线程处于逻辑循环状态，表现上是界面卡死最终导致崩溃现象。</p>
+<hr>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">Exception Type:  EXC_CRASH (SIGABRT)</span><br><span class="line">Exception Codes: 0x0000000000000000, 0x0000000000000000</span><br><span class="line">Exception Note:  EXC_CORPSE_NOTIFY</span><br><span class="line">Triggered by Thread:  25</span><br><span class="line"></span><br><span class="line">Application Specific Information:</span><br><span class="line">abort() called</span><br><span class="line"></span><br><span class="line">Thread 25 Crashed:</span><br><span class="line">0   libsystem_kernel.dylib        	0x00000001caf7f0e4 __pthread_kill + 8</span><br><span class="line">1   libsystem_c.dylib             	0x00000001caed7074 __abort + 156</span><br><span class="line">2   libsystem_c.dylib             	0x00000001caed6fd8 __abort + 0</span><br><span class="line">3   libsystem_malloc.dylib        	0x00000001cafd3c7c _malloc_put + 0</span><br><span class="line">4   libsystem_malloc.dylib        	0x00000001cafd3ec0 malloc_zone_error + 108</span><br><span class="line">5   libsystem_malloc.dylib        	0x00000001cafd3758 free_list_checksum_botch + 40</span><br><span class="line">6   libsystem_malloc.dylib        	0x00000001cafd27f0 tiny_malloc_from_free_list + 1316</span><br><span class="line">7   libsystem_malloc.dylib        	0x00000001cafd0728 tiny_malloc_should_clear + 252</span><br><span class="line">8   libsystem_malloc.dylib        	0x00000001cafb959c szone_malloc_should_clear + 80</span><br><span class="line">9   libsystem_malloc.dylib        	0x00000001cafc10bc nanov2_calloc + 168</span><br><span class="line">10  libsystem_malloc.dylib        	0x00000001cafc6f14 default_zone_calloc + 84</span><br><span class="line">11  libsystem_malloc.dylib        	0x00000001cafc4d88 malloc_zone_calloc + 148</span><br><span class="line">12  libsystem_malloc.dylib        	0x00000001cafc5694 calloc + 44</span><br><span class="line">13  libobjc.A.dylib               	0x00000001ca5fa4f4 class_createInstance + 76</span><br><span class="line">14  libobjc.A.dylib               	0x00000001ca60512c _objc_rootAlloc + 56</span><br><span class="line">15  Photos                        	0x00000001da417ad4 -[PHPhotoLibrary fetchPHObjectsForOIDs:propertyHint:includeTrash:] + 476</span><br><span class="line">16  Photos                        	0x00000001da4c62ac -[PHBatchFetchingArray _phObjectsForOIDs:] + 240</span><br><span class="line">17  Photos                        	0x00000001da4c6774 -[PHBatchFetchingArray __batchHelper:] + 344</span><br><span class="line">18  Photos                        	0x00000001da4c698c __41-[PHBatchFetchingArray _phObjectAtIndex:]_block_invoke + 40</span><br><span class="line">19  AssetsLibraryServices         	0x00000001d90a2b3c __pl_dispatch_sync_block_invoke + 44</span><br><span class="line">20  libdispatch.dylib             	0x00000001cadf830c _dispatch_client_callout + 20</span><br><span class="line">21  libdispatch.dylib             	0x00000001cae04cb4 _dispatch_lane_barrier_sync_invoke_and_complete + 60</span><br><span class="line">22  AssetsLibraryServices         	0x00000001d90a2b04 pl_dispatch_sync + 84</span><br><span class="line">23  Photos                        	0x00000001da4c68f4 -[PHBatchFetchingArray _phObjectAtIndex:] + 168</span><br><span class="line">24  Photos                        	0x00000001da4c5a1c -[PHBatchFetchingArray objectAtIndex:] + 48</span><br><span class="line">25  Photos                        	0x00000001da4e7b00 -[PHFetchResult lastObject] + 52</span><br></pre></td></tr></table></figure>
+<p>这个崩溃从堆栈上看比较奇怪，是在系统进行malloc内存分配的时候出现了异常触发了abort()函数。同时这段业务代码调用并不存在可能触发这类异常的逻辑，所以可以大胆猜测这份Crash实际上堆栈已经被破坏了（Heap corruption），最重要的是堆错误的时候可能是在指针出现损坏（野指针）后很久才会被访问到导致崩溃。所以这份奇怪的Crash实际上并非真正导致崩溃的现场，这种情况就需要借助其他内存排查工具去解决。</p>
+<h2 id="内存访问错误（EXC-BAD-ACCESS）"><a href="#内存访问错误（EXC-BAD-ACCESS）" class="headerlink" title="内存访问错误（EXC_BAD_ACCESS）"></a>内存访问错误（EXC_BAD_ACCESS）</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Exception Type:  EXC_BAD_ACCESS (SIGSEGV)</span><br><span class="line">Exception Subtype: KERN_INVALID_ADDRESS at 0x0000000000000000</span><br></pre></td></tr></table></figure>
+<p>当进程试图访问无效的内存（野指针释放、访问错误类型指针）或试图以内存的保护级别所不允许的方式去访问内存（例如写入到只读存储器）的时候会触发内存访问错误。这种现象也被称作堆栈错误（Heap Corruption），同时这份Crash堆栈可能并非是导致这个错误的直接原因，只是正好它访问了这个无效内存导致Crash。</p>
+<p>当出现这种情况我们可能需要到诸如：Zombies Instrument、Xcode Zombie Object（僵尸对象）、Address Sanitizer（地址消毒剂）、Thread Sanitizer（多线程资源访问检测）等工具来排查问题。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">Exception Type:  EXC_BAD_ACCESS (SIGSEGV)</span><br><span class="line">Exception Subtype: KERN_INVALID_ADDRESS at 0x0000000000000010</span><br><span class="line">VM Region Info: 0x10 is not in any region.  Bytes before following region: 4307648496</span><br><span class="line">      REGION TYPE                      START - END             [ VSIZE] PRT/MAX SHRMOD  REGION DETAIL</span><br><span class="line">      UNUSED SPACE AT START</span><br><span class="line">---&gt;  </span><br><span class="line">      __TEXT                 0000000100c18000-0000000105820000 [ 76.0M] r-x/r-x SM=COW</span><br><span class="line"></span><br><span class="line">Termination Signal: Segmentation fault: 11</span><br><span class="line">Termination Reason: Namespace SIGNAL, Code 0xb</span><br><span class="line">Terminating Process: exc handler [0]</span><br><span class="line">Triggered by Thread:  29</span><br><span class="line"></span><br><span class="line">....</span><br><span class="line"></span><br><span class="line">Thread 29 name:  Dispatch queue: com.meitu.hawkeye.status_flush</span><br><span class="line">Thread 29 Crashed:</span><br><span class="line">0   libobjc.A.dylib               	0x000000018170216c cache_t::find+ 24940 (unsigned long, objc_object*) + 20</span><br><span class="line">1   libobjc.A.dylib               	0x00000001817022f0 cache_fill + 288</span><br><span class="line">2   libobjc.A.dylib               	0x000000018170db24 lookUpImpOrForward + 496</span><br><span class="line">3   libobjc.A.dylib               	0x0000000181718c38 _objc_msgSend_uncached + 56</span><br><span class="line">4   CoreFoundation                	0x000000018254acd0 __exceptionPreprocess + 40</span><br><span class="line">5   libobjc.A.dylib               	0x00000001817045ec objc_exception_throw + 56</span><br><span class="line">6   Foundation                    	0x0000000182f76d7c _NSErrnoMessage + 0</span><br><span class="line">7   CoreFoundation                	0x0000000182512a70 __CFStringChangeSizeMultiple + 3044</span><br><span class="line">8   CoreFoundation                	0x000000018250ef00 __CFStringAppendBytes + 640</span><br><span class="line">9   CoreFoundation                	0x000000018250a0d4 __CFStringAppendFormatCore + 14052</span><br><span class="line">10  CoreFoundation                	0x000000018250a740 _CFStringCreateWithFormatAndArgumentsAux2 + 132</span><br><span class="line">11  Foundation                    	0x0000000182ea3f5c -[NSString initWithFormat:locale:] + 36</span><br><span class="line">12  Foundation                    	0x0000000182ea3ed4 -[NSNumber descriptionWithLocale:] + 1044</span><br><span class="line">13  CoreFoundation                	0x000000018245ed84 -[__NSCFNumber descriptionWithLocale:] + 72</span><br><span class="line">14  Foundation                    	0x0000000182ed2168 _NSDescriptionWithLocaleFunc + 76</span><br><span class="line">15  CoreFoundation                	0x0000000182508fd8 __CFStringAppendFormatCore + 9704</span><br><span class="line">16  CoreFoundation                	0x000000018250a740 _CFStringCreateWithFormatAndArgumentsAux2 + 132</span><br><span class="line">17  Foundation                    	0x0000000182e84b88 +[NSString stringWithFormat:] + 68</span><br><span class="line">18  MTHawkeyeInjection            	0x0000000108db63c8 -[PodMTHawkeyeInjection_MTHawkeyeClient doBuildInFlushStatusTasks] + 132</span><br><span class="line">19  MTHawkeyeInjection            	0x0000000108db62f4 -[PodMTHawkeyeInjection_MTHawkeyeClient statusFlushTimerFired] + 28</span><br><span class="line">20  MTHawkeyeInjection            	0x0000000108db6228 __62-[PodMTHawkeyeInjection_MTHawkeyeClient startStatusFlushTimer]_block_invoke + 40</span><br><span class="line">21  libdispatch.dylib             	0x0000000181e3cae4 _dispatch_client_callout + 16</span><br><span class="line">22  libdispatch.dylib             	0x0000000181e797a8 _dispatch_continuation_pop$VARIANT$armv81 + 416</span><br><span class="line">23  libdispatch.dylib             	0x0000000181e82c20 _dispatch_source_invoke$VARIANT$armv81 + 1248</span><br><span class="line">24  libdispatch.dylib             	0x0000000181e7b074 _dispatch_queue_serial_drain$VARIANT$armv81 + 248</span><br><span class="line">25  libdispatch.dylib             	0x0000000181e7bad8 _dispatch_queue_invoke$VARIANT$armv81 + 328</span><br><span class="line">26  libdispatch.dylib             	0x0000000181e7c47c _dispatch_root_queue_drain_deferred_wlh$VARIANT$armv81 + 332</span><br><span class="line">27  libdispatch.dylib             	0x0000000181e8444c _dispatch_workloop_worker_thread$VARIANT$armv81 + 612</span><br><span class="line">28  libsystem_pthread.dylib       	0x000000018216fe70 _pthread_wqthread + 860</span><br><span class="line">29  libsystem_pthread.dylib       	0x000000018216fb08 start_wqthread + 4</span><br></pre></td></tr></table></figure>
+<p>这个Crash的<code>Exception Subtype</code>部分告诉我们这是一个由访问野指针造成的崩溃。同时我们再看一看它的崩溃线程堆栈，在这一段业务代码逻辑的<code>[NSString stringWithFormat:]</code>是在ARC环境中栈对象，所以理论上并不是它产生了这个野指针。这时候要解决这个Crash就必须要借助Address Sanitizer或者Zombie Object来找到产生野指针的对象。</p>
+<hr>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">Exception Type:  EXC_BAD_ACCESS (SIGSEGV)</span><br><span class="line">Exception Subtype: KERN_INVALID_ADDRESS at 0x0000000000000000</span><br><span class="line">VM Region Info: 0 is not in any region.  Bytes before following region: 4301012992</span><br><span class="line">      REGION TYPE                      START - END             [ VSIZE] PRT/MAX SHRMOD  REGION DETAIL</span><br><span class="line">      UNUSED SPACE AT START</span><br><span class="line">---&gt;  </span><br><span class="line">      __TEXT                 00000001005c4000-0000000103b3c000 [ 53.5M] r-x/r-x SM=COW  ...pp/XXXXX</span><br><span class="line"></span><br><span class="line">Termination Signal: Segmentation fault: 11</span><br><span class="line">Termination Reason: Namespace SIGNAL, Code 0xb</span><br><span class="line">Terminating Process: exc handler [0]</span><br><span class="line">Triggered by Thread:  0</span><br><span class="line"></span><br><span class="line">Thread 0 name:  Dispatch queue: com.apple.main-thread</span><br><span class="line">Thread 0 Crashed:</span><br><span class="line">0   libobjc.A.dylib               	0x000000018016d6bc lookUpImpOrForward + 92</span><br><span class="line">1   libobjc.A.dylib               	0x000000018016d6b4 lookUpImpOrForward + 84</span><br><span class="line">2   libobjc.A.dylib               	0x0000000180178758 _objc_msgSend_uncached + 56</span><br><span class="line">3   StoreKit                      	0x000000019438b980 __NotifyObserverAboutRestoreTransactionsFailure + 48</span><br><span class="line">4   CoreFoundation                	0x0000000180de37a0 CFArrayApplyFunction + 80</span><br><span class="line">5   StoreKit                      	0x000000019438b934 -[SKPaymentQueue _notifyObserversRestoreTransactionsFailedWithError:] + 144</span><br><span class="line">6   StoreKit                      	0x000000019438a4d4 -[SKPaymentQueue _completeRestoreWithMessage:] + 188</span><br><span class="line">7   StoreKit                      	0x000000019438b328 __44-[SKPaymentQueue _handleMessage:connection:]_block_invoke + 168</span><br><span class="line">8   libdispatch.dylib             	0x000000018089aa54 _dispatch_call_block_and_release + 24</span><br><span class="line">9   libdispatch.dylib             	0x000000018089aa14 _dispatch_client_callout + 16</span><br><span class="line">10  libdispatch.dylib             	0x00000001808dbc80 _dispatch_main_queue_callback_4CF$VARIANT$armv81 + 968</span><br><span class="line">11  CoreFoundation                	0x0000000180ec6544 __CFRUNLOOP_IS_SERVICING_THE_MAIN_DISPATCH_QUEUE__ + 12</span><br><span class="line">12  CoreFoundation                	0x0000000180ec4120 __CFRunLoopRun + 2012</span><br><span class="line">13  CoreFoundation                	0x0000000180de3e58 CFRunLoopRunSpecific + 436</span><br><span class="line">14  GraphicsServices              	0x0000000182c90f84 GSEventRunModal + 100</span><br><span class="line">15  UIKit                         	0x000000018a46367c UIApplicationMain + 236</span><br><span class="line">16  XXXXX                         	0x0000000100a302b4 main + 4637364 (main.m:16)</span><br><span class="line">17  libdyld.dylib                 	0x000000018090056c start + 4</span><br></pre></td></tr></table></figure>
+<p>这是一个比较奇怪的Crash，表现上是使用Apple内购IAP的时候触发支付动作点击取消低概率崩溃。从它的崩溃堆栈上看表明是KVO对象已经释放但仍然给它发送消息导致的内存访问崩溃。对于这个Crash的原因推测是在StoreKit（另外一个系统进程）出现观察者对象释放异常，当在非当次访问时就出现Crash。</p>
+<p>这里涉及到IAP业务中的编码逻辑，原来的做法在一个单例中全局观察StoreKit的操作类似如下逻辑：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">+  (instancetype)shared &#123;</span><br><span class="line">    static dispatch_once_t onceToken;</span><br><span class="line">    static id shared;</span><br><span class="line">    dispatch_once(&amp;onceToken, ^&#123;</span><br><span class="line">        shared = [[self alloc] init];</span><br><span class="line">    &#125;);</span><br><span class="line">    return shared;</span><br><span class="line">&#125;</span><br><span class="line">- (instancetype)init &#123;</span><br><span class="line">    self = [super init];</span><br><span class="line">    if (self) &#123;</span><br><span class="line">        [[SKPaymentQueue defaultQueue] addTransactionObserver:self];</span><br><span class="line">    &#125;</span><br><span class="line">    return self;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>也就是这个App程序进程释放前都会一致观察着StoreKit，大概率是这段业务存在异常情况。故在后续版本中修改为支付、恢复业务单次观察单次移除的情况。</p>
+<h2 id="解决Crash的一点思路"><a href="#解决Crash的一点思路" class="headerlink" title="解决Crash的一点思路"></a>解决Crash的一点思路</h2><p>在解决一个Crash的思路核心总结起来大概就这么两点：</p>
+<ol>
+<li>动态联调与场景复现</li>
+<li>逻辑分析与合理推测</li>
+</ol>
+<p>对于一个Crash，假如它的复现路径是明确的，那基本上就是把Xcode开起来动态联调一下相关的业务代码分析一下逻辑就解决的事情了:)。然而我们常常拿到的Crash Report都是线上难以复现的问题，并没有十分明确的复现路径（毕竟在编码、自测与自动化测试阶段就已经规避掉一波了）。</p>
+<p>就我目前遇到的Crash Report来说，均为EXC_CRASH和EXC_BAD_ACCESS这两类。对于EXC_BREAKPOINT、EXC_BAD_INSTRUCTION等等类型的Crash还没见识到。故在这里总结一下解决这两类问题的一点点思路和方法。</p>
+<p>在解决Crash的路上最重要一点的是要善用现有工具，比如在Xcode联调时我们进行代码调试的时候可以在<a href="https://developer.apple.com/documentation/code_diagnostics?language=objc" target="_blank" rel="noopener">Code Diagnostics</a>中开启内存、线程调试选项。<br><img src="/images/15870010478670.jpg" alt=""></p>
+<h3 id="对于未捕获异常（EXC-CRASH）"><a href="#对于未捕获异常（EXC-CRASH）" class="headerlink" title="对于未捕获异常（EXC_CRASH）"></a>对于未捕获异常（EXC_CRASH）</h3><p>在我们连上Xcode开始调试的时候一定要记得加一个全局的异常断点（Breakpoint navigator —&gt; Create a breakpoint —&gt; Exception Breakpoint），然后就可以到对应的业务场景流程中尝试复现问题路径了。<br><img src="/images/15869397614143.jpg" alt=""></p>
+<p>比如当我们写一段数组访问越界崩溃代码，Xcode就能立马帮我们定位出问题代码的位置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NSArray *array = [NSArray new];</span><br><span class="line">id object = [array objectAtIndex:0];</span><br></pre></td></tr></table></figure></p>
+<p><img src="/images/15870017052760.jpg" alt=""></p>
+<p>当然了现实中当我们遇到低概率路径崩溃的时候，这种联调找复现路径是一种十分低效的方式。那能怎么办呢？我们可以直接到Crash出现的崩溃上下文附近进行合理的代码逻辑分析与崩溃原因推测，然后再不引入副作用的前提下通过自动化场景复现这类问题。</p>
+<h3 id="对于内存问题（EXC-BAD-ACCESS）"><a href="#对于内存问题（EXC-BAD-ACCESS）" class="headerlink" title="对于内存问题（EXC_BAD_ACCESS）"></a>对于内存问题（EXC_BAD_ACCESS）</h3><p>这类问题是线上崩溃中最让人头疼的一类问题，原理还是当出现内存访问问题而导致崩溃的时候上报的Crash Report有可能并非出现野指针的真凶。崩溃现场仅有一些参考意义，在大型多人合作的项目中还十分不容易定位到相应的模块。</p>
+<p>当然了在ARC环境下Objective-C和Swift高级对象编码中一般而言是不容易存在访问野指针的内存操作（强行非法访问栈内存），反而在直接调用malloc()这种更底层分配堆内存的时候一不小心就有可能造成野指针内存。</p>
+<p>所以在开发调试阶段我们就有必要有意识地利用好工具来规避可能存在内存问题，<a href="https://developer.apple.com/documentation/code_diagnostics/address_sanitizer?language=objc" target="_blank" rel="noopener">Address Sanitizer</a>就是现阶段Xcode上最有效的工具（比Zombie Objects适用范围更广）。</p>
+<p>从文档上看，这个工具可以帮助我们发现以下几种问题：</p>
+<ul>
+<li><p>访问已释放内存（Use of Deallocated Memory）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">__unsafe_unretained MyClass *unsafePointer;</span><br><span class="line">@autoreleasepool &#123;    </span><br><span class="line">    MyClass *object = [MyClass new];</span><br><span class="line">    unsafePointer = object;</span><br><span class="line">&#125;</span><br><span class="line">NSLog(@&quot;%d&quot;, unsafePointer-&gt;instanceVariable); </span><br><span class="line">// Error: unsafePointer is deallocated in autorelease pool</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>再次释放已释放的内存（Deallocation of Deallocated Memory）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">int *pointer = malloc(sizeof(int));</span><br><span class="line">free(pointer);</span><br><span class="line">free(pointer); // Error: free called twice with the same memory address</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>释放未分配的内存（Deallocation of Nonallocated Memory）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">int value = 42;</span><br><span class="line">free(&amp;value); // Error: free called on stack allocated variable</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在函数返回后访问函数内的栈上内存（Use of Stack Memory After Function Return）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">int *integer_pointer_returning_function() &#123;</span><br><span class="line">    int value = 42;</span><br><span class="line">    return &amp;value;</span><br><span class="line">&#125;</span><br><span class="line">int *integer_pointer = integer_returning_function();</span><br><span class="line">*integer_pointer = 43; // Error: invalid access of returned stack memory</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>访问非同一代码块作用域的栈上内存（Use of Out-of-Scope Stack Memory）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">int *pointer = NULL;</span><br><span class="line">if (bool_returning_function()) &#123;</span><br><span class="line">    int value = integer_returning_function();</span><br><span class="line">    pointer = &amp;value;</span><br><span class="line">&#125;</span><br><span class="line">*pointer = 42; // Error: invalid access of stack memory out of declaration scope</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>缓存区溢出（Overflow and Underflow of Buffers）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">int global_array[10] = &#123;0, 1, 2, 3, 4, 5, 6, 7, 8, 9&#125;;</span><br><span class="line">void foo() &#123;</span><br><span class="line">    int idx = 10;</span><br><span class="line">    global_array[idx] = 42; // Error: out of bounds access of global variable</span><br><span class="line">    char *heap_buffer = malloc(10);</span><br><span class="line">    heap_buffer[idx] = &apos;x&apos;; // Error: out of bounds access of heap allocated variable</span><br><span class="line">    char stack_buffer[10];</span><br><span class="line">    stack_buffer[idx] = &apos;x&apos;; // Error: out of bounds access of stack allocated variable</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>C++容器溢出（Overflow of C++ Containers）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">std::vector&lt;int&gt; vector;vector.push_back(0);vector.push_back(1);vector.push_back(2);</span><br><span class="line">auto *pointer = &amp;vector[0];</span><br><span class="line">return pointer[3]; // Error: out of bounds access for vector</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>其中我们最为可能遇到的问题是：<strong>访问已释放内存</strong>和<strong>缓存区溢出</strong>这两种问题。比如这里造一个缓存区溢出场景，当开启这个功能后能够抓到相应的运行上下文。<br><img src="/images/15870044052041.jpg" alt=""></p>
+<p>额外的，现实中还存在内存泄漏（Memory Leak）和OOM（Out of Memory）这两种内存问题同样会导致程序崩溃且收集不到对于的Crash报告，这两个问题从开发阶段就要借助Xcode Debug Memory Graph或者Instrument Leak模板重点关注。</p>
+<p>总的来说就是对于Crash不要担心解决不掉，更需要我们善用到Apple提供的调试工具。从Xcode、Instrument到LLDB总有一款能够帮助你找到崩溃时的一些线索再推断出它出现的原因从而解决它。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://developer.apple.com/videos/play/wwdc2018/414/" target="_blank" rel="noopener">WWDC2018-414，Understanding Crashes and Crash Logs</a><br><a href="https://developer.apple.com/videos/play/wwdc2017/414/" target="_blank" rel="noopener">WWDC2017-414，Engineering for Testability</a><br><a href="https://developer.apple.com/documentation/code_diagnostics?language=objc" target="_blank" rel="noopener">Code Diagnostics</a><br><a href="https://mp.weixin.qq.com/s/MW02G1qiyce9v2cRYHCzLQ" target="_blank" rel="noopener">iOS App 后台任务的坑</a><br><a href="https://forums.developer.apple.com/thread/85066" target="_blank" rel="noopener">UIApplication Background Task Notes</a><br><a href="https://satanwoo.github.io/2016/04/11/dispatch-once/" target="_blank" rel="noopener">滥用单例之dispatch_once死锁</a><br><a href="http://colin1994.github.io/2019/12/27/iOS-Memory-Debug/?utm_source=tuicool&amp;utm_medium=referral" target="_blank" rel="noopener">iOS 内存调试技巧</a><br><a href="https://sunjinshuai.github.io/2017/05/10/%E6%B5%85%E8%B0%88-Zombie-Objects/" target="_blank" rel="noopener">浅谈 Zombie Objects</a><br><a href="http://mrpeak.cn/blog/thread-sanitizer/" target="_blank" rel="noopener">如何用Xcode8解决多线程问题</a><br><a href="https://www.jianshu.com/p/ddb32f683a54" target="_blank" rel="noopener">【迁移】Xcode7新特性AddressSanitizer</a></p>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="http://jslibs.wuxubj.cn/sweetalert_mini/jquery-1.7.1.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/archives/952f054c.html">Crash及其分析技巧的一点心得</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
+  <p><span>发布时间:</span>2020年04月16日 - 10:04</p>
+  <p><span>最后更新:</span>2020年04月16日 - 10:04</p>
+  <p><span>原始链接:</span><a href="/archives/952f054c.html" title="Crash及其分析技巧的一点心得">https://hello-david.github.io/archives/952f054c.html</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/952f054c.html"  aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
+</div>
+<script> 
+    var clipboard = new Clipboard('.fa-clipboard');
+    clipboard.on('success', $(function(){
+      $(".fa-clipboard").click(function(){
+        swal({   
+          title: "",   
+          text: '复制成功',   
+          html: false,
+          timer: 500,   
+          showConfirmButton: false
+        });
+      });
+    }));  
+</script>
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/工程上的二三事/" rel="tag"># 工程上的二三事</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/archives/4397956c.html" rel="next" title="iOS中的并发编程与GCD的一些认知">
+                <i class="fa fa-chevron-left"></i> iOS中的并发编程与GCD的一些认知
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/archives/3d1fb5d7.html" rel="prev" title="从ARKit上找到你的人脸">
+                从ARKit上找到你的人脸 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">David Dai</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#未捕获异常（EXC-CRASH）"><span class="nav-number">1.</span> <span class="nav-text">未捕获异常（EXC_CRASH）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内存访问错误（EXC-BAD-ACCESS）"><span class="nav-number">2.</span> <span class="nav-text">内存访问错误（EXC_BAD_ACCESS）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决Crash的一点思路"><span class="nav-number">3.</span> <span class="nav-text">解决Crash的一点思路</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#对于未捕获异常（EXC-CRASH）"><span class="nav-number">3.1.</span> <span class="nav-text">对于未捕获异常（EXC_CRASH）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对于内存问题（EXC-BAD-ACCESS）"><span class="nav-number">3.2.</span> <span class="nav-text">对于内存问题（EXC_BAD_ACCESS）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">David Dai</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+-->
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

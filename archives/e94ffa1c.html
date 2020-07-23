@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="工作原理," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="内存——它的硬件实体称作RAM（随机存储器），它的基本特点就是和CPU数据交换速度快、断电易失。在iPhone这类嵌入式设备上通常被认为是资源有限（目前最大的容量也才4GB），而iOS中又该如何高效的利用这一块存储器呢？ 让我们从官方文档：  Advanced Memory Management Programming Guide Memory Management Programming Gui">
+<meta name="keywords" content="工作原理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS中的内存布局与管理">
+<meta property="og:url" content="https://hello-david.github.io/archives/e94ffa1c.html">
+<meta property="og:site_name" content="David&#39;Blog">
+<meta property="og:description" content="内存——它的硬件实体称作RAM（随机存储器），它的基本特点就是和CPU数据交换速度快、断电易失。在iPhone这类嵌入式设备上通常被认为是资源有限（目前最大的容量也才4GB），而iOS中又该如何高效的利用这一块存储器呢？ 让我们从官方文档：  Advanced Memory Management Programming Guide Memory Management Programming Gui">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://hello-david.github.io/images/15697505891002.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15697500779911.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15697521651237.png">
+<meta property="og:image" content="https://hello-david.github.io/images/28C881FD-BABC-4C65-B9E3-74A97055C67D.png">
+<meta property="og:image" content="https://hello-david.github.io/images/8F14A520-C3F7-4A83-8014-F2E42E89B009.png">
+<meta property="og:image" content="https://hello-david.github.io/images/1C6CE8A3-29F0-441A-87D2-7D10F376F2EC.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15705279274040.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/62F922F4-2E41-4EA8-99A5-20023E8BE0D0.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15706888713871.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15707125770025.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15708731978175.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15708732454327.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15708743597919.png">
+<meta property="og:updated_time" content="2019-10-12T10:35:21.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS中的内存布局与管理">
+<meta name="twitter:description" content="内存——它的硬件实体称作RAM（随机存储器），它的基本特点就是和CPU数据交换速度快、断电易失。在iPhone这类嵌入式设备上通常被认为是资源有限（目前最大的容量也才4GB），而iOS中又该如何高效的利用这一块存储器呢？ 让我们从官方文档：  Advanced Memory Management Programming Guide Memory Management Programming Gui">
+<meta name="twitter:image" content="https://hello-david.github.io/images/15697505891002.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hello-david.github.io/archives/e94ffa1c.html"/>
+
+
+
+<meta name="google-site-verification" content="xPc40P1FFnuv2Aer8rA72v2doNkgf1bEhU79GGlStmE" />
+
+
+  <title>iOS中的内存布局与管理 | David'Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">David'Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/e94ffa1c.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="David Dai">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="David'Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">iOS中的内存布局与管理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-12T18:35:21+08:00">
+                2019-10-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/工作原理/" itemprop="url" rel="index">
+                    <span itemprop="name">工作原理</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>内存——它的硬件实体称作RAM（随机存储器），它的基本特点就是和CPU数据交换速度快、断电易失。在iPhone这类嵌入式设备上通常被认为是资源有限（目前最大的容量也才4GB），而iOS中又该如何高效的利用这一块存储器呢？</p>
+<p>让我们从官方文档：</p>
+<ul>
+<li><a href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/MemoryMgmt/Articles/MemoryMgmt.html#//apple_ref/doc/uid/10000011-SW1" target="_blank" rel="noopener">Advanced Memory Management Programming Guide</a></li>
+<li><a href="https://developer.apple.com/library/archive/documentation/CoreFoundation/Conceptual/CFMemoryMgmt/CFMemoryMgmt.html#//apple_ref/doc/uid/10000127i" target="_blank" rel="noopener">Memory Management Programming Guide for Core Foundation</a></li>
+<li><a href="https://developer.apple.com/library/archive/documentation/Performance/Conceptual/ManagingMemory/ManagingMemory.html#//apple_ref/doc/uid/10000160-SW1" target="_blank" rel="noopener">Memory Usage Performance Guidelines</a></li>
+</ul>
+<p>开始深入学习iOS的程序在运行时候关于内存的一些话题。</p>
+<h2 id="内存相关基本概念"><a href="#内存相关基本概念" class="headerlink" title="内存相关基本概念"></a>内存相关基本概念</h2><p>在深入学习内存相关的话题之前有必有先明白：”<strong>虚拟内存</strong>“和”<strong>物理内存</strong>“这个两个基本概念。</p>
+<p>首先我们知道在32位计算机系统里面它的寻址空间是2的32次方约为4GB，意味着在32位的计算机系统中理论上支持的内存物理最大寻址空间是4GB，然而现实中一台设备的内存可能达不到4GB，但从程序设计的角度上来说都希望有4GB这么大的空间。</p>
+<p>所以衍生了一个<strong>虚拟（逻辑）地址</strong>的概念，程序内记录的都是虚拟（逻辑）地址，而从逻辑地址到物理地址最终将由CPU中的一个硬件单元MMU进行映射，这样子每个程序都能够有0x00000000~0xffffffff的寻址空间。<br><img src="/images/15697505891002.png" alt=""></p>
+<p>在iOS系统中虚拟内存（使用逻辑地址表示的内存空间）到物理内存映射流程如下图：<br><img src="/images/15697500779911.png" alt=""><br>在应用程序中在用户空间使用API调用生成的堆Heap转换成App VM再转成内核空间中的VM Object，然后以4K对齐的方式一个个排列到物理空间中。</p>
+<h2 id="程序对象内存基本布局"><a href="#程序对象内存基本布局" class="headerlink" title="程序对象内存基本布局"></a>程序对象内存基本布局</h2><p>根据下图可知在iOS中一个对象的内存基本布局中包含的数据空间，可不仅仅是由用户申请的堆空间，还包含一些其他的信息。主要包括代码部分（<strong>TEXT）以及全局数据（</strong>DATA），动态库(Dynamic Libraries)，GPU驱动内存(GPU Driver Memory)，malloc堆(malloc heap)以及其他空间。<br><img src="/images/15697521651237.png" alt=""></p>
+<p>在iOS设备上的内存空间是有限的，而这些对象所占用的有效内存空间又被归类为两类：</p>
+<ul>
+<li><p>脏内存(Dirty Memory)：无法被系统主动回收的内存空间，主要包括：</p>
+<ul>
+<li>所有堆上的对象</li>
+<li>图片解码缓冲数据(Decoded image buffers)</li>
+<li>Frameworks 中的 <strong>DATA 和 </strong>DATA_DIRTY部分</li>
+</ul>
+</li>
+<li><p>干净内存(Clean Memory)：可以被系统主动回收的内存空间且在需要时能重新加载的数据，主要包括：</p>
+<ul>
+<li>Memory mapped files</li>
+<li>Frameworks 中的 __DATA_CONST 部分</li>
+<li>应用的二进制可执行文件</li>
+</ul>
+</li>
+</ul>
+<p>比如在iOS中常见的字符串对象NSString可能由于生成方式不同就归属为不同空间类型：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NSString *welcomeMessage = @”Welcome to WWDC!”;// Clean</span><br><span class="line">NSString *welcomeMessage = [NSString stringWithString:@”Welcome to WWDC!”];// Dirty</span><br></pre></td></tr></table></figure></p>
+<p>而无法被检索或者重新创建的内存空间被称为无效内存，回收它唯一的办法只有终止它的所属进程。其中App产生的大部分空间内存属于Dirty Memory，一个高效的操作系统必然会有一套高效的内存管理方案。接下来我们从两个层次上来学习iOS中如何管理内存空间的。</p>
+<h2 id="系统级的内存管理"><a href="#系统级的内存管理" class="headerlink" title="系统级的内存管理"></a>系统级的内存管理</h2><p>根据文档上的描述，在iOS系统中App的基本内存管理原则是保证前台App的运行，可能回收后台App内存（这也是iOS中常常被说到的假后台机制）。首先当一个App在登录的时候，它所占用的Virtual Memory基本机构如下图：<br><img src="/images/28C881FD-BABC-4C65-B9E3-74A97055C67D.png" alt=""><br>在运行一段时间后这个App的内存占用大幅度上涨（主要是Dirty Memory)，这个时候让系统感受到了内存压力较大，它就会触发内存回收，把后台应用的内存空间回收回来给前台应用使用。<br><img src="/images/8F14A520-C3F7-4A83-8014-F2E42E89B009.png" alt=""><br><img src="/images/1C6CE8A3-29F0-441A-87D2-7D10F376F2EC.png" alt=""><br>内存管理的总体行为如上面，在查找各种文档后找到其中几种回收管理的具体技术：</p>
+<ul>
+<li>脏内存压缩技术——Compressed Memory</li>
+<li>内存警告机制——<a href="https://developer.apple.com/documentation/uikit/app_and_environment/managing_your_app_s_life_cycle/responding_to_memory_warnings?language=objc" target="_blank" rel="noopener">Responding to Memory Warnings</a></li>
+<li>低内存回收机制——Jetsam</li>
+</ul>
+<p>对于iOS中的Compressed Memory技术的由来引用一段话：</p>
+<blockquote>
+<p>由于闪存容量和读写寿命的限制，iOS 上没有Disk swap机制，取而代之使用 Compressed memory。 Disk swap 是指在 macOS 以及一些其他桌面操作系统中，当内存可用资源紧张时，系统将内存中的内容写入磁盘中的backing store (Swapping out)，并且在需要访问时从磁盘中再读入 RAM (Swapping in)。与大多数 UNIX 系统不同的是，macOS 没有预先分配磁盘中的一部分作为 backing store，而是利用引导分区所有可用的磁盘空间。</p>
+</blockquote>
+<blockquote>
+<p>苹果最初只是公开了从 OS X Mavericks 开始使用 Compressed memory 技术，但 iOS 系统也从 iOS 7 开始悄悄地使用。从 <a href="https://images.apple.com/media/us/osx/2013/docs/OSX_Mavericks_Core_Technology_Overview.pdf" target="_blank" rel="noopener">OS X Mavericks Core Technology Overview</a> 文档中可以了解到该技术在内存紧张时能够将最近使用过的内存占用压缩至原有大小的一半以下，并且能够在需要时解压复用。它在节省内存的同时提高了系统的响应速度，其特点可以归结为：</p>
+<ul>
+<li>Shrinks memory usage 减少了不活跃内存占用</li>
+<li>Improves power efficiency 改善电源效率，通过压缩减少磁盘IO带来的损耗</li>
+<li>Minimizes CPU usage 压缩/解压十分迅速，能够尽可能减少 CPU 的时间开销</li>
+<li>Is multicore aware 支持多核操作</li>
+</ul>
+</blockquote>
+<p>程序运行时所需的内存空间是一个动态的过程。在内存可用空间紧张的时候桌面系统利用Disk Swap机制搬回磁盘中增大物理内存空间可用量，iOS系统则利用压缩内存技术将一部分Dirty Memory压缩增加当前物理内存空间可用量。</p>
+<p><img src="/images/15705279274040.jpg" alt=""></p>
+<p>在当压缩脏内存依然不解决问题，导致内存压力过大则会触发内存警报（有可能还会先尝试先把后台App的内存回收回来，未找到详细细节资料表明这一点），可通过以下四种途径获取警报：</p>
+<ul>
+<li><code>applicationDidReceiveMemoryWarning</code>协议方法</li>
+<li><code>[UIViewController didReceiveMemoryWarning]</code> 实例方法</li>
+<li><code>UIApplicationDidReceiveMemoryWarningNotification</code> 内存警告通知</li>
+<li><code>DISPATCH_SOURCE_TYPE_MEMORYPRESSURE</code> Dispatch触发源</li>
+</ul>
+<p>这时候开发者收到内存警报后可以主动回收程序的内存空间，以达到缓解系统内存空间使用压力。假如App的占用内存还是控制不住的时候最终将导致OOM(Out of Memory)崩溃。这个内存崩溃依赖于系统提供的低内存回收机制——Jetsam。</p>
+<p>对于Jetsam的设计细节探究文档还比较少，从<a href="http://newosxbook.com/articles/MemoryPressure.html" target="_blank" rel="noopener">MemoryPressure</a>和<a href="https://satanwoo.github.io/2017/10/18/abort/" target="_blank" rel="noopener">iOS内存abort(Jetsam) 原理探究</a>这两篇文章大致可以理解在iOS系统中存在一种系统级的内存回收服务(Jetsam)。它是一个常驻在系统中的进程，它在内核中的线程执行优先级比其他进程的执行优先级都要高，这也是它能够强制回收内存空间的缘故。</p>
+<h2 id="程序级的内存管理"><a href="#程序级的内存管理" class="headerlink" title="程序级的内存管理"></a>程序级的内存管理</h2><p>上面提到了在iOS系统中是如何保证一个App正常运行所需的内存空间，而显然它的能力也是有上限的，不可能整出一个无限大的运行空间。即需要我们在程序设计上主动管理内存创建、释放过程从而保证这个程序能够运行正常、高效。</p>
+<p>内存中的对象只有两种状态：存活和释放，在文档中官方建议避免出现长时间占用内存而不及时回收它的情况：<br><img src="/images/62F922F4-2E41-4EA8-99A5-20023E8BE0D0.png" alt=""></p>
+<p>那么在iOS系统中应该如何通过程序设计来实现这一目的呢？</p>
+<p>首先在iOS系统中使用<strong>引用计数</strong>来管理对象内存，它的原理也很简单，当一个对象的计数器不为0的时候表示这个对象需要被使用，故而是需存活的，会占用一定的内存空间。当计数器为0的时候则表示这个对象不需要被使用了，故而是释放的，内存会在某个时机被系统回收掉。而依赖于这个技术原理开发者可以选择使用MRC或者ARC去设计程序。</p>
+<p>ps：当然其他平台上可能还有其他管理对象内存的手段如：垃圾回收机制。</p>
+<h3 id="手动时代——MRC"><a href="#手动时代——MRC" class="headerlink" title="手动时代——MRC"></a>手动时代——MRC</h3><p>MRC全称Manual Reference Counting即手工引用计数。在iOS早期版本中开发者们需要利用引用计数这个管理对象内存手段主动去管理内存空间。主动管理内存需要遵循四个基本原则：</p>
+<blockquote>
+<ol>
+<li>You own any object you create<br>You create an object using a method whose name begins with “alloc”, “new”, “copy”, or “mutableCopy” (for example, alloc, newObject, or mutableCopy).</li>
+</ol>
+</blockquote>
+<blockquote>
+<ol start="2">
+<li>You can take ownership of an object using retain<br>A received object is normally guaranteed to remain valid within the method it was received in, and that method may also safely return the object to its invoker. You use retain in two situations: (1) In the implementation of an accessor method or an init method, to take ownership of an object you want to store as a property value; and (2) To prevent an object from being invalidated as a side-effect of some other operation (as explained in Avoid Causing Deallocation of Objects You’re Using).</li>
+</ol>
+</blockquote>
+<blockquote>
+<ol start="3">
+<li>When you no longer need it, you must relinquish ownership of an object you own<br>You relinquish ownership of an object by sending it a release message or an autorelease message. In Cocoa terminology, relinquishing ownership of an object is therefore typically referred to as “releasing” an object.</li>
+</ol>
+</blockquote>
+<blockquote>
+<ol start="4">
+<li>You must not relinquish ownership of an object you do not own<br>This is just corollary of the previous policy rules, stated explicitly.</li>
+</ol>
+</blockquote>
+<ol>
+<li>自己创建自己持有</li>
+<li>非自己生成的对象，自己也可以持有</li>
+<li>不需要的自己持有的对象时释放</li>
+<li>非自己持有的对象无法释放</li>
+</ol>
+<p>从目的考虑就是要保证对象的计数器在被使用的时候应该是不为0，当不需要被使用的时候为0，达到及时回收内存空间的目的。在MRC中引起对象计数器变化的动作如下：<br><img src="/images/15706888713871.jpg" alt=""></p>
+<p>接下来我们来简单看几个示例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">// 对象使用完回收内存空间</span><br><span class="line">&#123;</span><br><span class="line">    Person *aPerson = [[Person alloc] init];// 计数器+1</span><br><span class="line">    // ...</span><br><span class="line">    NSString *name = aPerson.fullName;</span><br><span class="line">    // ...</span><br><span class="line">    [aPerson release];// 计数器-1，aPerson.counter == 0将执行内存释放函数</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 使用autorelease标记为延迟释放对象等[autoReleasePool drain]的时候再回收内存空间</span><br><span class="line">- (NSString *)fullName &#123;</span><br><span class="line">    NSString *string = [[[NSString alloc] initWithFormat:@&quot;%@ %@&quot;,</span><br><span class="line">                                          self.firstName, self.lastName] autorelease];</span><br><span class="line">    return string;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 这个stringWithFormat方法自动使用了autorelease标记</span><br><span class="line">- (NSString *)fullName &#123;</span><br><span class="line">    NSString *string = [NSString stringWithFormat:@&quot;%@ %@&quot;,</span><br><span class="line">                                 self.firstName, self.lastName];</span><br><span class="line">    return string;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="自动时代——ARC"><a href="#自动时代——ARC" class="headerlink" title="自动时代——ARC"></a>自动时代——ARC</h3><p>ARC全称Auto Reference Counting即自动引用计数。Apple历来是一个对开发者友好的公司，它通过在编译器层级设计了一套能够自动插入对象引用计数管理代码的系统，将开发者们从繁琐的对象内存管理工作中解放出来。这里根据官方<a href="https://developer.apple.com/library/archive/releasenotes/ObjectiveC/RN-TransitioningToARC/Introduction/Introduction.html#//apple_ref/doc/uid/TP40011226" target="_blank" rel="noopener">Transitioning to ARC Release Notes</a>具体学习一下ARC的设计细节。</p>
+<blockquote>
+<p>自动引用计数（ARC）是一种编译器功能，可提供对Objective-C对象的自动内存管理。ARC无需考虑保留和释放操作，而是使您可以专注于有趣的代码，对象图以及应用程序中对象之间的关系。</p>
+</blockquote>
+<p><img src="/images/15707125770025.jpg" alt=""></p>
+<p>在Xcode4.2之后新建的代码源文件默认是使用ARC机制的，如果想要使用MRC可在工程的编译选项中<code>target -&gt; Build Phases -&gt; Compile Sources</code>将对应的源文件加上<code>-fno-objc-arc</code>选项才能开启MRC手动管理这个源码文件中的对象内存。</p>
+<p>即在ARC环境下是禁止调用[object dealloc]/[object autorelease]/[object retainCount]/[object retain]/[object release]这些MRC环境下的对象内存管理方法函数的。</p>
+<p>首先呢，ARC环境的作用范围是OC对象，而CoreFoundation或者其他C类型的指针对象/结构体需要转换成OC对象才能够享受到ARC。可以通过以下三种桥接方式来利用ARC:</p>
+<ul>
+<li><code>__bridge</code>可以桥接OC对象和Core Foundation，而不改变被转换对象的持有状态，当ARC控制的OC对象释放时对应的Core Foundation对象指针也会被释放。</li>
+<li><code>__bridge_retained</code>和<code>CFBridgingRetain</code>也能够桥接两者，不同的是它会变更被转换对象的持有状态，即会进行一步retain让它的计数器+1，编译器不会自动管理Core Foundation对象的内存，需要调用CFRelease()手动释放。</li>
+<li><code>__bridge_transfer</code>和<code>CFBridgingRelease</code>也能够桥接两者，不同的是它会变更被转换对象的持有状态，即会进行一步release，被转换的对象在赋值给目标对象后随之释放。</li>
+</ul>
+<p>那么在ARC环境下对象是什么状态的呢？目前iOS中定义了四种修饰符来说明它们的状态：</p>
+<ul>
+<li><code>__strong</code>这是默认的动作，表明着这个对象是存活状态，持有强引用的变量在超出其作用域时被废弃，随着强引用失效，引用的对象会随之释放。</li>
+<li><code>__weak</code>弱引用一个对象，即不改变被引用对象的持有状态（计数器不变），同时当这个对象被释放后这个使用<code>__weak</code>修饰的变量会自动置为<code>nil</code>。</li>
+<li><code>__unsafe_unretained</code>与weak类似不会修改被引用对象的持有状态（计数器不变），但这个对象释放后这个使用它修饰的变量的指针会悬空不会自动置为<code>nil</code>。</li>
+<li><code>__autoreleasing</code>相当于MRC下[object autorelease]或者ARC下使用@autorelease{}管理的变量，将这个变量标记为自动释放。</li>
+</ul>
+<p>在常规的编码实践中，我们最常用到的应该就是使用<code>__weak</code>去修饰一个变量，防止它在一个Block中被循环引用的这种场景了。因为在Objective-C的Block与Swift的闭包均能够捕获外部变量，假如我们使用默认的<code>__strong</code>强引用一个对象的时候，同时又循环引用了这个Block的时候变会造成内存泄漏。</p>
+<h3 id="绕不开的Autorelease与AutoreleasePool"><a href="#绕不开的Autorelease与AutoreleasePool" class="headerlink" title="绕不开的Autorelease与AutoreleasePool"></a>绕不开的Autorelease与AutoreleasePool</h3><p>前面提到了引用计数为0的时候对象会在某个时机被系统回收掉，那么具体是什么时候呢？这里要分为两种情况：<strong>立即执行内存释放</strong>和<strong>自动执行内存释放</strong>。</p>
+<p>立即释放：使用[object release]将计数器-1，当对象计数器为0的时候会触发这个对象的内存回收dealloc。</p>
+<p>自动(延迟)释放：当一个实例对象被我们使用[object autorelease]或者@autoreleasepool{}、NSAutoreleasePool标记为需要自动(延迟)释放的时候，则它会在距离它最近一层的自动释放池被清空（Pool drain）后才会进行[object release]将计数器-1。</p>
+<p>那么一个空工程中我们貌似还未添加任意一行@autoreleasepool{}代码，那么目前存在的对象是如何被自动释放的呢？</p>
+<p>答案在于当一个自动释放池被释放或者清空的时候同时会将存在于这个池子中的对象进行释放。而根据官方文档的描述，系统会为主线程在Runloop的每个事件循环(Event Loop)开始前创建一个AutoreleasePool，在这个事件循环结束的时候将它释放同时清空池子中的对象。同时其他线程都会维护自己的AutoreleasePool堆栈。</p>
+<p>根据文档<a href="https://developer.apple.com/documentation/foundation/nsautoreleasepool?language=objc#1651537" target="_blank" rel="noopener">NSAutoreleasePool</a>的描述中在MRC环境下我们可以使用NSAutoreleasePool对象来创建一个自动释放池：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">NSArray *urls = &lt;# An array of file URLs #&gt;;</span><br><span class="line">for (NSURL *url in urls) &#123;</span><br><span class="line">    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];</span><br><span class="line">    </span><br><span class="line">    NSError *error;</span><br><span class="line">    NSString *fileContents = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:&amp;error];</span><br><span class="line">    /* Process the string, creating and autoreleasing more objects. */</span><br><span class="line">    </span><br><span class="line">    [pool release];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>等价于在ARC环境下使用@autoreleasepool{}创建一个自动释放池：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">NSArray *urls = &lt;# An array of file URLs #&gt;;</span><br><span class="line">for (NSURL *url in urls) &#123;</span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        NSError *error;</span><br><span class="line">        NSString *fileContents = [NSString stringWithContentsOfURL:url</span><br><span class="line">                                         encoding:NSUTF8StringEncoding error:&amp;error];</span><br><span class="line">        /* Process the string, creating and autoreleasing more objects. */</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这么做的好处在于ARC环境下由于内层@autorlepool的存在for循环中的对象会在这个自动释放池release的时候同时也被释放，而不是等到外层(系统默认维护的那个池子)释放的时候再进行内存对象回收，这样就达到了避开可能存在的内存峰值问题。</p>
+<h2 id="原理应用：侦测App运行时内存情况"><a href="#原理应用：侦测App运行时内存情况" class="headerlink" title="原理应用：侦测App运行时内存情况"></a>原理应用：侦测App运行时内存情况</h2><p>这里从<a href="https://github.com/meitu/MTHawkeye" target="_blank" rel="noopener">MTHawkeye</a>的Allocation模块开始学习我们可以从哪些方面与层次去记录iOS程序在运行时候的内存情况。在这个功能模块中实现的核心功能就是记录App的内存运行情况，它的侦测粒度精确到每个对象的内存生命周期。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">这个模块暴露给外部以下两个控制的接口用于开启malloc/vmalloc的内存记录：</span><br><span class="line">- (BOOL)startMallocLogging:(BOOL)mallocLogOn vmLogging:(BOOL)vmLogOn;</span><br><span class="line">- (BOOL)stopMallocLogging:(BOOL)mallocLogOff vmLogging:(BOOL)vmLogOff;</span><br><span class="line"></span><br><span class="line">而在内部处理之后中需要主动调用下面三个接口才能生成相关的序列化记录报告</span><br><span class="line">- (void)generateReportAndSaveToFile;</span><br><span class="line">- (void)generateReportAndSaveToFileInJSON;</span><br><span class="line">- (void)generateReportAndFlushToConsole;</span><br></pre></td></tr></table></figure>
+<p>首先再回顾一下最开始在谈<strong>虚拟内存</strong>和<strong>物理内存</strong>那里个小节里面，iOS的用户态通过malloc申请的内存空间(Heap)需要经过一系列的转换到内核空间的VM Object，这里内核空间中使用vmalloc申请虚拟内存。</p>
+<p>所以上面接口中的<code>mallocLogOn</code>用于开启程序中用户态内存记录，<code>vmLogging</code>用于开启程序中内核态内存记录。</p>
+<h3 id="获取内存分配记录流程"><a href="#获取内存分配记录流程" class="headerlink" title="获取内存分配记录流程"></a>获取内存分配记录流程</h3><p>首先在MTHawkeye Allocation中通过Hook [NSObject alloc]方法来实现内存分配记录：<br><img src="/images/15708731978175.png" alt=""><br><img src="/images/15708732454327.png" alt=""><br>同时在这个模块开启5秒后再加载程序中的镜像用于之后的符号化，这样子我们就拿到了运行过程中原始内存分配记录了。</p>
+<p>接着对于侦测App运行中的内存情况这个行为本身产生的数据，如果不设计合理的数据结构和存储方式都将对整个模块性能带来极大的负担，显而易见的因为[NSObject alloc]是一个调用频率超级高的方法。这一部分该模块采用<code>Sply Tree</code>（伸展树）做为存储这些记录的数据结构，而通过<code>mmap</code>方式进行数据io存储方式（与微信内存监控方案一致）。<br><img src="/images/15708743597919.png" alt=""></p>
+<p>当需要的时候最终调用上方的三个数据报告生成函数，这部分工作里面无非是将数据格式化和符号化。</p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>对于性能监控，内存是一个永恒的话题，理解这些细节有助于我们更好的搬砖~。近期发布的iOS 13提供了一个全新的框架——<a href="https://developer.apple.com/documentation/metrickit?language=objc" target="_blank" rel="noopener">MetricKit</a>用来衡量iOS设备的性能指标，官方建议通过这个框架获取一些App运行的性能情况并根据这份报告去优化App的性能表现。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://developer.apple.com/videos/play/wwdc2018/416/" target="_blank" rel="noopener">WWDC2018-416</a><br><a href="https://developer.apple.com/videos/play/wwdc2012/242/" target="_blank" rel="noopener">WWDC2012-242</a><br><a href="https://developer.apple.com/documentation/xcode/improving_your_app_s_performance?language=objc" target="_blank" rel="noopener">Improving Your App’s Performance</a><br><a href="https://techblog.toutiao.com/2018/06/19/untitled-40/" target="_blank" rel="noopener">WWDC2018 - 深入解析iOS内存 iOS Memory Deep Dive</a><br><a href="https://xta0.me/2012/07/10/iOS-Memory-1.html" target="_blank" rel="noopener">理解iOS中的内存结构</a><br><a href="https://juejin.im/post/5bec0efcf265da61273cf333" target="_blank" rel="noopener">iOS 内存管理研究</a><br><a href="https://juejin.im/entry/59225afada2f60005d590f4a" target="_blank" rel="noopener">iOS 内存探秘</a><br><a href="https://www.jianshu.com/p/8e764d05275b" target="_blank" rel="noopener">iOS中的内存管理</a></p>
+<p><a href="https://www.quora.com/What-is-the-iOS-jetsam-and-how-does-it-exactly-work" target="_blank" rel="noopener">What is the iOS jetsam, and how does it exactly work?</a><br><a href="https://satanwoo.github.io/2017/10/18/abort/" target="_blank" rel="noopener">iOS内存abort(Jetsam) 原理探究</a><br><a href="http://nanhuacoder.top/2019/04/17/iOS-OOM/" target="_blank" rel="noopener">OOM问题小记</a><br><a href="http://saveload.me/ios-explore-arc-dealloc/" target="_blank" rel="noopener">iOS底层探索 - ARC下的dealloc</a><br><a href="https://imtangqi.com/2016/04/15/autorelease-pool-in-ios/" target="_blank" rel="noopener">iOS 中的 Autorelease Pool</a></p>
+<p><a href="https://github.com/meitu/MTHawkeye/blob/develop/doc/memory/allocations-cn.md" target="_blank" rel="noopener">Hawkeye - Allocations</a></p>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="http://jslibs.wuxubj.cn/sweetalert_mini/jquery-1.7.1.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/archives/e94ffa1c.html">iOS中的内存布局与管理</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
+  <p><span>发布时间:</span>2019年10月12日 - 18:10</p>
+  <p><span>最后更新:</span>2019年10月12日 - 18:10</p>
+  <p><span>原始链接:</span><a href="/archives/e94ffa1c.html" title="iOS中的内存布局与管理">https://hello-david.github.io/archives/e94ffa1c.html</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/e94ffa1c.html"  aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
+</div>
+<script> 
+    var clipboard = new Clipboard('.fa-clipboard');
+    clipboard.on('success', $(function(){
+      $(".fa-clipboard").click(function(){
+        swal({   
+          title: "",   
+          text: '复制成功',   
+          html: false,
+          timer: 500,   
+          showConfirmButton: false
+        });
+      });
+    }));  
+</script>
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/工作原理/" rel="tag"># 工作原理</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/archives/98bfdabd.html" rel="next" title="iOS中的Key-Value-Coding">
+                <i class="fa fa-chevron-left"></i> iOS中的Key-Value-Coding
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/archives/402ac68b.html" rel="prev" title="iOS并发编程之Runloop">
+                iOS并发编程之Runloop <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">David Dai</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#内存相关基本概念"><span class="nav-number">1.</span> <span class="nav-text">内存相关基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#程序对象内存基本布局"><span class="nav-number">2.</span> <span class="nav-text">程序对象内存基本布局</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#系统级的内存管理"><span class="nav-number">3.</span> <span class="nav-text">系统级的内存管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#程序级的内存管理"><span class="nav-number">4.</span> <span class="nav-text">程序级的内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#手动时代——MRC"><span class="nav-number">4.1.</span> <span class="nav-text">手动时代——MRC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自动时代——ARC"><span class="nav-number">4.2.</span> <span class="nav-text">自动时代——ARC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#绕不开的Autorelease与AutoreleasePool"><span class="nav-number">4.3.</span> <span class="nav-text">绕不开的Autorelease与AutoreleasePool</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原理应用：侦测App运行时内存情况"><span class="nav-number">5.</span> <span class="nav-text">原理应用：侦测App运行时内存情况</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#获取内存分配记录流程"><span class="nav-number">5.1.</span> <span class="nav-text">获取内存分配记录流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最后"><span class="nav-number">6.</span> <span class="nav-text">最后</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">David Dai</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+-->
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

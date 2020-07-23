@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="OpenGL," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="之前在这篇文章学习了如何在OpenGL中是如何构建一个空间描述物体的信息而又是如何投射到渲染屏幕上的过程。  OpenGL采用的是相机模型，就是把视图变换操作类比为使用照相机拍摄照片的过程，具体步骤如下：1.将准备拍摄的对象移动到场景中指定位置。（模型变换，Model Transform）2.将相机移动到准备拍摄的位置，将它对准某个方向。（视图变换，View Transform）3.设置相机的焦距">
+<meta name="keywords" content="OpenGL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenGL学习——再探坐标系与矩阵">
+<meta property="og:url" content="https://hello-david.github.io/archives/45a24241.html">
+<meta property="og:site_name" content="David&#39;Blog">
+<meta property="og:description" content="之前在这篇文章学习了如何在OpenGL中是如何构建一个空间描述物体的信息而又是如何投射到渲染屏幕上的过程。  OpenGL采用的是相机模型，就是把视图变换操作类比为使用照相机拍摄照片的过程，具体步骤如下：1.将准备拍摄的对象移动到场景中指定位置。（模型变换，Model Transform）2.将相机移动到准备拍摄的位置，将它对准某个方向。（视图变换，View Transform）3.设置相机的焦距">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://hello-david.github.io/images/15514046211265.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15542804264475.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15544741516585.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15544828533534.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15544846969708.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15544846825302.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15544851664524.jpg">
+<meta property="og:updated_time" content="2019-10-09T10:33:14.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="OpenGL学习——再探坐标系与矩阵">
+<meta name="twitter:description" content="之前在这篇文章学习了如何在OpenGL中是如何构建一个空间描述物体的信息而又是如何投射到渲染屏幕上的过程。  OpenGL采用的是相机模型，就是把视图变换操作类比为使用照相机拍摄照片的过程，具体步骤如下：1.将准备拍摄的对象移动到场景中指定位置。（模型变换，Model Transform）2.将相机移动到准备拍摄的位置，将它对准某个方向。（视图变换，View Transform）3.设置相机的焦距">
+<meta name="twitter:image" content="https://hello-david.github.io/images/15514046211265.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hello-david.github.io/archives/45a24241.html"/>
+
+
+
+<meta name="google-site-verification" content="xPc40P1FFnuv2Aer8rA72v2doNkgf1bEhU79GGlStmE" />
+
+
+  <title>OpenGL学习——再探坐标系与矩阵 | David'Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">David'Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/45a24241.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="David Dai">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="David'Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">OpenGL学习——再探坐标系与矩阵</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-06T02:52:02+08:00">
+                2019-04-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/图像处理/" itemprop="url" rel="index">
+                    <span itemprop="name">图像处理</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>之前在<a href="https://hello-david.github.io/archives/e8814f3.html">这篇文章</a>学习了如何在OpenGL中是如何构建一个空间描述物体的信息而又是如何投射到渲染屏幕上的过程。</p>
+<blockquote>
+<p>OpenGL采用的是相机模型，就是把视图变换操作类比为使用照相机拍摄照片的过程，具体步骤如下：<br>1.将准备拍摄的对象移动到场景中指定位置。（模型变换，Model Transform）<br>2.将相机移动到准备拍摄的位置，将它对准某个方向。（视图变换，View Transform）<br>3.设置相机的焦距，或者调整缩放比例。（投影变换，Projection Transform）<br>4.拍摄照片并变换到需要的图片大小。（这个是视口变换，glViewPort）</p>
+</blockquote>
+<p>接下来深刻学习如何将<strong>模型坐标系-&gt;世界坐标系-&gt;视图坐标系-&gt;裁剪空间</strong>最终到屏幕空间的过程，以及在渲染引擎中的具体操作。<br><img src="/images/15514046211265.png" alt=""></p>
+<h2 id="矩阵与坐标系"><a href="#矩阵与坐标系" class="headerlink" title="矩阵与坐标系"></a>矩阵与坐标系</h2><p>在OpenGL中所有的<strong>图形变化</strong>都可以通过矩阵来表示（通过一个4x4的矩阵来表示空间信息），下图中前三列表示一个三维空间中<strong>(x, y, z)三个向量</strong>，最后一列表示这个坐标系以哪个坐标为<strong>原点(一般为0,0,0)</strong>，而最后一位表示这个三维坐标系的<strong>齐次坐标</strong>。</p>
+<p>我们通过这个矩阵的前三列来实现对一个坐标系的<strong>旋转</strong>和<strong>缩放</strong>，最后一列来实现<strong>平移</strong>，最后通过齐次坐标来表示观察者的远近（在投影变换里面需要用到）。<br><img src="/images/15542804264475.jpg" alt=""></p>
+<p>那么显然一个模型的原始顶点<strong>(x, y, z)向量坐标</strong>到裁剪空间的顶点坐标可以看做是它的坐标系经过一系列的平移，旋转，缩放，投影变换得到的。</p>
+<p>这三个变换过程又可以细分成6个过程，在世界坐标系中进行平移旋转缩放，在视图坐标系中进行平移旋转，以及投射到平面上。</p>
+<p>我们想要得到一个最终输入的顶点坐标（裁剪空间），只需要将它的过程变换坐标系矩阵相乘得到最终坐标系矩阵再乘于原始顶点就能得到了，这也是OpenGL中坐标变换的基本原理了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/*S：缩放  R：旋转  T：平移*/</span><br><span class="line">ModelViewProject = Projection                 // 投影变换</span><br><span class="line">    　　　　　　　　　* ViewR  * ViewT           // 视图变换    </span><br><span class="line">    　　　　　　　　　* ModelS * ModelR * ModelT // 模型变换</span><br><span class="line">gl_position = ModelViewProject * Vertex;</span><br></pre></td></tr></table></figure>
+<p><a href="https://github.com/hello-david/OpenGLDemo/tree/master/0x06_2D%E7%9F%A9%E9%98%B5%E5%8F%98%E6%8D%A2" target="_blank" rel="noopener">附上一个简单的实践过程</a></p>
+<h3 id="从模型坐标系到世界坐标系-模型变换"><a href="#从模型坐标系到世界坐标系-模型变换" class="headerlink" title="从模型坐标系到世界坐标系(模型变换)"></a>从模型坐标系到世界坐标系(模型变换)</h3><blockquote>
+<p>模型空间（Model Space）<br>用于描述物体空间信息的本地坐标空间，通常也称为物体坐标空间(object space)。通常选择物体的重心或者某一特定的点建立3维空间坐标系，并用一系列顶点来描述一个3D模型。坐标原点通常不会在模型外部，物体绕其坐标原点旋转的同时产生平移是没有任何意义的。</p>
+</blockquote>
+<p>回到最初的视角上，我们准备把拍摄的对象摆放到指定位置上（模型变换）。这个过程可以看做一个模型本身在世界坐标系中<strong>平移，旋转，缩放</strong>的过程。</p>
+<p>我们在<strong>模型空间</strong>那些顶点都是基于<strong>模型原点</strong>所描绘出来的，那么我们只要找到这个模型的模型原点相对世界坐标系原点的位置不就可以在这个世界坐标系中描绘出这个模型了吗？</p>
+<p>其中OpenGL中世界坐标系是<strong>固定以(0, 0, 0)为原点</strong>的，而一个模型的基本变换过程如下图所示。<br><img src="/images/15544741516585.jpg" alt=""></p>
+<p>其中模型可以绕x,y,z三个轴分别做旋转所以会有三个旋转矩阵可选择：</p>
+<p>$$Rx = \left[<br> \begin{matrix}<br>   1 &amp; 0 &amp; 0 &amp; 0\\<br>   0 &amp; Cosθ &amp; -Sinθ &amp; 0\\<br>   0 &amp; Sinθ &amp; Cosθ &amp; 0\\<br>   0 &amp; 0 &amp; 0 &amp; 1<br>  \end{matrix}<br>\right]<br>Ry = \left[<br> \begin{matrix}<br>   Cosθ  &amp; 0 &amp; -Sinθ &amp; 0\\<br>   0 &amp; 1 &amp; 0 &amp; 0\\<br>   Sinθ  &amp; 0 &amp; Cosθ &amp; 0\\<br>   0 &amp; 0 &amp; 0 &amp; 1<br>  \end{matrix}<br>\right]<br>Rz = \left[<br> \begin{matrix}<br>   Cosθ &amp; -Sinθ &amp; 0 &amp; 0\\<br>   Sinθ &amp; Cosθ &amp; 0 &amp; 0\\<br>   0 &amp; 0 &amp; 1 &amp; 0\\<br>   0 &amp; 0 &amp; 0 &amp; 1<br>  \end{matrix}<br>\right]<br>$$</p>
+<p>合成一个旋转矩阵：<br><img src="/images/15544828533534.jpg" alt=""></p>
+<p>最终，模型变换过程可以用下面这个数学公式来概括，需要注意的是我们使用左乘矩阵<strong>依次进行缩放-&gt;旋转-&gt;平移</strong>才能得到正确的结果（矩阵不满足交换律）。</p>
+<p>$$<br>Model =<br>\left[<br> \begin{matrix}<br>   1 &amp; 0 &amp; 0 &amp; Position X\\<br>   0 &amp; 1 &amp; 0 &amp; Position Y\\<br>   0 &amp; 0 &amp; 1 &amp; Position Z\\<br>   0 &amp; 0 &amp; 0 &amp; 1<br>  \end{matrix}<br>\right]<br>\left[Rotate<br>\right]<br>\left[<br> \begin{matrix}<br>   Scale X &amp; 0 &amp; 0 &amp; 0\\<br>   0 &amp;  Scale Y &amp; 0 &amp; 0\\<br>   0 &amp; 0 &amp;  Scale Z &amp; 0\\<br>   0 &amp; 0 &amp; 0 &amp; 1<br>  \end{matrix}<br>\right]<br>$$</p>
+<h3 id="从世界坐标系到视图坐标系-视图变换"><a href="#从世界坐标系到视图坐标系-视图变换" class="headerlink" title="从世界坐标系到视图坐标系(视图变换)"></a>从世界坐标系到视图坐标系(视图变换)</h3><blockquote>
+<p>视图/观察者空间（View Space）<br>和观察者相关的空间，有时也称为相机空间（Camera or Eye space）。同模型空间类似，视图空间也是基于世界坐标系建立的。其x，y方向表示相机的右侧和上方，其z轴负方向表示相机的镜头朝向（右手坐标系）。</p>
+</blockquote>
+<p>这时候我们摆好物体的位置了，准备拿出相机选个角度拍摄这个物体（视图变换）。而这个过程中我们只需要<strong>平移，旋转</strong>相机就可以了。</p>
+<p>显然我们拍照的时候镜头肯定是对着物体的嘛，所以相机的的镜头朝向应该是在z轴的负方向。它的矩阵变换公式和上面的没有本质的区别，但是由于镜头朝向，所以把它的平移公式定义为<br>$$<br>View = \left[<br> \begin{matrix}<br>   1 &amp; 0 &amp; 0 &amp; -Position X\\<br>   0 &amp; 1 &amp; 0 &amp; -Position Y\\<br>   0 &amp; 0 &amp; 1 &amp; -Position Z\\<br>   0 &amp; 0 &amp; 0 &amp; 1<br>  \end{matrix}<br>\right]\left[<br> \begin{matrix}<br> Rotate<br>  \end{matrix}<br>\right]<br>$$</p>
+<h3 id="从视图坐标系到裁剪空间-投影变换"><a href="#从视图坐标系到裁剪空间-投影变换" class="headerlink" title="从视图坐标系到裁剪空间(投影变换)"></a>从视图坐标系到裁剪空间(投影变换)</h3><blockquote>
+<p>裁剪空间(clip space，也叫作齐次裁剪空间)。</p>
+</blockquote>
+<blockquote>
+<p>其矩阵是裁剪矩阵(clip matrix)，也叫作投影矩阵(projection matrix)，目的是将3D的物体投射到2D的平面上。</p>
+</blockquote>
+<blockquote>
+<p>投影矩阵会将在这个指定的范围内的坐标变换为标准化设备坐标(NDC)的范围[-1.0, 1.0]，超出这个范围的坐标则被舍弃掉，这也就是<strong>裁剪</strong>的过程。</p>
+</blockquote>
+<p>接下来我们要按下相机的快门拍下一张物体的快照了（投影变换），而通过相机能观察到的范围我们称作<strong>视椎体(view frustum)</strong>，然后我们按下快门后会将视椎体中的内容映射到相片上，而映射的方式可以选择<strong>透视投影(perspective projection)</strong>或者<strong>正交投影(orthographic projection)</strong>。</p>
+<p>对于透视投影：<br><img src="/images/15544846969708.jpg" alt=""></p>
+<p>对于正交投影：<br><img src="/images/15544846825302.jpg" alt=""></p>
+<p>在经过这上诉的矩阵变换后我们终于把模型空间中的坐标送到OpenGL能接受的裁剪空间里面了。通过实践会发现在这一步我们获得的坐标已经转换成了NDC范围里面的坐标了，接着只需要再进行一步到屏幕的映射就完成了整个渲染过程。</p>
+<h3 id="裁剪空间到屏幕"><a href="#裁剪空间到屏幕" class="headerlink" title="裁剪空间到屏幕"></a>裁剪空间到屏幕</h3><blockquote>
+<p>裁剪后需要进行真正的投影，需要把视椎体投影到屏幕空间(screen space)得到像素位置。</p>
+</blockquote>
+<blockquote>
+<p>这里将利用透视除法(Perspective Division)进行最后的映射工作，透视除法就是将位置向量的x，y，z分量分别除以位置向量的齐次w分量。</p>
+</blockquote>
+<blockquote>
+<p>在OpenGL中使用glViewPort内部的参数来将标准化设备坐标(NDC)映射到屏幕坐标，从而让每个坐标关联上屏幕相应的点，这个过程称为视口变换。<br><img src="/images/15544851664524.jpg" alt=""></p>
+</blockquote>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://zhangwenli.com/blog/2015/08/28/opengl-matrix-transformations/" target="_blank" rel="noopener">OpenGL矩阵变换</a><br><a href="https://gameinstitute.qq.com/community/detail/127995" target="_blank" rel="noopener">U3D中的坐标系变换</a><br><a href="https://www.cnblogs.com/caster99/p/4780984.html" target="_blank" rel="noopener">模型和视图变换</a><br><a href="https://www.cnblogs.com/caster99/p/4783386.html" target="_blank" rel="noopener">投影变换</a><br><a href="https://www.cnblogs.com/caster99/p/4787988.html" target="_blank" rel="noopener">法线变换</a><br><a href="https://www.jianshu.com/p/0a4011d852d2" target="_blank" rel="noopener">数学原理1</a><br><a href="https://www.jianshu.com/p/a294a864f4f5" target="_blank" rel="noopener">数学原理2</a><br><a href="http://www.songho.ca/opengl/gl_transform.html#example1" target="_blank" rel="noopener">参考示例</a></p>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="http://jslibs.wuxubj.cn/sweetalert_mini/jquery-1.7.1.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/archives/45a24241.html">OpenGL学习——再探坐标系与矩阵</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
+  <p><span>发布时间:</span>2019年04月06日 - 02:04</p>
+  <p><span>最后更新:</span>2019年10月09日 - 18:10</p>
+  <p><span>原始链接:</span><a href="/archives/45a24241.html" title="OpenGL学习——再探坐标系与矩阵">https://hello-david.github.io/archives/45a24241.html</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/45a24241.html"  aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
+</div>
+<script> 
+    var clipboard = new Clipboard('.fa-clipboard');
+    clipboard.on('success', $(function(){
+      $(".fa-clipboard").click(function(){
+        swal({   
+          title: "",   
+          text: '复制成功',   
+          html: false,
+          timer: 500,   
+          showConfirmButton: false
+        });
+      });
+    }));  
+</script>
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/OpenGL/" rel="tag"># OpenGL</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/archives/f9b28799.html" rel="next" title="滤镜Shader——独立像素点变换">
+                <i class="fa fa-chevron-left"></i> 滤镜Shader——独立像素点变换
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/archives/696dccb2.html" rel="prev" title="滤镜Shader——像素卷积变换">
+                滤镜Shader——像素卷积变换 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">David Dai</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#矩阵与坐标系"><span class="nav-number">1.</span> <span class="nav-text">矩阵与坐标系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#从模型坐标系到世界坐标系-模型变换"><span class="nav-number">1.1.</span> <span class="nav-text">从模型坐标系到世界坐标系(模型变换)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#从世界坐标系到视图坐标系-视图变换"><span class="nav-number">1.2.</span> <span class="nav-text">从世界坐标系到视图坐标系(视图变换)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#从视图坐标系到裁剪空间-投影变换"><span class="nav-number">1.3.</span> <span class="nav-text">从视图坐标系到裁剪空间(投影变换)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#裁剪空间到屏幕"><span class="nav-number">1.4.</span> <span class="nav-text">裁剪空间到屏幕</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">2.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">David Dai</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+-->
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="工程上的二三事," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="众所周知成为iOS开发者是有成本的，开发App交钱和没交钱也会被区别对待。查一查App-Capabilities这张表里面的功能中一些高级功能都是需要成为付费用户才能够进行开发的。 如果只是想要学一学相关框架应用或者是技术验证而不上架Appstore的话，交这99刀就有些浪费了。不过假设你和我一样拥有一台越狱设备的话，完全可以通过技术手段来绕开这些限制。 安装必要越狱插件在进行修改App授权设备能">
+<meta name="keywords" content="工程上的二三事">
+<meta property="og:type" content="article">
+<meta property="og:title" content="免99刀开发iOS应用——解锁App的高级能力">
+<meta property="og:url" content="https://hello-david.github.io/archives/61787736.html">
+<meta property="og:site_name" content="David&#39;Blog">
+<meta property="og:description" content="众所周知成为iOS开发者是有成本的，开发App交钱和没交钱也会被区别对待。查一查App-Capabilities这张表里面的功能中一些高级功能都是需要成为付费用户才能够进行开发的。 如果只是想要学一学相关框架应用或者是技术验证而不上架Appstore的话，交这99刀就有些浪费了。不过假设你和我一样拥有一台越狱设备的话，完全可以通过技术手段来绕开这些限制。 安装必要越狱插件在进行修改App授权设备能">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://hello-david.github.io/images/15779441625185.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15779466551810.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15779468069092.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15779477799240.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15779499324652.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15779500886179.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15779502813790.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15779504565339.png">
+<meta property="og:updated_time" content="2020-01-03T01:36:16.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="免99刀开发iOS应用——解锁App的高级能力">
+<meta name="twitter:description" content="众所周知成为iOS开发者是有成本的，开发App交钱和没交钱也会被区别对待。查一查App-Capabilities这张表里面的功能中一些高级功能都是需要成为付费用户才能够进行开发的。 如果只是想要学一学相关框架应用或者是技术验证而不上架Appstore的话，交这99刀就有些浪费了。不过假设你和我一样拥有一台越狱设备的话，完全可以通过技术手段来绕开这些限制。 安装必要越狱插件在进行修改App授权设备能">
+<meta name="twitter:image" content="https://hello-david.github.io/images/15779441625185.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hello-david.github.io/archives/61787736.html"/>
+
+
+
+<meta name="google-site-verification" content="xPc40P1FFnuv2Aer8rA72v2doNkgf1bEhU79GGlStmE" />
+
+
+  <title>免99刀开发iOS应用——解锁App的高级能力 | David'Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">David'Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/61787736.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="David Dai">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="David'Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">免99刀开发iOS应用——解锁App的高级能力</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-02T18:42:15+08:00">
+                2020-01-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/工程上的二三事/" itemprop="url" rel="index">
+                    <span itemprop="name">工程上的二三事</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>众所周知成为iOS开发者是有成本的，开发App交钱和没交钱也会被区别对待。查一查<a href="https://developer.apple.com/support/app-capabilities/" target="_blank" rel="noopener">App-Capabilities</a>这张表里面的功能中一些高级功能都是需要成为付费用户才能够进行开发的。<br><img src="/images/15779441625185.png" alt=""></p>
+<p>如果只是想要学一学相关框架应用或者是技术验证而不上架Appstore的话，交这99刀就有些浪费了。不过假设你和我一样拥有一台越狱设备的话，完全可以通过技术手段来绕开这些限制。</p>
+<h2 id="安装必要越狱插件"><a href="#安装必要越狱插件" class="headerlink" title="安装必要越狱插件"></a>安装必要越狱插件</h2><p>在进行修改App授权设备能力之前需要给越狱设备安装下面这两个插件：</p>
+<ul>
+<li>AFC2：开放设备的文件系统。</li>
+<li>AppSync Undefined：使得应用绕开验证便可以安装到设备上。</li>
+</ul>
+<p>在找到正确的方案之前，发现在Xcode8及以前安装越狱应用可能需要如<a href="https://akemi.ai/?page/how2asu" target="_blank" rel="noopener">Tutorial: How to use AppSync Unified for development with Xcode</a>这篇文章说的那么做，但是这样做只能在Xcode9以下的版本实现安装越狱应用而它的高级功能仍受限于授权文件无法使用，然后又跟着<a href="https://dkimitsa.github.io/2018/01/04/ios-homemade-provision-profile/" target="_blank" rel="noopener">Tutorial: iOS - creating self-signed development certificate and provisioning profile to sign intermediate binaries</a>这篇文章使用自签证书修改<code>Provisioning Profile</code>里面的授权信息并重签发现在App运行起来的时候总是失败，说明不能使用自签证书。</p>
+<p>绕了一圈想到应该是需要使用Apple提供的签名证书才能够让应用在设备上运行起来。最终使用 <strong>Apple提供的免费开发者证书</strong> + <strong>自定义<code>Provisioning Profile</code></strong> 实现开放App高级功能并实现在Xcode11调试。</p>
+<h2 id="自定义Provisioning-Profile"><a href="#自定义Provisioning-Profile" class="headerlink" title="自定义Provisioning Profile"></a>自定义Provisioning Profile</h2><p>1.打开一个新项目使用免费账号创建一个<code>Provisioning Profile</code><br><img src="/images/15779466551810.png" alt=""></p>
+<p>2.到<code>~/Library/MobileDevice/Provisioning Profiles</code>目录下找到这个文件<br><img src="/images/15779468069092.png" alt=""></p>
+<p>3.执行<code>security cms -D -i xxx.mobileprovision</code>解码这个文件获取如下模板的内容:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;</span><br><span class="line">&lt;plist version=&quot;1.0&quot;&gt;</span><br><span class="line">&lt;dict&gt;</span><br><span class="line">	&lt;key&gt;AppIDName&lt;/key&gt;</span><br><span class="line">	&lt;string&gt;XC com hellowrold&lt;/string&gt;</span><br><span class="line">	&lt;key&gt;ApplicationIdentifierPrefix&lt;/key&gt;</span><br><span class="line">	&lt;array&gt;</span><br><span class="line">	&lt;string&gt;9FGA344YZ7&lt;/string&gt;</span><br><span class="line">	&lt;/array&gt;</span><br><span class="line">	&lt;key&gt;CreationDate&lt;/key&gt;</span><br><span class="line">	&lt;date&gt;2020-01-02T06:29:08Z&lt;/date&gt;</span><br><span class="line">	&lt;key&gt;Platform&lt;/key&gt;</span><br><span class="line">	&lt;array&gt;</span><br><span class="line">		&lt;string&gt;iOS&lt;/string&gt;</span><br><span class="line">	&lt;/array&gt;</span><br><span class="line">	&lt;key&gt;IsXcodeManaged&lt;/key&gt;</span><br><span class="line">	&lt;true/&gt;</span><br><span class="line">	&lt;key&gt;DeveloperCertificates&lt;/key&gt;</span><br><span class="line">	&lt;array&gt;</span><br><span class="line">		&lt;data&gt;xxxxxxx&lt;/data&gt;</span><br><span class="line">		&lt;data&gt;xxxxx&lt;/data&gt;</span><br><span class="line">	&lt;/array&gt;</span><br><span class="line"></span><br><span class="line">	&lt;key&gt;Entitlements&lt;/key&gt;</span><br><span class="line">	&lt;dict&gt;</span><br><span class="line">		&lt;key&gt;application-identifier&lt;/key&gt;</span><br><span class="line">		&lt;string&gt;9FGA344YZ7.com.hellowrold&lt;/string&gt;</span><br><span class="line">		&lt;key&gt;keychain-access-groups&lt;/key&gt;</span><br><span class="line">		&lt;array&gt;</span><br><span class="line">			&lt;string&gt;9FGA344YZ7.*&lt;/string&gt;</span><br><span class="line">		&lt;/array&gt;</span><br><span class="line">		&lt;key&gt;get-task-allow&lt;/key&gt;</span><br><span class="line">		&lt;true/&gt;</span><br><span class="line">		&lt;key&gt;com.apple.developer.team-identifier&lt;/key&gt;</span><br><span class="line">		&lt;string&gt;9FGA344YZ7&lt;/string&gt;</span><br><span class="line"></span><br><span class="line">	&lt;/dict&gt;</span><br><span class="line">	&lt;key&gt;ExpirationDate&lt;/key&gt;</span><br><span class="line">	&lt;date&gt;2020-01-09T06:29:08Z&lt;/date&gt;</span><br><span class="line">	&lt;key&gt;Name&lt;/key&gt;</span><br><span class="line">	&lt;string&gt;xxxxxxxxxxxxxxxxxx&lt;/string&gt;</span><br><span class="line">	&lt;key&gt;ProvisionedDevices&lt;/key&gt;</span><br><span class="line">	&lt;array&gt;</span><br><span class="line">		&lt;string&gt;xxxxxxxxxxxxxxxxxxxx&lt;/string&gt;</span><br><span class="line">	&lt;/array&gt;</span><br><span class="line">	&lt;key&gt;LocalProvision&lt;/key&gt;</span><br><span class="line">	&lt;true/&gt;</span><br><span class="line">	&lt;key&gt;TeamIdentifier&lt;/key&gt;</span><br><span class="line">	&lt;array&gt;</span><br><span class="line">		&lt;string&gt;9FGA344YZ7&lt;/string&gt;</span><br><span class="line">	&lt;/array&gt;</span><br><span class="line">	&lt;key&gt;TeamName&lt;/key&gt;</span><br><span class="line">	&lt;string&gt;xxxxxxxxxx&lt;/string&gt;</span><br><span class="line">	&lt;key&gt;TimeToLive&lt;/key&gt;</span><br><span class="line">	&lt;integer&gt;7&lt;/integer&gt;</span><br><span class="line">	&lt;key&gt;UUID&lt;/key&gt;</span><br><span class="line">	&lt;string&gt;228ad050-34c4-42d8-a62b-80f1ee27e9e0&lt;/string&gt;</span><br><span class="line">	&lt;key&gt;Version&lt;/key&gt;</span><br><span class="line">	&lt;integer&gt;1&lt;/integer&gt;</span><br><span class="line">&lt;/dict&gt;</span><br><span class="line">&lt;/plist&gt;</span><br></pre></td></tr></table></figure></p>
+<p>4.打开Key-Chain里面可以找到我们的免费开发证书，其中组织单位字段对应着上面那张自动生成的Profile中的Team字段。<br><img src="/images/15779477799240.png" alt=""></p>
+<p>5.执行<code>security find-certificate -c &quot;Apple免费开发者证书&quot; -p</code>获取<code>DeveloperCertificates</code>的内容（因为这里Apple帮我们生成的Profile里面已经包含了这部分所以直接略过这一步)</p>
+<p>6.可以知道<code>Provisioning Profile</code>里面的内容实际上就是一些xml配置，我们可以通过修改这里面的配置内容来实现提升设备授权Entitlements。这里由于我们需要用到VPN和Netwrok Extension所以将上面的授权信息修改为如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&lt;key&gt;Entitlements&lt;/key&gt;</span><br><span class="line">&lt;dict&gt;</span><br><span class="line">	&lt;key&gt;application-identifier&lt;/key&gt;</span><br><span class="line">	&lt;string&gt;9FGA344YZ7.*&lt;/string&gt;</span><br><span class="line">	&lt;key&gt;keychain-access-groups&lt;/key&gt;</span><br><span class="line">	&lt;array&gt;</span><br><span class="line">		&lt;string&gt;9FGA344YZ7.*&lt;/string&gt;</span><br><span class="line">	&lt;/array&gt;</span><br><span class="line">	&lt;key&gt;get-task-allow&lt;/key&gt;</span><br><span class="line">	&lt;true/&gt;</span><br><span class="line">	&lt;key&gt;com.apple.developer.team-identifier&lt;/key&gt;</span><br><span class="line">	&lt;string&gt;9FGA344YZ7&lt;/string&gt;</span><br><span class="line">       &lt;key&gt;com.apple.developer.networking.networkextension&lt;/key&gt;</span><br><span class="line">	&lt;array&gt;</span><br><span class="line">		&lt;string&gt;app-proxy-provider&lt;/string&gt;</span><br><span class="line">		&lt;string&gt;content-filter-provider&lt;/string&gt;</span><br><span class="line">		&lt;string&gt;dns-proxy&lt;/string&gt;</span><br><span class="line">		&lt;string&gt;packet-tunnel-provider&lt;/string&gt;</span><br><span class="line">	&lt;/array&gt;</span><br><span class="line">	&lt;key&gt;com.apple.developer.networking.vpn.api&lt;/key&gt;</span><br><span class="line">	&lt;array&gt;</span><br><span class="line">		&lt;string&gt;allow-vpn&lt;/string&gt;</span><br><span class="line">	&lt;/array&gt;</span><br><span class="line">&lt;/dict&gt;</span><br></pre></td></tr></table></figure></p>
+<p>7.上一步实现了我们的主要目的，还需要进一步调整这个Provisioning Profile的一些细节如：关闭Xcode管理、允许所有设备安装、修改创建时间以及过期时间、修改Provision\team显示名称、文件UUID<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">&lt;key&gt;IsXcodeManaged&lt;/key&gt;</span><br><span class="line">&lt;false/&gt;</span><br><span class="line"></span><br><span class="line">&lt;key&gt;ProvisionsAllDevices&lt;/key&gt;</span><br><span class="line">&lt;true/&gt;</span><br><span class="line"></span><br><span class="line">&lt;key&gt;CreationDate&lt;/key&gt;</span><br><span class="line">&lt;date&gt;2020-01-02T06:29:08Z&lt;/date&gt;</span><br><span class="line">&lt;key&gt;ExpirationDate&lt;/key&gt;</span><br><span class="line">&lt;date&gt;2020-01-02T06:29:08Z&lt;/date&gt;</span><br><span class="line">&lt;key&gt;TimeToLive&lt;/key&gt;</span><br><span class="line">&lt;integer&gt;3652&lt;/integer&gt;</span><br><span class="line"></span><br><span class="line">&lt;key&gt;AppIDName&lt;/key&gt;</span><br><span class="line">&lt;string&gt;Jailbreak Provisioning Profile&lt;/string&gt;</span><br><span class="line">&lt;key&gt;Name&lt;/key&gt;</span><br><span class="line">&lt;string&gt;Jailbreak Provisioning Profile: David Changed&lt;/string&gt;</span><br><span class="line">&lt;key&gt;TeamName&lt;/key&gt;</span><br><span class="line">&lt;string&gt;Jailbreak&lt;/string&gt;</span><br><span class="line"></span><br><span class="line">&lt;key&gt;UUID&lt;/key&gt;</span><br><span class="line">&lt;string&gt;274b8030-eeff-6a4d-5657-c51ec2f4ab22&lt;/string&gt;</span><br></pre></td></tr></table></figure></p>
+<p>8.最后使用<code>security cms -S -N &quot;Apple免费开发者证书&quot; -i provisioning.plist -o Jailbreak.mobileprovision</code>生成一张新的Provisioning Profile。<br><img src="/images/15779499324652.png" alt=""></p>
+<h2 id="修改工程配置指定Provisioning-Profile"><a href="#修改工程配置指定Provisioning-Profile" class="headerlink" title="修改工程配置指定Provisioning Profile"></a>修改工程配置指定Provisioning Profile</h2><p>首先我们进入<code>Build Setting</code>里面搜索<code>code sign</code>指定Entitlements(授权文件)的路径以及代码签名所用的证书(Apple颁发的免费开发者证书)，同时把签名方式改为手动的。<br><img src="/images/15779500886179.png" alt=""><br>接着搜索<code>provision</code>指定<code>Provisioning Profile</code>为我们修改的文件以及修改相应的Team。<br><img src="/images/15779502813790.png" alt=""><br>到这里，我的越狱设备就拥有了调试<code>Network Extension</code>和<code>Personal VPN</code>这两个高级功能的能力了。<br><img src="/images/15779504565339.png" alt=""></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://blog.0xbbc.com/2014/12/ios-entitlement%E5%88%86%E6%9E%90/" target="_blank" rel="noopener">iOS Entitlement分析</a><br><a href="https://akemi.ai/?page/how2asu" target="_blank" rel="noopener">Tutorial: How to use AppSync Unified for development with Xcode</a><br><a href="https://dkimitsa.github.io/2018/01/04/ios-homemade-provision-profile/" target="_blank" rel="noopener">Fake provisioning</a><br><a href="http://xelz.info/blog/2019/01/11/ios-code-signature/" target="_blank" rel="noopener">深度长文：细说iOS代码签名</a></p>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="http://jslibs.wuxubj.cn/sweetalert_mini/jquery-1.7.1.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/archives/61787736.html">免99刀开发iOS应用——解锁App的高级能力</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
+  <p><span>发布时间:</span>2020年01月02日 - 18:01</p>
+  <p><span>最后更新:</span>2020年01月03日 - 09:01</p>
+  <p><span>原始链接:</span><a href="/archives/61787736.html" title="免99刀开发iOS应用——解锁App的高级能力">https://hello-david.github.io/archives/61787736.html</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/61787736.html"  aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
+</div>
+<script> 
+    var clipboard = new Clipboard('.fa-clipboard');
+    clipboard.on('success', $(function(){
+      $(".fa-clipboard").click(function(){
+        swal({   
+          title: "",   
+          text: '复制成功',   
+          html: false,
+          timer: 500,   
+          showConfirmButton: false
+        });
+      });
+    }));  
+</script>
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/工程上的二三事/" rel="tag"># 工程上的二三事</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/archives/d8f63008.html" rel="next" title="入坑SwiftUI">
+                <i class="fa fa-chevron-left"></i> 入坑SwiftUI
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/archives/4397956c.html" rel="prev" title="iOS中的并发编程与GCD的一些认知">
+                iOS中的并发编程与GCD的一些认知 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">David Dai</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装必要越狱插件"><span class="nav-number">1.</span> <span class="nav-text">安装必要越狱插件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义Provisioning-Profile"><span class="nav-number">2.</span> <span class="nav-text">自定义Provisioning Profile</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改工程配置指定Provisioning-Profile"><span class="nav-number">3.</span> <span class="nav-text">修改工程配置指定Provisioning Profile</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">David Dai</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+-->
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

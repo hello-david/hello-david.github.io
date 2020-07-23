@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="ARKit," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="这几年Apple一致再大力推动AR这个方向的应用，正好我对于AR渲染、人脸检测等技术应用都有一些兴趣，这里就利用这个ARKitDemo工程来探究一下ARKit的人脸跟踪的能力。 在Apple的Tracking and Visualizing Faces工程中内置了一张2048*2048的2D标准Facemesh，在常规的人脸贴图应用就可以通过这张Facemesh来制作特定的效果。 后来发现ARKi">
+<meta name="keywords" content="ARKit">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从ARKit上找到你的人脸">
+<meta property="og:url" content="https://hello-david.github.io/archives/3d1fb5d7.html">
+<meta property="og:site_name" content="David&#39;Blog">
+<meta property="og:description" content="这几年Apple一致再大力推动AR这个方向的应用，正好我对于AR渲染、人脸检测等技术应用都有一些兴趣，这里就利用这个ARKitDemo工程来探究一下ARKit的人脸跟踪的能力。 在Apple的Tracking and Visualizing Faces工程中内置了一张2048*2048的2D标准Facemesh，在常规的人脸贴图应用就可以通过这张Facemesh来制作特定的效果。 后来发现ARKi">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://hello-david.github.io/images/wireframeTexture.png">
+<meta property="og:image" content="https://hello-david.github.io/images/DCIM.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15876120574299.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15876244322676.jpg">
+<meta property="og:updated_time" content="2020-04-23T06:57:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="从ARKit上找到你的人脸">
+<meta name="twitter:description" content="这几年Apple一致再大力推动AR这个方向的应用，正好我对于AR渲染、人脸检测等技术应用都有一些兴趣，这里就利用这个ARKitDemo工程来探究一下ARKit的人脸跟踪的能力。 在Apple的Tracking and Visualizing Faces工程中内置了一张2048*2048的2D标准Facemesh，在常规的人脸贴图应用就可以通过这张Facemesh来制作特定的效果。 后来发现ARKi">
+<meta name="twitter:image" content="https://hello-david.github.io/images/wireframeTexture.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hello-david.github.io/archives/3d1fb5d7.html"/>
+
+
+
+<meta name="google-site-verification" content="xPc40P1FFnuv2Aer8rA72v2doNkgf1bEhU79GGlStmE" />
+
+
+  <title>从ARKit上找到你的人脸 | David'Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">David'Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/3d1fb5d7.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="David Dai">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="David'Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">从ARKit上找到你的人脸</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-23T14:53:29+08:00">
+                2020-04-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/图像处理/" itemprop="url" rel="index">
+                    <span itemprop="name">图像处理</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这几年Apple一致再大力推动AR这个方向的应用，正好我对于AR渲染、人脸检测等技术应用都有一些兴趣，这里就利用这个<a href="https://github.com/hello-david/ARKitDemo" target="_blank" rel="noopener">ARKitDemo</a>工程来探究一下ARKit的人脸跟踪的能力。</p>
+<p>在Apple的<a href="https://developer.apple.com/documentation/arkit/tracking_and_visualizing_faces" target="_blank" rel="noopener">Tracking and Visualizing Faces工程</a>中内置了一张2048*2048的2D标准Facemesh，在常规的人脸贴图应用就可以通过这张Facemesh来制作特定的效果。<br><img src="/images/wireframeTexture.png" alt="wireframeTexture"></p>
+<p>后来发现ARKit中实际上是有提供原始的Facemesh顶点位置信息的，这里就想要探究一下这些顶点信息的位置分布关系。</p>
+<h2 id="绘制ARKit中的人脸点"><a href="#绘制ARKit中的人脸点" class="headerlink" title="绘制ARKit中的人脸点"></a>绘制ARKit中的人脸点</h2><p>首先找到<code>ARFaceGeometry</code>这个类的定义：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> An object representing the geometry of a face.</span><br><span class="line"> @discussion The face geometry will have a constant number of triangles</span><br><span class="line"> and vertices, updating only the vertex positions from frame to frame.</span><br><span class="line"> */</span><br><span class="line">API_AVAILABLE(ios(11.0))</span><br><span class="line">@interface ARFaceGeometry : NSObject&lt;NSSecureCoding, NSCopying&gt;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line">The number of mesh vertices of the geometry.</span><br><span class="line"> */</span><br><span class="line">@property (nonatomic, readonly) NSUInteger vertexCount NS_REFINED_FOR_SWIFT;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> The mesh vertices of the geometry.</span><br><span class="line"> */</span><br><span class="line">@property (nonatomic, readonly) const simd_float3 *vertices NS_REFINED_FOR_SWIFT;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> The number of texture coordinates of the face geometry.</span><br><span class="line"> */</span><br><span class="line">@property (nonatomic, readonly) NSUInteger textureCoordinateCount NS_REFINED_FOR_SWIFT;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> The texture coordinates of the geometry.</span><br><span class="line"> */</span><br><span class="line">@property (nonatomic, readonly) const simd_float2 *textureCoordinates NS_REFINED_FOR_SWIFT;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> The number of triangles of the face geometry.</span><br><span class="line"> */</span><br><span class="line">@property (nonatomic, readonly) NSUInteger triangleCount;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> The triangle indices of the geometry.</span><br><span class="line"> */</span><br><span class="line">@property (nonatomic, readonly) const int16_t *triangleIndices NS_REFINED_FOR_SWIFT;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> Creates and returns a face geometry by applying a set of given blend shape coefficients.</span><br><span class="line"> </span><br><span class="line"> @discussion An empty dictionary can be provided to create a neutral face geometry.</span><br><span class="line"> @param blendShapes A dictionary of blend shape coefficients.</span><br><span class="line"> @return Face geometry after applying the blend shapes.</span><br><span class="line"> */</span><br><span class="line">- (nullable instancetype)initWithBlendShapes:(NSDictionary&lt;ARBlendShapeLocation, NSNumber*&gt; *)blendShapes;</span><br><span class="line"></span><br><span class="line">/** Unavailable */</span><br><span class="line">- (instancetype)init NS_UNAVAILABLE;</span><br><span class="line">+ (instancetype)new NS_UNAVAILABLE;</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure></p>
+<p>这个类表示表示ARFace的几何形状，其中面部几何形状具有恒定数量的三角形图元和顶点坐标，仅在帧之间更新顶点位置。这个类的属性和注释说明都表明了ARKit会通过这个类返回一个固定大小的顶点数据且当位置变动的时候仅更新对应位置的数值。</p>
+<p>这个就意味着我们可以像其他框架一样标注出ARKit的人脸点及其索引之间的关系。下面来分析一下这个类中能获取什么信息：</p>
+<ol>
+<li>从人脸三角形图元的顶点数组<code>simd_float3 *vertices</code>中发现存在1220个顶点坐标，即在ARKit中会存在1220个人脸点。</li>
+<li>Apple通过blendShapes帮我们定义了一部分人脸点组合成的动作，比如眨眼睛、抬头等等。</li>
+</ol>
+<p>接着我们通过ARKit+Metal将这里面的人脸点给渲染出来，效果如下图：<br><img src="/images/DCIM.jpg" alt=""></p>
+<h2 id="ARKit人脸点位置探究"><a href="#ARKit人脸点位置探究" class="headerlink" title="ARKit人脸点位置探究"></a>ARKit人脸点位置探究</h2><p>接下来这里就要探究<code>vertices</code>中顶点与它索引位置关系。假如是固定位置分布的话，那我们完全可以直接通过标注出ARKit中人脸点位置然后做一些更精细的效果（不使用苹果封装的效果)，在相关业务中还是有比较大的应用价值的。</p>
+<p>那么具体要怎么找到这张Facemesh上的位置分布关系呢？</p>
+<p>方案一：利用Metal中[[vertex_id]]这个内建变量提供的顶点索引，然后通过不同的颜色来标记每个顶点找出它们的分布关系。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">struct FaceInputVertexIO &#123;</span><br><span class="line">    float4 position [[position]];</span><br><span class="line">    float  point_size [[point_size]];</span><br><span class="line">    ushort vertexIndex;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">vertex FaceInputVertexIO facePointVertex(const device vector_float3 *facePoint [[buffer(kBufferIndexGenerics)]],</span><br><span class="line">                                         constant FaceMeshUniforms &amp;faceMeshUniforms [[buffer(kBufferIndexFaceMeshUniforms)]],</span><br><span class="line">                                         ushort vid [[vertex_id]]) &#123;</span><br><span class="line">    float4x4 modelViewProjectMatrix = faceMeshUniforms.projectionMatrix * faceMeshUniforms.viewMatrix * faceMeshUniforms.modelMatrix;</span><br><span class="line">    FaceInputVertexIO outputVertices;</span><br><span class="line">    outputVertices.position = modelViewProjectMatrix * float4(facePoint[vid], 1.0);</span><br><span class="line">    outputVertices.point_size = 2.5;</span><br><span class="line">    outputVertices.vertexIndex = vid;</span><br><span class="line">    return outputVertices;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">fragment float4 facePointFragment(FaceInputVertexIO fragmentInput [[stage_in]]) &#123;</span><br><span class="line">    if (fragmentInput.vertexIndex &lt; 39) &#123;</span><br><span class="line">        return float4(1.0, 0.0, 0.0, 1.0);</span><br><span class="line">    &#125;</span><br><span class="line">    return float4(0.0, 0.0, 1.0, 1.0);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>下图就是将0-39号点标记出来的样子，不过这样子还是要手动标注人脸点位置索引，效率是在有些低下。<br><img src="/images/15876120574299.jpg" alt=""></p>
+<hr>
+<p>方案二：在每个人脸点的位置上贴一个索引下标数值文本。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">for label in indexLabels &#123;</span><br><span class="line">    label.removeFromSuperview()</span><br><span class="line">&#125;</span><br><span class="line">indexLabels.removeAll()</span><br><span class="line">for index in 0..&lt;faceAnchor.geometry.vertices.count &#123;</span><br><span class="line">    let facePoint = uniforms.pointee.projectionMatrix * uniforms.pointee.viewMatrix * uniforms.pointee.modelMatrix * vector_float4(faceAnchor.geometry.vertices[index], 1.0)</span><br><span class="line">    let label = UILabel(frame: CGRect.zero)</span><br><span class="line">    label.text = String(format: &quot;%ld&quot;, index)</span><br><span class="line">    label.font = UIFont(name: &quot;PingFangSC-Regular&quot;, size: 5)</span><br><span class="line">    label.sizeToFit()</span><br><span class="line">    label.center = CGPoint(x: CGFloat(facePoint.x/facePoint.w + 1.0)/2.0 * facePointRenderView.frame.size.width,</span><br><span class="line">                                       y: CGFloat(-facePoint.y/facePoint.w + 1.0)/2.0 * facePointRenderView.frame.size.height)</span><br><span class="line">    view.addSubview(label)</span><br><span class="line">    indexLabels.append(label)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><img src="/images/15876244322676.jpg" alt=""></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://developer.apple.com/metal/sample-code/" target="_blank" rel="noopener">Metal Sample Code</a><br><a href="https://developer.apple.com/documentation/arkit/tracking_and_visualizing_faces" target="_blank" rel="noopener">Tracking and Visualizing Faces</a></p>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="http://jslibs.wuxubj.cn/sweetalert_mini/jquery-1.7.1.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/archives/3d1fb5d7.html">从ARKit上找到你的人脸</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
+  <p><span>发布时间:</span>2020年04月23日 - 14:04</p>
+  <p><span>最后更新:</span>2020年04月23日 - 14:04</p>
+  <p><span>原始链接:</span><a href="/archives/3d1fb5d7.html" title="从ARKit上找到你的人脸">https://hello-david.github.io/archives/3d1fb5d7.html</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/3d1fb5d7.html"  aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
+</div>
+<script> 
+    var clipboard = new Clipboard('.fa-clipboard');
+    clipboard.on('success', $(function(){
+      $(".fa-clipboard").click(function(){
+        swal({   
+          title: "",   
+          text: '复制成功',   
+          html: false,
+          timer: 500,   
+          showConfirmButton: false
+        });
+      });
+    }));  
+</script>
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ARKit/" rel="tag"># ARKit</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/archives/952f054c.html" rel="next" title="Crash及其分析技巧的一点心得">
+                <i class="fa fa-chevron-left"></i> Crash及其分析技巧的一点心得
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/archives/ffc2e515.html" rel="prev" title="从函数指针开始的回调编程">
+                从函数指针开始的回调编程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">David Dai</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#绘制ARKit中的人脸点"><span class="nav-number">1.</span> <span class="nav-text">绘制ARKit中的人脸点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ARKit人脸点位置探究"><span class="nav-number">2.</span> <span class="nav-text">ARKit人脸点位置探究</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">David Dai</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+-->
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

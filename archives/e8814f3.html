@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="OpenGL," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="上一篇学习如何将EGL和本地窗口系统联系在一起，这时候我们拥有了OpenGL的Contex（上下文环境）和本地渲染视图。接下来我们就可以愉快的开始进行OpenGL的渲染程序编写了。 在进行渲染程序编写之前，我们先要了解一下着色器(Shader)的基本工作流程。这里的着色器主要指的是顶点着色器(Vertex Shader)和片段着色器(Fragament Shader)。它们负责图形和图像颜色的绘制">
+<meta name="keywords" content="OpenGL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenGL学习——着色器绘制与坐标系">
+<meta property="og:url" content="https://hello-david.github.io/archives/e8814f3.html">
+<meta property="og:site_name" content="David&#39;Blog">
+<meta property="og:description" content="上一篇学习如何将EGL和本地窗口系统联系在一起，这时候我们拥有了OpenGL的Contex（上下文环境）和本地渲染视图。接下来我们就可以愉快的开始进行OpenGL的渲染程序编写了。 在进行渲染程序编写之前，我们先要了解一下着色器(Shader)的基本工作流程。这里的着色器主要指的是顶点着色器(Vertex Shader)和片段着色器(Fragament Shader)。它们负责图形和图像颜色的绘制">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://hello-david.github.io/images/15383129368174.png">
+<meta property="og:image" content="https://hello-david.github.io/images/viewmodel.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15383129795215.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15384087490541.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15384064171683.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15384081183067.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/15384046803516.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15384046933352.png">
+<meta property="og:image" content="https://hello-david.github.io/images/15385405210511.jpg">
+<meta property="og:image" content="https://hello-david.github.io/images/android.png">
+<meta property="og:updated_time" content="2019-10-09T10:29:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="OpenGL学习——着色器绘制与坐标系">
+<meta name="twitter:description" content="上一篇学习如何将EGL和本地窗口系统联系在一起，这时候我们拥有了OpenGL的Contex（上下文环境）和本地渲染视图。接下来我们就可以愉快的开始进行OpenGL的渲染程序编写了。 在进行渲染程序编写之前，我们先要了解一下着色器(Shader)的基本工作流程。这里的着色器主要指的是顶点着色器(Vertex Shader)和片段着色器(Fragament Shader)。它们负责图形和图像颜色的绘制">
+<meta name="twitter:image" content="https://hello-david.github.io/images/15383129368174.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hello-david.github.io/archives/e8814f3.html"/>
+
+
+
+<meta name="google-site-verification" content="xPc40P1FFnuv2Aer8rA72v2doNkgf1bEhU79GGlStmE" />
+
+
+  <title>OpenGL学习——着色器绘制与坐标系 | David'Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">David'Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/e8814f3.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="David Dai">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="David'Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">OpenGL学习——着色器绘制与坐标系</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-10T18:49:19+08:00">
+                2018-10-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/图像处理/" itemprop="url" rel="index">
+                    <span itemprop="name">图像处理</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>上一篇学习如何将EGL和本地窗口系统联系在一起，这时候我们拥有了OpenGL的Contex（上下文环境）和本地渲染视图。接下来我们就可以愉快的开始进行OpenGL的渲染程序编写了。</p>
+<p>在进行渲染程序编写之前，我们先要了解一下着色器(Shader)的基本工作流程。这里的着色器主要指的是顶点着色器(Vertex Shader)和片段着色器(Fragament Shader)。它们负责图形和图像颜色的绘制。简单地说，我们通过操作顶点着色器来描述图的形状，通过片段着色器来描述图上每个像素点的颜色。</p>
+<h1 id="坐标系"><a href="#坐标系" class="headerlink" title="坐标系"></a>坐标系</h1><p>我们从前面的总结知道，使用OpenGL引擎的第一个程序入口就是从编写顶点着色器开始的。既然要去描述图形的坐标信息，我们就有必要知道如何去构建坐标系给OpenGL，如何转换成我们看到的图形坐标的。</p>
+<p>在构建坐标系有一套标准的流水构建流程，依次从下面这些空间去转换到屏幕坐标系:</p>
+<ul>
+<li>局部空间(Local Space，或者称为物体空间(Object Space))</li>
+<li>世界空间(World Space)</li>
+<li>观察空间(View Space，或者称为视觉空间(Eye Space))</li>
+<li>裁剪空间(Clip Space)</li>
+<li>屏幕空间(Screen Space)</li>
+</ul>
+<p>将物体的坐标变换到几个过渡坐标系(Intermediate Coordinate System)的优点在于，在这些特定的坐标系统中，一些操作或运算更加方便和容易。同时它们之间可以很方便的通过矩阵变换来实现转换。</p>
+<p><img src="/images/15383129368174.png" alt=""></p>
+<ol>
+<li>首先我们描述一个物体的空间信息会建立一个局部坐标，从物体本身的坐标原点开始来描述一个物体的形状。</li>
+</ol>
+<ol start="2">
+<li>然后假设我们有多个物体，我们就需要构建一个世界坐标来描述物体与物体之间的相对坐标关系。这些坐标相对于世界的全局原点，物体从这个世界坐标系的原点开始进行摆放。</li>
+</ol>
+<ol start="3">
+<li>接下来，假如我们从不同的角度去观察这些物体的话，就需要再加入一个观察者的坐标系。使得每个坐标都是从摄像机或者说观察者的角度进行描述的。</li>
+</ol>
+<ol start="4">
+<li>坐标到达观察空间之后，就已经描绘出一个完整的坐标空间了，这时候我们需要将它传递给OpenGL进行绘制了。我们通过投影将它转换到裁剪空间即裁剪坐标会被处理至-1.0到1.0的范围内，并判断哪些顶点将会出现在屏幕上。</li>
+</ol>
+<ol start="5">
+<li>最后，OpenGL要绘制到屏幕上又需要将裁剪坐标变换为屏幕坐标，我们将使用一个叫做视口变换(Viewport Transform)的过程让位于-1.0到1.0范围的裁剪空间坐标变换到由glViewport函数所定义的屏幕坐标范围内。最后变换出来的坐标将会送到光栅器将其转化为片段。</li>
+</ol>
+<p>上述流程中我们通过<strong>模型(Model)</strong>、<strong>观察(View)</strong>、<strong>投影(Projection)</strong>这三个矩阵来实现不同坐标系之间的转换。</p>
+<p>我们知道矩阵是可以相乘的并且不满足交换律的(有方向的)，而上面的全部流程我们可以通过下面的左乘矩阵来一步到位实现坐标转换。<br><img src="/images/viewmodel.png" alt=""></p>
+<p>在OpenGL里面它希望传入顶点着色器的值是标准化设备的坐标(Normalized Device Coordinate, NDC)即裁剪空间的坐标。</p>
+<p>在目前我所接触到2D图像处理中，都是从单一观察角度去描述一个图像的。所以我所面临的构建坐标系统一般有两种情况:</p>
+<ol>
+<li>在观察者空间中构建真实的坐标系然后通过<strong>投影变换</strong>转换到裁剪空间再传给OpenGL。</li>
+<li>直接描述裁剪空间中的坐标并传给OpenGL。</li>
+</ol>
+<p>例如，在描述一张图像渲染的时候直接描述它的裁剪空间坐标然后交由OpenGL渲染就行了。但是假如我要描述它是如何运动的(旋转、平移、缩放)就先在观察空间描述完它的坐标运动然后通过投影变换映射到裁剪空间再交由OpenGL渲染。</p>
+<p>下图就是OpenGL中裁剪空间示意：<br><img src="/images/15383129795215.png" alt=""></p>
+<h2 id="投影变换"><a href="#投影变换" class="headerlink" title="投影变换"></a>投影变换</h2><p>上面描述了一个完整构建坐标系的流程，而在实践过程中(平面图像处理)我更关注观察空间和裁剪空间的转换，即投影变换，这里常用到两种投影方式：</p>
+<ul>
+<li>正射投影矩阵(Orthographic Projection Matrix)</li>
+<li>透视投影矩阵(Perspective Projection Matrix)</li>
+</ul>
+<p><img src="/images/15384087490541.png" alt=""></p>
+<p>投影这个概念相比大家并不陌生，形象的说投影区域就像是阳光直射照见物体所形成的阴影面积一样，而在坐标的投影变换里面由投影矩阵创建的<strong>观察箱</strong>(Viewing Box)被称为<strong>平截头体</strong>(Frustum)，每个出现在平截头体范围内的坐标都会最终出现在用户的屏幕上。</p>
+<p>而当真正表示这个<strong>平截头体</strong>(Frustum)的时候我们需要赋予OpenGL (x,y,z,w)四个分量，其中x,y,z可以描述这个容器而w分量(齐次坐标)则表示观察者远近的概念。</p>
+<p>这里有必要再学习一下w分量(齐次坐标)的含义，我们知道在欧式空间里面两条共面的平行线无法相交然而在投影空间内却不是这样的。比如下图中两个平行的轨道间距随着视线变远而减小在远处某点相交（透视投影）:<br><img src="/images/15384064171683.jpg" alt=""></p>
+<p>为了解决这个问题，数学家们引入齐次坐标这个概念，在N维空间中采用N+1个量来表示N维坐标。如(x,y,z)的空间就表示为(x,y,z,w)。而(x,y,z)与w之间的转换关系如下:<br><img src="/images/15384081183067.jpg" alt=""></p>
+<p>那么w分量(齐次坐标)所代表的含义在这里我们可以看做是操作远近的分量。</p>
+<ul>
+<li>当w = 1的时候，坐标不会增大或缩小，投影的区域保持原有的大小。</li>
+<li>当w &lt; 1的时候，坐标会变小，投影的区域也跟着缩小。</li>
+<li>当w &gt; 1的时候，坐标会变大，投影的区域也跟着变大。</li>
+<li>当w = 0的时候，它表示无穷远（或者表示无限长的一个向量）。</li>
+</ul>
+<h3 id="正射投影-Orthographic-Projection"><a href="#正射投影-Orthographic-Projection" class="headerlink" title="正射投影(Orthographic Projection)"></a>正射投影(Orthographic Projection)</h3><p>正交投影所形成的平截头体(Frustum)就如同下图一样，它更像是一个矩形容器，位于近平面(Near Plane)和远平面(Far Plane)之间的空间区域坐标就是这个平截头体，超出这个区域的坐标将会被裁剪掉。<br><img src="/images/15384046803516.png" alt=""></p>
+<p>可以看到这个平截头体(Frustum)是由宽,高,远近组成的。而当你操作(x,y,z,w)分量的时候，在正交投影里面操作w保持为1通过计算并不影响(x,y,z)，它用于控制裁剪区域而不会形成透视的视觉效果。</p>
+<h3 id="透视投影-Perspective-Projection"><a href="#透视投影-Perspective-Projection" class="headerlink" title="透视投影(Perspective Projection)"></a>透视投影(Perspective Projection)</h3><p>透视投影所形成的平截头体(Frustum)就如同下图一样，也就是我们常见的相机视角。它通过定义宽,高,远近,视野这几个分量来形成一个观察空间。在这个空间内的物体经过透视投影变换后会出现近大远小的效果。<br><img src="/images/15384046933352.png" alt=""></p>
+<h1 id="着色器脚本绘制"><a href="#着色器脚本绘制" class="headerlink" title="着色器脚本绘制"></a>着色器脚本绘制</h1><p>学会怎么构建物体坐标系后就可以开始编写一些简单的着色器脚本了。在前面的文章里总结了如何将OpenGL和本地窗口系统联系到一起的流程，并简单的用glClear和glClearCorlor来操作上下文渲染一个颜色到屏幕视图上，而接下来将开始真正进入OpenGL的渲染绘制编程。</p>
+<p>回想一下，OpenGL本质是一个状态机(通过一系列的变量描述OpenGL此刻应当如何运行)，这个状态机的一个状态称作OpenGL的上下文(Context)。然后将一个个标准绘制流程包裹成渲染管线程序(Program)在上下文中去执行。</p>
+<p>也就是上下文(Context)提供设置选项，操作缓冲这些环境变量，而渲染管线(Program)负责真正的渲染绘制。</p>
+<p>不同的渲染管线(Program)可以运行在同一个上下文(Context)中达到资源共享和程序顺序。也可以运行在不同上下文(Context)来实现资源独占和程序并行，而不同的上下文(Context)之间可可以通过ShareObject实现资源共享。</p>
+<p>Demo工程：<a href="https://github.com/hello-david/OpenGLDemo.git" target="_blank" rel="noopener">OpenGL学习实例</a></p>
+<h2 id="iOS上绘制一个三角形"><a href="#iOS上绘制一个三角形" class="headerlink" title="iOS上绘制一个三角形"></a>iOS上绘制一个三角形</h2><p><img src="/images/15385405210511.jpg" alt=""><br>按照之前的思路，将上下文(Context),渲染管线(Program),绘制程序(Render)分别抽象出来。Context负责提供上下文环境和切换操作，Render包裹渲染管线Program执行绘制，Program负责渲染脚本编译链接和添加渲染变量。</p>
+<p>这里简单编写一个Vertex脚本和Fragment脚本实现控制输入顶点坐标绘制一个图形。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">NSString *const kVertexShaderString = SHADER_STRING</span><br><span class="line">(</span><br><span class="line"> attribute vec2 position;</span><br><span class="line"> attribute vec2 inputTextureCoordinate;</span><br><span class="line"> varying vec2 textureCoordinate;</span><br><span class="line"> </span><br><span class="line"> void main() &#123;</span><br><span class="line">     gl_Position = vec4(position.xy, 0, 1);</span><br><span class="line">     textureCoordinate = inputTextureCoordinate;</span><br><span class="line"> &#125;</span><br><span class="line"> );</span><br><span class="line"></span><br><span class="line">NSString *const kFragmentShaderString = SHADER_STRING</span><br><span class="line">(</span><br><span class="line"> varying highp vec2 textureCoordinate;</span><br><span class="line"> uniform sampler2D inputTexture;</span><br><span class="line"> </span><br><span class="line"> void main() &#123;</span><br><span class="line">     gl_FragColor = texture2D(inputTexture, textureCoordinate);</span><br><span class="line"> &#125;</span><br><span class="line"> );</span><br></pre></td></tr></table></figure></p>
+<p>在将脚本编译链接到Program后，设置glViewport(输出到屏幕的Rect)和一个三角形的顶点坐标，然后利用glDrawArrays绘制到这个glContext中。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">// 通过默认脚本绘制一个三角形</span><br><span class="line">- (void)render:(CGSize)size &#123;</span><br><span class="line">    // 当前上下文使用该渲染管线</span><br><span class="line">    [self.program use];</span><br><span class="line">    </span><br><span class="line">    // 定义裁剪空间转换到屏幕上的空间大小</span><br><span class="line">    glViewport(0, 0, size.width, size.height);</span><br><span class="line">    </span><br><span class="line">    // 输入顶点坐标</span><br><span class="line">    glEnableVertexAttribArray(self.positionAttribute);</span><br><span class="line">    const float vertex[8] = &#123;</span><br><span class="line">        -0.5, -0.5,</span><br><span class="line">        -0.5, 0.5,</span><br><span class="line">        0.5, 0.5 &#125;;</span><br><span class="line">    </span><br><span class="line">    // 将顶点坐标和programz中position这个变量联系到一起</span><br><span class="line">    glVertexAttribPointer(self.positionAttribute, 2, GL_FLOAT, GL_FALSE, 0, vertex);</span><br><span class="line">    </span><br><span class="line">    // 使用三角形图元绘制</span><br><span class="line">    glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);</span><br><span class="line">    </span><br><span class="line">    glDisableVertexAttribArray(self.positionAttribute);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="android上绘制一个三角形"><a href="#android上绘制一个三角形" class="headerlink" title="android上绘制一个三角形"></a>android上绘制一个三角形</h2><p><img src="/images/android.png" alt=""><br>类似的，抽象出渲染管线(Program)，绘制程序(Render)，将渲染脚本(Shader)放到每个渲染管线中包裹在绘制程序中执行渲染。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">// 当前上下文使用该渲染管线</span><br><span class="line">mProgram-&gt;use();</span><br><span class="line"></span><br><span class="line">// 定义裁剪空间转换到屏幕上的空间大小</span><br><span class="line">glViewport(0, 0, size.width, size.height);</span><br><span class="line"></span><br><span class="line">glClearColor(0,1,0,1);</span><br><span class="line">glClear(GL_COLOR_BUFFER_BIT);</span><br><span class="line"></span><br><span class="line">// 输入顶点坐标</span><br><span class="line">// 安卓中申请的每个attr必须要填入值，不然效果会失效</span><br><span class="line">glEnableVertexAttribArray(mPositionAttribute);</span><br><span class="line"></span><br><span class="line">const float vertex[6] = &#123;</span><br><span class="line">        -0.5, -0.5,</span><br><span class="line">        -0.5, 0.5,</span><br><span class="line">        0.5, 0.5 &#125;;</span><br><span class="line"></span><br><span class="line">// 将顶点坐标和program中position这个变量联系到一起</span><br><span class="line">glVertexAttribPointer(mPositionAttribute, 2, GL_FLOAT, GL_FALSE, 0, vertex);</span><br><span class="line"></span><br><span class="line">// 使用三角形图元绘制</span><br><span class="line">glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);</span><br><span class="line"></span><br><span class="line">glDisableVertexAttribArray(mPositionAttribute);</span><br></pre></td></tr></table></figure>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这里总结了如何规范化的去描述一个坐标系统将物体从物理空间世界转换到屏幕上的过程。这里分别用OC和Android+Cpp写了一套基础的渲染框架，之后的工作就可以开始集中注意力在编写Shader脚本上了。</p>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="http://jslibs.wuxubj.cn/sweetalert_mini/jquery-1.7.1.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/archives/e8814f3.html">OpenGL学习——着色器绘制与坐标系</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
+  <p><span>发布时间:</span>2018年10月10日 - 18:10</p>
+  <p><span>最后更新:</span>2019年10月09日 - 18:10</p>
+  <p><span>原始链接:</span><a href="/archives/e8814f3.html" title="OpenGL学习——着色器绘制与坐标系">https://hello-david.github.io/archives/e8814f3.html</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/e8814f3.html"  aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
+</div>
+<script> 
+    var clipboard = new Clipboard('.fa-clipboard');
+    clipboard.on('success', $(function(){
+      $(".fa-clipboard").click(function(){
+        swal({   
+          title: "",   
+          text: '复制成功',   
+          html: false,
+          timer: 500,   
+          showConfirmButton: false
+        });
+      });
+    }));  
+</script>
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/OpenGL/" rel="tag"># OpenGL</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/archives/150fea9e.html" rel="next" title="OpenGL学习——环境搭建">
+                <i class="fa fa-chevron-left"></i> OpenGL学习——环境搭建
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/archives/fabf343f.html" rel="prev" title="OpenGL学习——数据传输和组织方式与着色器语法">
+                OpenGL学习——数据传输和组织方式与着色器语法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">David Dai</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#坐标系"><span class="nav-number">1.</span> <span class="nav-text">坐标系</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#投影变换"><span class="nav-number">1.1.</span> <span class="nav-text">投影变换</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#正射投影-Orthographic-Projection"><span class="nav-number">1.1.1.</span> <span class="nav-text">正射投影(Orthographic Projection)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#透视投影-Perspective-Projection"><span class="nav-number">1.1.2.</span> <span class="nav-text">透视投影(Perspective Projection)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#着色器脚本绘制"><span class="nav-number">2.</span> <span class="nav-text">着色器脚本绘制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#iOS上绘制一个三角形"><span class="nav-number">2.1.</span> <span class="nav-text">iOS上绘制一个三角形</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#android上绘制一个三角形"><span class="nav-number">2.2.</span> <span class="nav-text">android上绘制一个三角形</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">David Dai</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+-->
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

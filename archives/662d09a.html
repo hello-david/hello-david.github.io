@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Metal," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前面学习了Metal框架的基本组成和运行方式,知道了要如何科学使用的它。然而我们最终的目的还是要使用这套框架来优雅的操作GPU单元进行图像处理，也就回到了Shader的编写上了。 我们知道OpenGL的Shader编写语言GLSL的语法上是非常类似C的，而Metal的Shader编写语言MSL则是直接基于C++14实现的一个子集。 Metal Shading Language官方文档文档中通过7个">
+<meta name="keywords" content="Metal">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Metal学习——Metal着色器语言(MSL)(一)">
+<meta property="og:url" content="https://hello-david.github.io/archives/662d09a.html">
+<meta property="og:site_name" content="David&#39;Blog">
+<meta property="og:description" content="前面学习了Metal框架的基本组成和运行方式,知道了要如何科学使用的它。然而我们最终的目的还是要使用这套框架来优雅的操作GPU单元进行图像处理，也就回到了Shader的编写上了。 我们知道OpenGL的Shader编写语言GLSL的语法上是非常类似C的，而Metal的Shader编写语言MSL则是直接基于C++14实现的一个子集。 Metal Shading Language官方文档文档中通过7个">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-12-24T08:15:59.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Metal学习——Metal着色器语言(MSL)(一)">
+<meta name="twitter:description" content="前面学习了Metal框架的基本组成和运行方式,知道了要如何科学使用的它。然而我们最终的目的还是要使用这套框架来优雅的操作GPU单元进行图像处理，也就回到了Shader的编写上了。 我们知道OpenGL的Shader编写语言GLSL的语法上是非常类似C的，而Metal的Shader编写语言MSL则是直接基于C++14实现的一个子集。 Metal Shading Language官方文档文档中通过7个">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hello-david.github.io/archives/662d09a.html"/>
+
+
+
+<meta name="google-site-verification" content="xPc40P1FFnuv2Aer8rA72v2doNkgf1bEhU79GGlStmE" />
+
+
+  <title>Metal学习——Metal着色器语言(MSL)(一) | David'Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">David'Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://hello-david.github.io/archives/662d09a.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="David Dai">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="David'Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Metal学习——Metal着色器语言(MSL)(一)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-01-16T14:58:28+08:00">
+                2019-01-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/框架学习/" itemprop="url" rel="index">
+                    <span itemprop="name">框架学习</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>前面学习了Metal框架的基本组成和运行方式,知道了要如何科学使用的它。然而我们最终的目的还是要使用这套框架来优雅的操作GPU单元进行图像处理，也就回到了Shader的编写上了。</p>
+<p>我们知道OpenGL的Shader编写语言GLSL的语法上是非常类似C的，而Metal的Shader编写语言MSL则是直接基于C++14实现的一个子集。</p>
+<p><a href="https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf" target="_blank" rel="noopener">Metal Shading Language官方文档</a>文档中通过7个模块来介绍Metal：</p>
+<ul>
+<li>“简介”是对文档的介绍，介绍了Metal和C++ 14之间的异同。</li>
+<li>“数据类型”列出了Metal数据类型，包括表示向量，矩阵，缓冲区，纹理和采样器的类型。它还讨论了类型对齐和类型转换。</li>
+<li>“运算符”列出了“Metal”运算符。</li>
+<li>“函数和变量声明”详细说明了如何声明函数和变量，有时使用限制它们使用方式的属性。</li>
+<li>“Metal Standard Library”定义了一系列内置Metal函数。</li>
+<li>“编译器”详细介绍了Metal编译器的选项，包括预处理器指令，数学内在函数选项和控制优化的选项。</li>
+<li>“数值符合性”描述了表示浮点数的要求，包括数学运算的准确性。</li>
+</ul>
+<hr>
+<p>接下来这里围绕着一个简单的MSL脚本来学习Metal的语法，之后再详细学习各个部分的细节。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;metal_stdlib&gt; // 导入Metal标准库</span><br><span class="line">using namespace metal;</span><br><span class="line"></span><br><span class="line">// 定义一个结构体用于传递顶点着色器的输出</span><br><span class="line">struct SingleInputVertexIO &#123;</span><br><span class="line">    float4 position [[position]];</span><br><span class="line">    float2 textureCoordinate [[user(texturecoord)]];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">// 顶点着色器</span><br><span class="line">vertex SingleInputVertexIO oneInputVertex(device packed_float2 *position [[buffer(0)]],</span><br><span class="line">                                          device packed_float2 *texturecoord [[buffer(1)]],</span><br><span class="line">                                          uint vid [[vertex_id]]) &#123;</span><br><span class="line">    SingleInputVertexIO outputVertices;</span><br><span class="line">    outputVertices.position = float4(position[vid], 0, 1.0);</span><br><span class="line">    outputVertices.textureCoordinate = texturecoord[vid];</span><br><span class="line">    </span><br><span class="line">    return outputVertices;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 片段着色器</span><br><span class="line">fragment half4 passthroughFragment(SingleInputVertexIO fragmentInput [[stage_in]],</span><br><span class="line">                                   texture2d&lt;half&gt; inputTexture [[texture(0)]]) &#123;</span><br><span class="line">    constexpr sampler quadSampler;</span><br><span class="line">    half4 color = inputTexture.sample(quadSampler, fragmentInput.textureCoordinate);</span><br><span class="line">    </span><br><span class="line">    return color;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在Metal中用[[…]]包含的这种变量实际上着色器的<strong>内置变量/内置函数</strong>，就像OpenGL中我们通过gl_Position函数访问顶点着色器的像素位置信息。</p>
+<p>可以看做着色器属性访问符号，在这里简化了语法可以十分的方便访问着色器的内置对象/方法(getter/setter函数)。</p>
+<p>这是一个简单的纹理绘制脚本，我们把它分成三个部分来解析。</p>
+<h2 id="结构体部分"><a href="#结构体部分" class="headerlink" title="结构体部分"></a>结构体部分</h2><p>我们定义了一个名为SingleInputVertexIO的结构体，它内部包含两个变量position和textureCoordinate。因为我们贴一张2D的纹理图一般只需要知道纹理的顶点坐标和纹理坐标就够了。</p>
+<p><strong>[[position]]</strong> 表示裁剪空间中输入到GPU中的原始坐标信息，固定是一个四维(xyzw)的向量。</p>
+<p><strong>[[user(name_xxx)]]</strong> 表示为片段着色器的函数参数指定一个(ImageBlock)图像块数据类型的属性名称为name_xxx，和OpenGL中varying限定符的作用十分相似。ImageBlock是一种二维图像独有的数据结构，它表示一个像素点的(x,y)坐标。简单的说就是定义一个name_xxx的二维图像坐标的片段着色器参数，理解起来有点绕，具体可以参考文档的2.10选节。</p>
+<h2 id="顶点着色器部分"><a href="#顶点着色器部分" class="headerlink" title="顶点着色器部分"></a>顶点着色器部分</h2><p>首先，在Metal中支持三种函数(kernel, vertex, fragment)的定义，而我们这里图像处理主要集中在编写vertex和fragment的Shader。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vertex SingleInputVertexIO oneInputVertex(device packed_float2 *position [[buffer(0)]],</span><br><span class="line">                                          device packed_float2 *texturecoord [[buffer(1)]],</span><br><span class="line">                                          uint vid [[vertex_id]])</span><br></pre></td></tr></table></figure>
+<p>接着我们来看顶点着色器脚本的函数声明，显然这里定义了一个叫oneInputVertex其中返回值为SingleInputVertexIO结构类型的顶点着色器。</p>
+<p><strong>[[buffer(n)]]</strong> 表示第n个设备和常量缓存区，即外部通过setVertexBuffer设置到encoder中的MTLBuffer对象。同时我们在外部实际上是把这个对象的指针传入设备中，所以我们这里声明为指针类型，而在Metal中指针对象必须要声明它的空间属性(Address Space Attributes)。</p>
+<p>其中在iOS中支持device/threadgroup/constant/thread/threadgroup_imageblock这5种空间属性。具体可参考文档4.2/4.3.1选节</p>
+<p><strong>packed_float2</strong> 表示压缩的2维float向量，将一组相关的数据打包在一起传递给GPU称作数据打包传输，我们可通过这个数组直接访问相关的数据(顶点坐标/法线等)从而减少了调用次数提高了效率。</p>
+<p><strong>[[vertex_id]]</strong> 表示每个顶点的标识符，而每个顶点缓冲区的真正地址基于这个标识符的相对偏移n来访问。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">outputVertices.position = float4(position[vid], 0, 1.0);</span><br><span class="line">相当于OpenGL中</span><br><span class="line">gl_Position = vec4(x, y, 0 , 1.0);</span><br><span class="line"></span><br><span class="line">device packed_float2 *texturecoord [[buffer(1)]]</span><br><span class="line">outputVertices.textureCoordinate = texturecoord[vid];</span><br><span class="line">相当于这个管线单元中缓存区buffer(1)的对象赋值给.textureCoordinate</span><br></pre></td></tr></table></figure>
+<h2 id="片段着色器部分"><a href="#片段着色器部分" class="headerlink" title="片段着色器部分"></a>片段着色器部分</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">fragment half4 passthroughFragment(SingleInputVertexIO fragmentInput [[stage_in]],</span><br><span class="line">                                   texture2d&lt;half&gt; inputTexture [[texture(0)]])</span><br></pre></td></tr></table></figure>
+<p><strong>[[stage_in]]</strong> 表示顶点着色器的输出/片段着色器的输入，它可以是一个结构体或者一个变量，结构体中变量可以是标量或者向量，具体参考4.3.5选节。</p>
+<p><strong>[[texture(n)]]</strong> 表示这个管线单元的纹理对象，外部通过setFragmentTexture函数输入到管线中。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这里通过一个示例来介绍MSL的基本结构和编写方法，其他内置对象/函数的含义可以详细查阅官方文档来得知。<a href="https://github.com/hello-david/MetalImage.git" target="_blank" rel="noopener">这是一个使用Metal实现的滤镜链框架</a></p>
+
+      
+    </div>
+    
+    
+    
+    <div>
+      
+        
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script type="text/javascript" src="http://jslibs.wuxubj.cn/sweetalert_mini/jquery-1.7.1.min.js"></script>
+  <script src="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://jslibs.wuxubj.cn/sweetalert_mini/sweetalert.mini.css">
+  <p><span>本文标题:</span><a href="/archives/662d09a.html">Metal学习——Metal着色器语言(MSL)(一)</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 David Dai 的个人博客">David Dai</a></p>
+  <p><span>发布时间:</span>2019年01月16日 - 14:01</p>
+  <p><span>最后更新:</span>2019年12月24日 - 16:12</p>
+  <p><span>原始链接:</span><a href="/archives/662d09a.html" title="Metal学习——Metal着色器语言(MSL)(一)">https://hello-david.github.io/archives/662d09a.html</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="https://hello-david.github.io/archives/662d09a.html"  aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
+</div>
+<script> 
+    var clipboard = new Clipboard('.fa-clipboard');
+    clipboard.on('success', $(function(){
+      $(".fa-clipboard").click(function(){
+        swal({   
+          title: "",   
+          text: '复制成功',   
+          html: false,
+          timer: 500,   
+          showConfirmButton: false
+        });
+      });
+    }));  
+</script>
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Metal/" rel="tag"># Metal</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/archives/6819375.html" rel="next" title="Hook调试初体验">
+                <i class="fa fa-chevron-left"></i> Hook调试初体验
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/archives/2fbe6240.html" rel="prev" title="C++中存在的头文件类/函数完整实现">
+                C++中存在的头文件类/函数完整实现 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">David Dai</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#结构体部分"><span class="nav-number">1.</span> <span class="nav-text">结构体部分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#顶点着色器部分"><span class="nav-number">2.</span> <span class="nav-text">顶点着色器部分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#片段着色器部分"><span class="nav-number">3.</span> <span class="nav-text">片段着色器部分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">David Dai</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+-->
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
